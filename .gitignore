@@ -1,0 +1,24 @@
+# --- WordPress web root: track only our custom plugin and theme ---
+/gas-retailer/*
+!/gas-retailer/wp-content/
+/gas-retailer/wp-content/*
+!/gas-retailer/wp-content/plugins/
+/gas-retailer/wp-content/plugins/*
+!/gas-retailer/wp-content/plugins/lpg-commerce-core/
+!/gas-retailer/wp-content/themes/
+/gas-retailer/wp-content/themes/*
+!/gas-retailer/wp-content/themes/lpg-storefront/
+
+# --- Dev tooling ---
+/vendor/
+node_modules/
+/tests/wp-tests-config.php
+.phpunit.result.cache
+.phpunit.cache/
+
+# --- Local / OS / secrets ---
+.DS_Store
+.env
+.env.*
+*.log
+.claude/settings.local.json
