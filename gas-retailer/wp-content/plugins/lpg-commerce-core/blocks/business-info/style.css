@@ -1,0 +1,8 @@
+/* Layout only; the theme owns visual styling of .lpg-business-info. */
+.lpg-business-info__item {
+	display: block;
+}
+
+.lpg-business-info__value {
+	display: block;
+}

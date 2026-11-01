@@ -1,0 +1,36 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "lpg/exchange-form",
+  "version": "0.5.0",
+  "title": "Cylinder refill / exchange form",
+  "category": "widgets",
+  "icon": "update",
+  "description": "Choose a cylinder brand, size and delivery location, then continue on WhatsApp. Shows nothing without a WhatsApp number or cylinder brands.",
+  "keywords": [
+    "exchange",
+    "refill",
+    "cylinder",
+    "whatsapp",
+    "lpg"
+  ],
+  "textdomain": "lpg-commerce-core",
+  "attributes": {},
+  "supports": {
+    "html": false,
+    "spacing": {
+      "margin": true,
+      "padding": true
+    },
+    "typography": {
+      "fontSize": true
+    },
+    "align": [
+      "wide"
+    ]
+  },
+  "editorScript": "file:./index.js",
+  "style": "file:./style-index.css",
+  "viewScript": "file:./view.js",
+  "render": "file:./render.php"
+}

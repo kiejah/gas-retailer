@@ -52,19 +52,23 @@ final class RfqController extends FormController {
 				'additionalProperties' => false,
 				'properties'           => array(
 					'name'         => array(
+						'title'     => __( 'Name', 'lpg-commerce-core' ),
 						'type'      => 'string',
 						'minLength' => 2,
 						'maxLength' => 100,
 					),
 					'organisation' => array(
+						'title'     => __( 'Organisation', 'lpg-commerce-core' ),
 						'type'      => 'string',
 						'maxLength' => 150,
 					),
 					'phone'        => array(
+						'title'     => __( 'Phone', 'lpg-commerce-core' ),
 						'type'      => 'string',
 						'maxLength' => 30,
 					),
 					'email'        => array(
+						'title'     => __( 'Email', 'lpg-commerce-core' ),
 						'type'      => 'string',
 						'format'    => 'email',
 						'maxLength' => 254,
@@ -72,11 +76,13 @@ final class RfqController extends FormController {
 				),
 			),
 			'segment'      => array(
+				'title'       => __( 'Segment', 'lpg-commerce-core' ),
 				'description' => __( 'Customer segment slug.', 'lpg-commerce-core' ),
 				'type'        => 'string',
 				'maxLength'   => 50,
 			),
 			'items'        => array(
+				'title'       => __( 'Items', 'lpg-commerce-core' ),
 				'description' => __( 'Requested items.', 'lpg-commerce-core' ),
 				'type'        => 'array',
 				'minItems'    => 1,
@@ -86,14 +92,17 @@ final class RfqController extends FormController {
 					'additionalProperties' => false,
 					'properties'           => array(
 						'product_id'  => array(
+							'title'   => __( 'Product', 'lpg-commerce-core' ),
 							'type'    => 'integer',
 							'minimum' => 0,
 						),
 						'description' => array(
+							'title'     => __( 'Item description', 'lpg-commerce-core' ),
 							'type'      => 'string',
 							'maxLength' => 500,
 						),
 						'qty'         => array(
+							'title'   => __( 'Quantity', 'lpg-commerce-core' ),
 							'type'    => 'integer',
 							'minimum' => 1,
 							'maximum' => 10000,
@@ -102,22 +111,27 @@ final class RfqController extends FormController {
 				),
 			),
 			'requirements' => array(
+				'title'     => __( 'Requirements', 'lpg-commerce-core' ),
 				'type'      => 'string',
 				'maxLength' => 2000,
 			),
 			'project'      => array(
+				'title'     => __( 'Project', 'lpg-commerce-core' ),
 				'type'      => 'string',
 				'maxLength' => 200,
 			),
 			'location'     => array(
+				'title'     => __( 'Location', 'lpg-commerce-core' ),
 				'type'      => 'string',
 				'maxLength' => 200,
 			),
 			'comments'     => array(
+				'title'     => __( 'Comments', 'lpg-commerce-core' ),
 				'type'      => 'string',
 				'maxLength' => 2000,
 			),
 			'consent'      => array(
+				'title'       => __( 'Consent', 'lpg-commerce-core' ),
 				'description' => __( 'Consent to the privacy notice. Must be true.', 'lpg-commerce-core' ),
 				'type'        => 'boolean',
 			),

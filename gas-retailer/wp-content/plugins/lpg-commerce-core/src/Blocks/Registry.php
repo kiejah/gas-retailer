@@ -21,7 +21,7 @@ final class Registry implements Service {
 	/**
 	 * Block directory names (source `blocks/<name>`, build `build/blocks/<name>`).
 	 */
-	public const BLOCKS = array( 'spec-table', 'compatible-products', 'product-documents', 'product-warranty' );
+	public const BLOCKS = array( 'spec-table', 'compatible-products', 'product-documents', 'product-warranty', 'enquiry-button', 'rfq-form', 'exchange-form', 'whatsapp-link', 'business-info' );
 
 	/**
 	 * Attach hooks.
@@ -48,6 +48,8 @@ final class Registry implements Service {
 	 * Register all blocks (hooked to `init`).
 	 */
 	public static function register_blocks(): void {
+		add_filter( 'block_type_metadata_settings', array( self::class, 'defer_view_scripts' ), 10, 2 );
+
 		$build    = self::build_dir();
 		$manifest = $build . '/blocks-manifest.php';
 
@@ -66,6 +68,35 @@ final class Registry implements Service {
 		}
 
 		self::register_from_source();
+	}
+
+	/**
+	 * Core enqueues a block's `viewScript` whenever the block is rendered, even
+	 * when the renderer outputs nothing (no WhatsApp number, no product...).
+	 * For LPG blocks the handle stays registered but is not attached to the
+	 * block type; the renderer enqueues it only when it prints markup.
+	 *
+	 * @param array<string, mixed> $settings Block type settings.
+	 * @param array<string, mixed> $metadata Block metadata.
+	 * @return array<string, mixed>
+	 */
+	public static function defer_view_scripts( $settings, $metadata ) {
+		if ( is_array( $settings ) && is_array( $metadata ) && 0 === strpos( (string) ( $metadata['name'] ?? '' ), 'lpg/' ) ) {
+			$settings['view_script_handles'] = array();
+		}
+		return $settings;
+	}
+
+	/**
+	 * Enqueue a block's front-end script (built `viewScript`), if registered.
+	 *
+	 * @param string $block_name Block name, e.g. `lpg/rfq-form`.
+	 */
+	public static function enqueue_view_script( string $block_name ): void {
+		$handle = generate_block_asset_handle( $block_name, 'viewScript' );
+		if ( wp_script_is( $handle, 'registered' ) ) {
+			wp_enqueue_script( $handle );
+		}
 	}
 
 	/**

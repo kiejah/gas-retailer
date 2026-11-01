@@ -1,0 +1,41 @@
+/* Layout only; the theme owns visual styling of .lpg-rfq and the .lpg-field classes. */
+.lpg-rfq [hidden] {
+	display: none !important;
+}
+
+.lpg-rfq .lpg-field {
+	display: flex;
+	flex-direction: column;
+	gap: 0.25rem;
+	margin-bottom: 1rem;
+}
+
+.lpg-rfq .lpg-field--checkbox {
+	display: block;
+}
+
+.lpg-rfq input:not([type="checkbox"]),
+.lpg-rfq select,
+.lpg-rfq textarea {
+	width: 100%;
+	max-width: 100%;
+	box-sizing: border-box;
+}
+
+.lpg-rfq__item-list {
+	margin: 0;
+	padding-inline-start: 1.25rem;
+}
+
+@media (min-width: 600px) {
+	.lpg-rfq__item {
+		display: grid;
+		grid-template-columns: 1fr 8rem auto;
+		gap: 0.75rem;
+		align-items: start;
+	}
+
+	.lpg-rfq__remove-item {
+		margin-top: 1.75rem;
+	}
+}

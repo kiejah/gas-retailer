@@ -134,9 +134,9 @@ abstract class FormController implements Service {
 			if ( null === $value ) {
 				continue;
 			}
-			$valid = rest_validate_value_from_schema( $value, $schema, $name );
-			if ( is_wp_error( $valid ) ) {
-				$errors[ $name ] = $valid->get_error_message();
+			$field_errors = self::validate_field( $value, $schema, $name );
+			if ( $field_errors ) {
+				$errors = array_merge( $errors, $field_errors );
 				continue;
 			}
 			$params[ $name ] = rest_sanitize_value_from_schema( $value, $schema, $name );
@@ -146,6 +146,53 @@ abstract class FormController implements Service {
 		}
 
 		return $this->handle( $params );
+	}
+
+	/**
+	 * Validate one param against its schema, reporting errors at the most
+	 * specific key so a form can mark the exact field: `contact.email` for an
+	 * object property, `items.2.qty` for a property of an array item, the
+	 * param name itself otherwise.
+	 *
+	 * @param mixed                $value  Value.
+	 * @param array<string, mixed> $schema Schema.
+	 * @param string               $name   Param name / key prefix.
+	 * @return array<string, string> Key => message.
+	 */
+	private static function validate_field( $value, array $schema, string $name ): array {
+		$type = $schema['type'] ?? '';
+
+		if ( 'object' === $type && ! empty( $schema['properties'] ) && is_array( $value ) ) {
+			$errors = array();
+			foreach ( $value as $key => $item ) {
+				if ( ! isset( $schema['properties'][ $key ] ) ) {
+					if ( false === ( $schema['additionalProperties'] ?? true ) ) {
+						$errors[ $name ] = __( 'Unexpected field.', 'lpg-commerce-core' );
+					}
+					continue;
+				}
+				$errors = array_merge( $errors, self::validate_field( $item, $schema['properties'][ $key ], $name . '.' . $key ) );
+			}
+			return $errors;
+		}
+
+		if ( 'array' === $type && isset( $schema['items'] ) && is_array( $value ) && wp_is_numeric_array( $value ) ) {
+			$outer = $schema;
+			unset( $outer['items'] );
+			$valid = rest_validate_value_from_schema( $value, $outer, (string) ( $schema['title'] ?? $name ) );
+			if ( is_wp_error( $valid ) ) {
+				return array( $name => $valid->get_error_message() );
+			}
+			$errors = array();
+			foreach ( array_values( $value ) as $index => $item ) {
+				$errors = array_merge( $errors, self::validate_field( $item, $schema['items'], $name . '.' . $index ) );
+			}
+			return $errors;
+		}
+
+		// The schema `title` (translated) names the field in core's messages.
+		$valid = rest_validate_value_from_schema( $value, $schema, (string) ( $schema['title'] ?? $name ) );
+		return is_wp_error( $valid ) ? array( $name => $valid->get_error_message() ) : array();
 	}
 
 	/**

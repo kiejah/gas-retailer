@@ -1,0 +1,20 @@
+/* Layout only; the theme owns visual styling of .lpg-enquiry. */
+.lpg-enquiry [hidden] {
+	display: none !important;
+}
+
+.lpg-enquiry__panel {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+	margin-top: 0.75rem;
+}
+
+.lpg-enquiry__message {
+	width: 100%;
+	box-sizing: border-box;
+}
+
+.lpg-enquiry__open {
+	align-self: flex-start;
+}

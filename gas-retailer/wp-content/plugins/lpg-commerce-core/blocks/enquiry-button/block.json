@@ -1,0 +1,45 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "lpg/enquiry-button",
+	"version": "0.5.0",
+	"title": "Enquire on WhatsApp",
+	"category": "woocommerce",
+	"icon": "format-chat",
+	"description": "WhatsApp enquiry button with an editable message, for enquiry-only products (or all products). Shows nothing without a WhatsApp number.",
+	"keywords": [
+		"whatsapp",
+		"enquiry",
+		"enquire",
+		"lpg"
+	],
+	"textdomain": "lpg-commerce-core",
+	"attributes": {
+		"showFor": {
+			"type": "string",
+			"enum": [
+				"enquiry-only",
+				"all"
+			],
+			"default": "enquiry-only"
+		}
+	},
+	"usesContext": [
+		"postId",
+		"postType"
+	],
+	"supports": {
+		"html": false,
+		"spacing": {
+			"margin": true,
+			"padding": true
+		},
+		"typography": {
+			"fontSize": true
+		}
+	},
+	"editorScript": "file:./index.js",
+	"style": "file:./style-index.css",
+	"viewScript": "file:./view.js",
+	"render": "file:./render.php"
+}

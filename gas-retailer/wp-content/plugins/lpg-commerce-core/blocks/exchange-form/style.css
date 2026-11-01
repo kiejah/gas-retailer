@@ -1,0 +1,18 @@
+/* Layout only; the theme owns visual styling of .lpg-exchange and the .lpg-field classes. */
+.lpg-exchange [hidden] {
+	display: none !important;
+}
+
+.lpg-exchange .lpg-field {
+	display: flex;
+	flex-direction: column;
+	gap: 0.25rem;
+	margin-bottom: 1rem;
+}
+
+.lpg-exchange input[type="text"],
+.lpg-exchange select {
+	width: 100%;
+	max-width: 100%;
+	box-sizing: border-box;
+}

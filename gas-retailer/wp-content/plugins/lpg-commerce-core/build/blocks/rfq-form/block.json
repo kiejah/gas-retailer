@@ -1,0 +1,35 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "lpg/rfq-form",
+  "version": "0.5.0",
+  "title": "Quote request form",
+  "category": "widgets",
+  "icon": "feedback",
+  "description": "Request-a-quote form for commercial, industrial and household customers. Sends to the quote requests list and notifies Sales.",
+  "keywords": [
+    "quote",
+    "rfq",
+    "form",
+    "lpg"
+  ],
+  "textdomain": "lpg-commerce-core",
+  "attributes": {},
+  "supports": {
+    "html": false,
+    "spacing": {
+      "margin": true,
+      "padding": true
+    },
+    "typography": {
+      "fontSize": true
+    },
+    "align": [
+      "wide"
+    ]
+  },
+  "editorScript": "file:./index.js",
+  "style": "file:./style-index.css",
+  "viewScript": "file:./view.js",
+  "render": "file:./render.php"
+}

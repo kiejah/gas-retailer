@@ -1,0 +1,35 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "lpg/whatsapp-link",
+  "version": "0.5.0",
+  "title": "WhatsApp and phone link",
+  "category": "widgets",
+  "icon": "phone",
+  "description": "A \"WhatsApp us\" text link and, optionally, the phone number. Shows nothing without a WhatsApp number.",
+  "keywords": [
+    "whatsapp",
+    "phone",
+    "contact",
+    "lpg"
+  ],
+  "textdomain": "lpg-commerce-core",
+  "attributes": {
+    "showPhone": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "supports": {
+    "html": false,
+    "spacing": {
+      "margin": true,
+      "padding": true
+    },
+    "typography": {
+      "fontSize": true
+    }
+  },
+  "editorScript": "file:./index.js",
+  "render": "file:./render.php"
+}

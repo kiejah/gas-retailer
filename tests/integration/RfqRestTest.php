@@ -96,11 +96,11 @@ class RfqRestTest extends WP_UnitTestCase {
 		$item    = static fn( array $i ) => static fn( array $b ) => array_merge( $b, array( 'items' => array( $i ) ) );
 		return array(
 			'no contact'         => array( static fn( array $b ) => array_diff_key( $b, array( 'contact' => 1 ) ), 'contact.email' ),
-			'short name'         => array( $contact( array( 'name' => 'A' ) ), 'contact' ),
+			'short name'         => array( $contact( array( 'name' => 'A' ) ), 'contact.name' ),
 			'blank name'         => array( $contact( array( 'name' => '  <b></b>  ' ) ), 'contact.name' ),
 			'bad phone'          => array( $contact( array( 'phone' => 'call me' ) ), 'contact.phone' ),
 			'foreign phone'      => array( $contact( array( 'phone' => '+1 555 010 0000' ) ), 'contact.phone' ),
-			'bad email'          => array( $contact( array( 'email' => 'not-an-email' ) ), 'contact' ),
+			'bad email'          => array( $contact( array( 'email' => 'not-an-email' ) ), 'contact.email' ),
 			'unknown contact'    => array( $contact( array( 'fax' => '1' ) ), 'contact' ),
 			'no segment'         => array( static fn( array $b ) => array_diff_key( $b, array( 'segment' => 1 ) ), 'segment' ),
 			'unknown segment'    => array( static fn( array $b ) => array_merge( $b, array( 'segment' => 'military' ) ), 'segment' ),
@@ -113,7 +113,7 @@ class RfqRestTest extends WP_UnitTestCase {
 						'qty'         => 0,
 					)
 				),
-				'items',
+				'items.0.qty',
 			),
 			'qty too big'        => array(
 				$item(
@@ -122,7 +122,7 @@ class RfqRestTest extends WP_UnitTestCase {
 						'qty'         => 10001,
 					)
 				),
-				'items',
+				'items.0.qty',
 			),
 			'no qty'             => array( $item( array( 'description' => 'x' ) ), 'items.0.qty' ),
 			'no description'     => array( $item( array( 'qty' => 1 ) ), 'items.0.description' ),
@@ -133,7 +133,7 @@ class RfqRestTest extends WP_UnitTestCase {
 						'qty'         => 1,
 					)
 				),
-				'items',
+				'items.0.description',
 			),
 			'missing product'    => array(
 				$item(
@@ -168,6 +168,16 @@ class RfqRestTest extends WP_UnitTestCase {
 		$this->assertArrayHasKey( $param, $response->get_data()['data']['params'] );
 		$this->assertSame( 0, $this->count_records( RfqPostType::POST_TYPE ) );
 		$this->assertFalse( tests_retrieve_phpmailer_instance()->get_sent() );
+	}
+
+	public function test_schema_errors_name_the_field_in_plain_words(): void {
+		$body                    = $this->rfq_body();
+		$body['contact']['name'] = 'A';
+		$body['items'][0]['qty'] = 0;
+		$params                  = $this->post_route( '/rfq', $body )->get_data()['data']['params'];
+
+		$this->assertStringStartsWith( 'Name ', $params['contact.name'] );
+		$this->assertStringStartsWith( 'Quantity ', $params['items.0.qty'] );
 	}
 
 	public function test_draft_product_is_rejected(): void {

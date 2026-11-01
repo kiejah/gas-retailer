@@ -1,0 +1,31 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "lpg/business-info",
+  "version": "0.5.0",
+  "title": "Business information",
+  "category": "widgets",
+  "icon": "location",
+  "description": "Shop address, opening hours and phone from WooCommerce → Settings → LPG.",
+  "keywords": [
+    "address",
+    "hours",
+    "contact",
+    "lpg"
+  ],
+  "textdomain": "lpg-commerce-core",
+  "attributes": {},
+  "supports": {
+    "html": false,
+    "spacing": {
+      "margin": true,
+      "padding": true
+    },
+    "typography": {
+      "fontSize": true
+    }
+  },
+  "editorScript": "file:./index.js",
+  "style": "file:./style-index.css",
+  "render": "file:./render.php"
+}

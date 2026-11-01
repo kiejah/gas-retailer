@@ -46,28 +46,34 @@ final class EnquiryController extends FormController {
 	protected function schema(): array {
 		return array(
 			'type'          => array(
+				'title'       => __( 'Enquiry type', 'lpg-commerce-core' ),
 				'description' => __( 'Enquiry type.', 'lpg-commerce-core' ),
 				'type'        => 'string',
 				'enum'        => array( EnquiryPostType::TYPE_PRODUCT, EnquiryPostType::TYPE_EXCHANGE ),
 			),
 			'product_id'    => array(
+				'title'   => __( 'Product', 'lpg-commerce-core' ),
 				'type'    => 'integer',
 				'minimum' => 1,
 			),
 			'brand'         => array(
+				'title'       => __( 'Brand', 'lpg-commerce-core' ),
 				'description' => __( 'Cylinder brand slug.', 'lpg-commerce-core' ),
 				'type'        => 'string',
 				'maxLength'   => 200,
 			),
 			'size'          => array(
+				'title'     => __( 'Size', 'lpg-commerce-core' ),
 				'type'      => 'string',
 				'maxLength' => 20,
 			),
 			'exchange_type' => array(
-				'type' => 'string',
-				'enum' => EnquiryPostType::EXCHANGE_TYPES,
+				'title' => __( 'Exchange or new', 'lpg-commerce-core' ),
+				'type'  => 'string',
+				'enum'  => EnquiryPostType::EXCHANGE_TYPES,
 			),
 			'location'      => array(
+				'title'     => __( 'Delivery location', 'lpg-commerce-core' ),
 				'type'      => 'string',
 				'maxLength' => 200,
 			),
