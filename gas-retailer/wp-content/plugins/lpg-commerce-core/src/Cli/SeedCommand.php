@@ -10,22 +10,24 @@ namespace LPG\Commerce\Cli;
 use LPG\Commerce\Specs\ProfilePostType;
 use LPG\Commerce\Specs\ProfileRepository;
 use LPG\Commerce\Specs\ProfileResolver;
+use LPG\Commerce\Taxonomies\CylinderBrand;
 
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Seeds the four spec profiles (field definitions only) and the starter
- * product_cat tree (§4.1, §11.3, C8). Idempotent: creates missing items only
+ * Seeds the four spec profiles (field definitions only), the starter
+ * product_cat tree and the starter cylinder brands (§4.1, §11.3, §13.2, C8). Idempotent: creates missing items only
  * and never overwrites profiles, field definitions or category assignments.
  * Never creates products or spec values.
  */
 final class SeedCommand {
 
 	/**
-	 * Seeds the starter spec profiles and product categories.
+	 * Seeds the starter spec profiles, product categories and cylinder brands.
 	 *
-	 * Creates missing items only. Existing profiles, field definitions and
-	 * category profile assignments are never changed. No products are created.
+	 * Creates missing items only. Existing profiles, field definitions,
+	 * category profile assignments and cylinder brands (and their sizes) are
+	 * never changed. No products are created.
 	 *
 	 * ## EXAMPLES
 	 *
@@ -46,13 +48,15 @@ final class SeedCommand {
 		}
 		\WP_CLI::success(
 			sprintf(
-				'Profiles: %d created, %d already present. Categories: %d created, %d already present. Default profiles: %d assigned, %d left unchanged.',
+				'Profiles: %d created, %d already present. Categories: %d created, %d already present. Default profiles: %d assigned, %d left unchanged. Cylinder brands: %d created, %d already present.',
 				$summary['profiles_created'],
 				$summary['profiles_existing'],
 				$summary['categories_created'],
 				$summary['categories_existing'],
 				$summary['assignments_made'],
-				$summary['assignments_kept']
+				$summary['assignments_kept'],
+				$summary['brands_created'],
+				$summary['brands_existing']
 			)
 		);
 	}
@@ -60,7 +64,7 @@ final class SeedCommand {
 	/**
 	 * Perform the seed. Usable without WP-CLI (tests).
 	 *
-	 * @return array{profiles_created: int, profiles_existing: int, categories_created: int, categories_existing: int, assignments_made: int, assignments_kept: int, log: string[], errors: string[]}
+	 * @return array{profiles_created: int, profiles_existing: int, categories_created: int, categories_existing: int, assignments_made: int, assignments_kept: int, brands_created: int, brands_existing: int, log: string[], errors: string[]}
 	 */
 	public static function run(): array {
 		$summary = array(
@@ -70,6 +74,8 @@ final class SeedCommand {
 			'categories_existing' => 0,
 			'assignments_made'    => 0,
 			'assignments_kept'    => 0,
+			'brands_created'      => 0,
+			'brands_existing'     => 0,
 			'log'                 => array(),
 			'errors'              => array(),
 		);
@@ -140,6 +146,12 @@ final class SeedCommand {
 			++$summary['assignments_made'];
 			$summary['log'][] = sprintf( 'Assigned default profile "%s" to category "%s".', self::profiles()[ $category['profile'] ]['title'], $category['name'] );
 		}//end foreach
+
+		$brands                     = CylinderBrand::seed();
+		$summary['brands_created']  = $brands['created'];
+		$summary['brands_existing'] = $brands['existing'];
+		$summary['log']             = array_merge( $summary['log'], $brands['log'] );
+		$summary['errors']          = array_merge( $summary['errors'], $brands['errors'] );
 
 		return $summary;
 	}

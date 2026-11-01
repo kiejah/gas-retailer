@@ -480,3 +480,4 @@ Builds on §5. Owner inputs are recorded in docs/owner-decisions.md (W-002/W-003
 **Phase 5 split.** 5A (lpg-domain): settings, cylinder brands, MessageBuilder, RestHardening. 5B (lpg-domain): records, REST, notifications, admin, privacy (owns the Installer/uninstall changes for caps). 5C: blocks (lpg-domain) plus theme placement and pages (lpg-theme). Then security review and QA acceptance (including A11Y-005, per P-018).
 
 **Shipping (§13.9) is configured on dev (Lead, 2026-11-02):** zone "Nairobi" (KE:KE30) with flat_rate KSh 300, free_shipping min KSh 10,000, local_pickup (placeholder address).
+| C18 | Phase 5A choices | Accepted: `privacy_policy_version` default `draft-2026-11-01` (bump when the client approves the privacy text); cylinder size labels over 20 chars are truncated, not rejected |

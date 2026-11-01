@@ -91,6 +91,7 @@ class CatalogueSetupTest extends WP_UnitTestCase {
 		$this->assertSame( 4, $first['profiles_created'] );
 		$this->assertSame( 11, $first['categories_created'] );
 		$this->assertSame( 4, $first['assignments_made'] );
+		$this->assertSame( 3, $first['brands_created'] );
 		$this->assertSame( array(), $first['errors'] );
 
 		$counts = $this->counts();
@@ -102,6 +103,8 @@ class CatalogueSetupTest extends WP_UnitTestCase {
 		$this->assertSame( 11, $second['categories_existing'] );
 		$this->assertSame( 0, $second['assignments_made'] );
 		$this->assertSame( 4, $second['assignments_kept'] );
+		$this->assertSame( 0, $second['brands_created'] );
+		$this->assertSame( 3, $second['brands_existing'] );
 		$this->assertSame( $counts, $this->counts() );
 	}
 
@@ -168,6 +171,12 @@ class CatalogueSetupTest extends WP_UnitTestCase {
 			'categories' => (int) wp_count_terms(
 				array(
 					'taxonomy'   => 'product_cat',
+					'hide_empty' => false,
+				)
+			),
+			'brands'     => (int) wp_count_terms(
+				array(
+					'taxonomy'   => 'lpg_cylinder_brand',
 					'hide_empty' => false,
 				)
 			),
