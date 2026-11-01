@@ -137,8 +137,10 @@ White fill, `contrast` text, 1 px `border-strong` border (3.66:1), 2 px radius, 
            Safety Equipment  Refills & Exchange  Request a quote
 ```
 - Wordmark: the core Site Title ("Gas-Plug", from Settings > General), **placeholder** pending W-001. No logo image.
-- Search: core Search with the WooCommerce product-search variation (searches products only). It sits outside the nav overlay, so it is visible at every width (P-005/P-006).
-- Tools: WooCommerce Customer account (icon) and Mini-cart (icon, price hidden). Tap targets are at least 44 × 44 px.
+- Search: core Search with the WooCommerce product-search variation (searches products only). It sits outside the nav overlay, so it is visible at every width (P-005/P-006). Core removes the input's outline, so the theme draws the 2 px `focus` ring (offset 2 px) around the whole field (`.wp-block-search__inside-wrapper`) when the input has keyboard focus, and on the search button when it has focus (DEF-003). Applies to every core Search in the theme, including the empty-state search.
+- Tools: WooCommerce Customer account (icon) and Mini-cart (icon, price hidden). Both are 44 × 44 px (the account rule targets `.wc-block-customer-account__link`, DEF-005).
+- **Mini-cart drawer:** WooCommerce 11.2.1 hides the closed drawer with opacity only, so its controls stayed in the Tab order. The theme adds `visibility: hidden` to `.wc-block-components-drawer__screen-overlay--is-hidden`, delayed by the 0.3 s fade-out, so the closed drawer is skipped by Tab and the open/close animation is unchanged (DEF-004, CSS only).
+- **Desktop/tablet nav (≥ 600 px):** top-level items are at least 44 px tall (flex, centred); wrapped rows at 768 have no extra row gap (DEF-005).
 - Nav: core/navigation with inner link/submenu blocks and **no `ref`**, so it needs no `wp_navigation` post and core creates no fallback. The order follows P-006. Items come from `inc/nav-items.php`, shared with the mobile menu, and are built from the terms that exist, so a missing term drops its item. Segment items go to `/segment/<slug>/`. LPG Accessories, Safety Equipment and Refills & Exchange go to their category archives.
 - **Products ▾ opens on click/tap** (`submenuVisibility: "click"`, P-014). "Products" is a `<button>` with `aria-expanded` (false → true on click, Enter or Space; Escape closes and returns focus). The dropdown (4 px radius, thin border, overlay shadow) lists **All products first**, then the 11 top-level categories.
 - **Request a quote** appears only when a published page with the slug `request-a-quote` exists, checked when the header renders (§12.2, P-013 #1). No page is created by the theme.
@@ -186,6 +188,9 @@ Everything under the gallery/summary columns sits in one wide group, `.lpg-produ
 
 ### 6.12 Cart cross-sells
 The cart page's WooCommerce Cart block already contains WooCommerce's default cross-sells inner block (a Product Collection in the `woocommerce/product-collection/cross-sells` collection, heading "You may be interested in…"). It lives in the cart page content, not in a theme template, so the theme only styles it: product cards from 6.6, 2-up at 375. It renders nothing when the cart items have no cross-sells. The cart's quantity input has its side padding reset (theme.json global CSS) so the theme's text-input padding doesn't widen WooCommerce's fixed 132 px mobile cart column, which had caused 7 px of horizontal scroll at 375.
+
+### 6.12 Checkout page (`templates/page-checkout.html`)
+Theme override of WooCommerce 11.2.1's checkout template: WooCommerce's minimal checkout header part, then the page title as the only H1 ("Checkout"), then the page content with WooCommerce's Checkout block unchanged (DEF-006). The cart uses WooCommerce's template, which already has one H1.
 
 ## 7. Asset loading (C15 performance note)
 
