@@ -356,3 +356,16 @@ For products where `EnquiryOnly::is_enquiry_only()` is true, the plugin (new ser
 ### 12.2 Navigation
 - "Request a quote" is shown **only if a published page with slug `request-a-quote` exists** (resolved at render time), per P-013 #1. No placeholder page is created; Phase 5 creates the page.
 - Submenus open on tap, per P-014.
+
+### 12.3 SEO plugin (D5 / P-010): Yoast SEO free 28.8 (Lead, 2026-11-01)
+- **Why Yoast:** both Yoast and Rank Math free are tested to WP 7.1.4. Yoast **leaves WooCommerce's product JSON-LD in place**, so our spec `additionalProperty` (§11.8) keeps working; this was checked on a rendered product with 1 property and offers present alongside Yoast's own graph. Rank Math's free WooCommerce module replaces WooCommerce's schema and would drop it.
+- **Checked on the dev site:** with indexing temporarily on, canonical is correct on home, shop, segment and category. While `blog_public=0`, pages are `noindex` and Yoast omits the canonical, as expected.
+- **Cost:** shop time to first byte went from 0.28 s to 0.37 s locally, still under the 0.55 s baseline. Recorded for the Phase 4 performance pass.
+- No paid add-ons. Tracking is off. Meta-description templates are set later with real content (owner content, W-series).
+- **The plugin is not tracked in Git** (A1): deployment installs it. It is listed in the Phase 8 checklist.
+
+### 12.4 Warranty block (P-009 #4)
+- **Block:** `lpg/product-warranty`, dynamic, same rules as §11.9 (`Markup::product()`; renders '' for a password-protected, non-viewable or empty product).
+- **Markup:** `<p class="lpg-product-warranty"><span class="lpg-product-warranty__label">Warranty:</span> <span class="lpg-product-warranty__value">{esc_html(_lpg_warranty), line breaks preserved}</span></p>`.
+- **Attribute:** `label` (string, default "Warranty:").
+- **Placement:** the theme puts it in the single-product summary, after the product meta.
