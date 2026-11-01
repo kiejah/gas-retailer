@@ -36,5 +36,22 @@ Payments: offline gateways only (COD/BACS) until M-Pesa is deliberately schedule
 
 ## Local environment
 
-- PHP 8.3 and local site served by Laravel Herd; MySQL 9.0 on localhost (DB `gas_retailer_db`). Production targets MySQL 8.0/MariaDB, so avoid version-specific SQL.
-- Commands (lint/test/build) will be added here once Phase 2 sets up tooling.
+- Site: http://gas-retailer.test (Herd link, PHP 8.3). MySQL 9.0 on localhost, site DB `gas_retailer_db`. Production targets MySQL 8.0/MariaDB, so avoid version-specific SQL.
+- WordPress 7.1.4 and WooCommerce 11.2.1 (HPOS on, KES, Kenya-only, COD only). `WP_ENVIRONMENT_TYPE=local`.
+- Debug log: `logs/debug.log` in the repo root, deliberately outside the web root.
+- Run `wp` (WP-CLI) from `gas-retailer/`. The user installs system-level tools themselves: give them the command instead of running brew or global installs.
+
+## Commands (run from repo root)
+
+```bash
+composer lint                      # PHPCS (WPCS 3 + PHPCompatibilityWP) on plugin, theme, tests
+composer lint:fix                  # phpcbf auto-fix
+composer test                      # PHPUnit integration suite (WP test suite + WooCommerce)
+vendor/bin/phpunit --filter test_install_does_not_overwrite_existing_settings   # single test
+vendor/bin/phpunit tests/integration/PluginTest.php                             # single file
+```
+
+- Tests use `tests/wp-tests-config.php` (git-ignored; template in `tests/wp-tests-config.sample.php`). It points at the separate `gas_retailer_test` DB with prefix `wptests_` and a MySQL user that can only reach that DB.
+- The test suite drops tables on every run. `tests/bootstrap.php` refuses to run unless the DB name ends in `_test` and the prefix is `wptests_`. Never weaken that guard.
+- Test classes go in `tests/integration/*Test.php` and extend `WP_UnitTestCase`.
+- The block build tool (`@wordpress/scripts`) is added in Phase 3 and needs Node 22+.

@@ -1,0 +1,25 @@
+{
+    "name": "kiejah/gas-retailer",
+    "description": "Kenya LPG Commerce Platform: dev tooling only (lint and tests). Nothing here is a runtime dependency.",
+    "type": "project",
+    "license": "proprietary",
+    "require-dev": {
+        "php": ">=8.1",
+        "wp-coding-standards/wpcs": "^3.4",
+        "phpcompatibility/phpcompatibility-wp": "^2.1",
+        "phpunit/phpunit": "^9.6",
+        "yoast/phpunit-polyfills": "^4.0 || ^3.0 || ^2.0",
+        "wp-phpunit/wp-phpunit": "7.1.*"
+    },
+    "config": {
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        },
+        "sort-packages": true
+    },
+    "scripts": {
+        "lint": "phpcs",
+        "lint:fix": "phpcbf",
+        "test": "phpunit"
+    }
+}

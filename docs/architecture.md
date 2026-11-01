@@ -20,7 +20,7 @@ Any change to a decision needs the owner's approval and a new row in the decisio
 | Composer 2.7.7, Node 20.17, npm 10.9 | Present | Dev tooling only, never runtime dependencies |
 | Docker | Installed, daemon not running | Not needed if Herd is used |
 | Git | 2.37.1; **no repository yet** | Created in Phase 2 |
-| wp-config.php | DB settings filled in, `WP_DEBUG` false | **All 8 auth keys/salts are still placeholders**; DB user `laravel_user` is shared with another project |
+| wp-config.php | DB settings filled in, `WP_DEBUG` false | **All 8 auth keys/salts are still placeholders**; the DB user is shared with another project |
 
 ---
 

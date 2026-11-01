@@ -8,7 +8,7 @@ Architecture details are in [architecture.md](architecture.md).
 | Phase | Status |
 |---|---|
 | 1 Discovery & Architecture | **Complete** — approved by the owner 2026-11-01 (all decisions accepted) |
-| 2 Foundation | In progress: WordPress installed and verified at http://gas-retailer.test (Herd link, salts regenerated, 2026-11-01). Ready to continue |
+| 2 Foundation | **Complete** (2026-11-01): see the Phase 2 report below |
 | 3–8 | Not started |
 
 ## Agent roles and coordination
@@ -85,7 +85,44 @@ cPanel guide: DB, HTTPS, SMTP, backups, caching, production wp-config, deploy (G
 | R7 | Logging a WhatsApp enquiry is best-effort (the customer may not send the message) | Log as "initiated", not "sent"; document this for the operator |
 
 ## Known issues
-- None yet (no code written).
+- Phase 2 security review (lpg-security, 2026-11-01): no critical or high findings.
+  - Fixed: F1, a fail-closed test DB guard in `tests/bootstrap.php`.
+  - Fixed: F2, the debug log moved to `logs/` outside the web root.
+  - Fixed: F3, ABSPATH guards added to the theme patterns.
+  - Fixed: F5, the DB username removed from the docs.
+  - F4: partly fixed. The test DB has its own test-only user (`gas_test`). The site DB still uses the shared user; switching is the owner's choice.
+- Theme: viewport and visual checks, Site Editor block validation and Theme Check have not been run yet (Phase 4/7).
+- `@wordpress/scripts` needs Node 22 or newer (local is 20.17). The install is deferred to Phase 3.
+- No shipping zones yet, so checkout charges no delivery (Phase 5).
+- Deployment checklist (Phase 8): `WP_DEBUG` off in production, logs outside `public_html`, never upload `debug.log`.
+
+## Phase 2 report (2026-11-01)
+
+**Agents:** Lead Architect (environment, WooCommerce, plugin skeleton, tooling, tests); lpg-theme (theme skeleton); lpg-security (review).
+
+**Delivered:**
+- **Git:** repo in the outer folder, pushed to origin/main. WordPress core, WooCommerce, uploads and secrets are ignored.
+- **WordPress settings:** environment type `local`, debug log at `logs/`, 256M memory limit, Post name permalinks, Africa/Nairobi timezone, sample content removed.
+- **WooCommerce 11.2.1:** HPOS on; KES with 0 decimals; Kenya/Nairobi; sells and ships to KE only; tax off; COD is the only payment method; onboarding skipped.
+- **Tooling:** composer dev tooling (WPCS 3.4.1, PHPCompatibilityWP, PHPUnit 9.6, wp-phpunit 7.1.3), `phpcs.xml.dist`, `phpunit.xml.dist`.
+- **Plugin `lpg-commerce-core` 0.1.0:** bootstrap, its own autoloader, Service contract, Plugin registry with the `lpg_services` filter and `lpg_loaded` action, Installer (settings and version stored without autoload), uninstall, WooCommerce dependency check, HPOS and cart/checkout blocks compatibility.
+- **Theme `lpg-storefront` 0.1.0:** placeholder theme.json tokens, 6 templates, header and footer, 3 patterns.
+
+**Tests executed:**
+
+| Test | Result |
+|---|---|
+| PHPUnit | 5 tests, 9 assertions, all passed |
+| Test DB guard | Refuses a site-DB config (exit 1) |
+| PHPCS (plugin, theme, tests) | 0 errors and 0 warnings |
+| Store API checkout | `[DEMO]` product, COD order reached "processing", stock went from 5 to 3 (test data deleted afterwards) |
+| HTTP | Home page and /shop/ return 200; 404 page returns 404 |
+| debug.log | Not reachable over HTTP |
+| composer audit | Clean |
+
+**Not tested:** theme viewport and visual checks, Site Editor block validation, Theme Check.
+
+**Next phase:** Phase 3, the product catalogue. It starts with the taxonomies (`lpg_segment`, `lpg_manufacturer`, `lpg_cylinder_brand`) and spec profiles, which are lpg-domain work. Before Phase 3 the owner should install Node 22 or newer for the block build.
 
 ## Next tasks
-- Await review of Phase 1 and decisions on the pre-requisites above.
+- Phase 3 kickoff: Lead defines the shared interfaces (taxonomy slugs, meta keys, spec profile schema) in architecture.md, then lpg-domain implements them.

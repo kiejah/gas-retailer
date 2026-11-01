@@ -22,3 +22,8 @@ node_modules/
 .env.*
 *.log
 .claude/settings.local.json
+
+# Local debug log lives here (outside the web root)
+!/logs/
+/logs/*
+!/logs/.gitkeep
