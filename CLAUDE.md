@@ -9,7 +9,7 @@ WordPress + WooCommerce storefront for an LPG **equipment and accessories** supp
 - `docs/architecture.md`: layer boundaries, data model, plugin and theme specs, decision log. **Read before changing any data model, meta key, hook or REST contract.**
 - `docs/implementation-plan.md`: phase status, agent ownership, risks and next tasks. Update it when work completes.
 
-**Team:** the main session is the Lead Architect: it owns architecture, shared interfaces and `docs/`, reviews all work, and closes phases. Specialists in `.claude/agents/`: `lpg-domain` (plugin), `lpg-theme` (theme), `lpg-security` (read-only review), `lpg-qa` (tests, perf, SEO). Each task given to a specialist must state the objective, inputs, files, dependencies and acceptance criteria. Only one agent edits a given directory at a time.
+**Team:** the main session is the Lead Architect: it owns architecture, shared interfaces and `docs/`, reviews all work, and closes phases. Specialists in `.claude/agents/`: `lpg-domain` (plugin), `lpg-theme` (theme), `lpg-security` (read-only review), `lpg-qa` (tests, perf, SEO). While the owner is away, `lpg-owner-proxy` makes provisional owner decisions and phase-gate approvals, logged in `docs/owner-decisions.md`. Its limits are in its definition file. Each task given to a specialist must state the objective, inputs, files, dependencies and acceptance criteria. Only one agent edits a given directory at a time.
 
 All decisions in the architecture decision log (A1–A5, D1–D6) were accepted by the owner on 2026-11-01. Changing one needs the owner's approval.
 
