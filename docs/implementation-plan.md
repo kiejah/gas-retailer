@@ -9,8 +9,9 @@ Architecture details are in [architecture.md](architecture.md).
 |---|---|
 | 1 Discovery & Architecture | **Complete** — approved by the owner 2026-11-01 (all decisions accepted) |
 | 2 Foundation | **Complete** (2026-11-01): see the Phase 2 report below |
-| 3 Product catalogue | In progress. **3A (data layer and admin) complete 2026-11-01**: lpg-domain built it; Lead and lpg-security reviewed it; 81 tests pass. 3B (blocks) waits on Node ≥ 22.22.2 |
-| 4–8 | Not started |
+| 3 Product catalogue | **Complete**: 3A and 3B delivered and tested. Gate approved by owner proxy 2026-11-01 (P-012, provisional, pending owner ratification) |
+| 4 Storefront | In progress: design-system checkpoint (P-008) with lpg-theme; extra permission and escaping tests (P-012 condition) with lpg-qa |
+| 5–8 | Not started |
 
 ## Agent roles and coordination
 
@@ -159,12 +160,10 @@ cPanel guide: DB, HTTPS, SMTP, backups, caching, production wp-config, deploy (G
 - Browser matrix beyond Chrome → Phase 7
 - Theme stylesheet loading on every page → Phase 4 performance
 
-**Pending for the Phase 3 gate (P-001):**
-- Browser checks: the editor (BLK-010), the admin JS (CAT-085), and the product page at 375/768/1280
-- Mapping the CAT INT rows in the test plan to the PHPUnit tests that cover them
+**Phase 3 gate:** all P-001 conditions met (browser checks §2.13, 66 INT rows mapped to tests, the uncovered list in §2.14). Approved P-012. Carried forward:
+- **Phase 4 gate:** PHPUnit tests for CAT-007, CAT-020, CAT-049/SEC-003, SEC-001, CAT-076, CAT-097; PERF-002 in the performance pass; SEO-006 in the SEO pass.
+- **Phase 7:** the remaining §2.14 rows, a manual or Playwright check of the search dropdown, BLK-012, a real uninstall run, other browsers.
 
 ## Next tasks
-- Close the Phase 3 gate (browser results → owner-proxy approval).
-- Phase 4 kickoff per the owner-proxy direction (P-003..P-011 in docs/owner-decisions.md):
-  - The design-system checkpoint first: tokens and contrast, plus the header, a product card and the spec table at 375 and 1280.
-  - Templates start after the proxy's one-round reply.
+- Phase 4 step 1: the design-system checkpoint (lpg-theme) goes to the owner proxy for its one-round review (P-008), then the page templates.
+- In parallel: lpg-qa adds the P-012 condition tests.
