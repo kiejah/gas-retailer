@@ -61,3 +61,8 @@ vendor/bin/phpunit tests/integration/PluginTest.php                             
   npm run lint:js    # ESLint (eslint.config.cjs marks @wordpress/* as core modules, provided by WordPress)
   ```
   Without `build/blocks/blocks-manifest.php`, `Blocks\Registry` registers blocks from source with no editor scripts: the front end works but the blocks don't appear in the editor.
+
+## Dev-site test fixtures
+
+- Name every fixture `[QA TEST]` and delete it with `--force`, **by the IDs you created**. Never delete by filename pattern or glob in `uploads/`.
+- **Never touch the WooCommerce placeholder** (attachment #8, `uploads/woocommerce-placeholder*.webp`). It has been deleted twice by over-broad cleanups. To restore it, copy `plugins/woocommerce/assets/images/placeholder.webp` to `uploads/woocommerce-placeholder.webp`, then run `wp media regenerate 8 --yes`.

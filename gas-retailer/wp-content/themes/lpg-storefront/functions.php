@@ -2,7 +2,8 @@
 /**
  * LPG Storefront theme setup.
  *
- * Presentation only: theme supports, pattern registration and asset enqueueing. All business
+ * Presentation only: theme supports, pattern registration, asset enqueueing and
+ * one WooCommerce block-template display opt-out (classic upsells). All business
  * logic lives in the lpg-commerce-core plugin.
  *
  * Notes:
@@ -15,7 +16,7 @@
  *   load only where their blocks render: assets/css/lpg-blocks.css
  *   (lpg-commerce-core blocks), assets/css/product-card.css (product cards),
  *   assets/css/catalog.css (listings, filters, category links) and
- *   assets/css/single-product.css (product tabs and reviews).
+ *   assets/css/single-product.css (product tabs, reviews, meta and warranty).
  *
  * @package lpg_storefront
  */
@@ -67,7 +68,7 @@ function lpg_storefront_enqueue_block_styles() {
 		),
 		'lpg-storefront-single'       => array(
 			'file'   => 'assets/css/single-product.css',
-			'blocks' => array( 'woocommerce/product-details' ),
+			'blocks' => array( 'woocommerce/product-details', 'lpg/product-warranty' ),
 		),
 	);
 
@@ -86,3 +87,34 @@ function lpg_storefront_enqueue_block_styles() {
 	}
 }
 add_action( 'init', 'lpg_storefront_enqueue_block_styles' );
+
+/**
+ * Tells WooCommerce's block-template compatibility layer that the theme's
+ * Product Collection upsells section (pattern lpg-storefront/upsell-products)
+ * replaces the classic woocommerce_upsell_display() output.
+ *
+ * Without this, WooCommerce 11.2 still runs the classic hook after the
+ * woocommerce/product-details block, so upsells would appear twice (once
+ * unstyled). The filter is WooCommerce's documented way for a block template
+ * to opt out of one hooked function (since 9.5). It applies only while a block
+ * template renders and changes no data.
+ *
+ * @param array  $data       Additional hooked data.
+ * @param string $class_name Compatibility class running the removal.
+ * @return array
+ */
+function lpg_storefront_replace_classic_upsells( $data, $class_name ) {
+	if ( 'SingleProductTemplateCompatibility' !== $class_name ) {
+		return $data;
+	}
+
+	$data   = is_array( $data ) ? $data : array();
+	$data[] = array(
+		'hook'     => 'woocommerce_after_single_product_summary',
+		'function' => 'woocommerce_upsell_display',
+		'priority' => 15,
+	);
+
+	return $data;
+}
+add_filter( 'woocommerce_blocks_hook_compatibility_additional_data', 'lpg_storefront_replace_classic_upsells', 10, 2 );

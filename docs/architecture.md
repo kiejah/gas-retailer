@@ -370,3 +370,4 @@ For products where `EnquiryOnly::is_enquiry_only()` is true, the plugin (new ser
 - **Attribute:** `label` (string, default "Warranty:").
 - **Placement:** the theme puts it in the single-product summary, after the product meta.
 - Empty `label` hides the label span (same as an empty heading hides the `<h2>`). Confirmed by Lead.
+| C17 | The theme removes WooCommerce's classic `woocommerce_upsell_display` hook during block-template rendering (via `woocommerce_blocks_hook_compatibility_additional_data`) to stop a duplicate upsells list | **Accepted in the theme.** It is presentation (which markup renders) and changes no data or behaviour. Recorded as the one documented exception to the "functions.php = enqueue/supports/patterns" rule |

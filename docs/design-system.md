@@ -146,7 +146,7 @@ White fill, `contrast` text, 1 px `border-strong` border (3.66:1), 2 px radius, 
 - WooCommerce block hooks would otherwise inject a second account icon after the nav. The nav sets `metadata.ignoredHookedBlocks` to prevent that.
 
 ### 6.6 Product card (`assets/css/product-card.css`)
-One look for WooCommerce product-template cards (shop, archives, related products) and `lpg/compatible-products` cards:
+One look for WooCommerce product-template cards (shop, archives, upsells, related products, cart cross-sells) and `lpg/compatible-products` cards:
 - White card, 1 px `border`, 4 px radius, 0.75rem padding, 0.5rem gap, left-aligned. The border goes to `border-strong` on hover (no shadow, no motion).
 - **Image well:** square, `surface` background, `object-fit: contain`, so the product sits on a plain background and is never cropped.
 - **Name:** 16 px/600 `contrast`, wraps in full (technical names are not truncated). Underlined on hover.
@@ -155,7 +155,7 @@ One look for WooCommerce product-template cards (shop, archives, related product
 - **Sale badge:** small `contrast` tag with white uppercase `x-small` text, top right of the image. Never the accent.
 - **Enquire** (enquiry-only products): a neutral label, not a button. Uppercase `x-small`, `steel` text, 1 px `border-strong` border, 2 px radius. Used for `.lpg-compatible-products__price--enquire` and for the plugin's `.lpg-enquire-label` (§12.1), which replaces the price in WooCommerce cards and on the single product page (that rule is global in theme.json because it appears outside cards).
 - **Button** (WooCommerce cards only, see 6.1). For enquiry-only products the plugin replaces it with `.lpg-enquire-link` "View details": same place, full width, 44 px tall, outline look as "Read more". The plugin's compatible-products markup has no button.
-- **Grid:** WooCommerce Product Collection with `shrinkColumns: true`, so every grid (shop, archives, homepage, related) is 2 columns at 375 and up to its column count on wide screens (P-013 #2).
+- **Grid:** WooCommerce Product Collection with `shrinkColumns: true`, so every grid (shop, archives, homepage, upsells, related, cart cross-sells) is 2 columns at 375 and up to its column count on wide screens (P-013 #2).
 - Loaded only when `woocommerce/product-template` or `lpg/compatible-products` renders.
 
 ### 6.7 Spec table (`assets/css/lpg-blocks.css`)
@@ -177,10 +177,15 @@ Templates `archive-product` (shop), `taxonomy-product_cat`, `taxonomy-lpg_segmen
 Hero (`surface` band, catalogue-led H1, primary "Browse products", outline "Request a quote" only when that page exists) → segment tiles (3-column grid of bordered tiles; the whole tile is the link) → category links (chips; the section is left out while no category has products) → Featured products → RFQ band (left 4 px `contrast` rule; button only when the page exists, otherwise "Contact us for bulk and project orders." with no contact details) → New products → safety strip (`surface` band) → delivery with a small Refills & Exchange note tile → trust strip (three placeholder tiles, visually hidden H2). Product grids keep their heading inside the Product Collection block, so a grid with zero products renders nothing at all. All copy is placeholder and marked `[Placeholder]`, `[Placeholder copy]` or `[PLACEHOLDER: …]` (italic `muted`). Sections are spaced with `spacing-70`. These small rules live in theme.json global CSS.
 
 ### 6.11 Single product sections (`assets/css/single-product.css`)
-Everything under the gallery/summary columns sits in one wide group, `.lpg-product-sections`, so the spec table, WooCommerce tabs, documents, compatible products and related products share the columns' width (P-013 #3; measured 28–1252 px at 1280 and 20–355 px at 375). Order is unchanged (§11.9).
+Everything under the gallery/summary columns sits in one wide group, `.lpg-product-sections`, so the spec table, WooCommerce tabs, documents, compatible products, upsells and related products share the columns' width (P-013 #3; measured 28–1252 px at 1280 and 20–355 px at 375). Order: spec table → tabs → documents → compatible products → upsells → related products (§11.9, P-009 #4).
 - **Tabs** (WooCommerce "minimal" style, restyled): a row of tab links over a 1 px `border` rule; inactive `muted`, active `contrast` with a 2 px `contrast` underline; 44 px tall. Panel headings `x-large`; text limited to 75 ch.
 - **Reviews** (WooCommerce default behaviour, W-008): title `x-large`, "no reviews" in `muted`, the form in a bordered panel up to 40 rem wide inside the shared column (not full-width), labels above fields, inputs full width at 44 px, required marks in `error`, primary "Submit".
 - **Meta** (SKU, category, tags, brand): `small` `muted`, wrapping row.
+- **Warranty** (`lpg/product-warranty`, §12.4): directly under the meta row in the summary. Same `small` `muted` text as the meta; `__label` ("Warranty:") is 600 weight; `__value` keeps the plugin's line breaks (`nl2br`) and wraps long words. The block renders nothing without a warranty value.
+- **Upsells** (pattern `lpg-storefront/upsell-products`, heading "You may also need"): WooCommerce Product Collection in its native `woocommerce/product-collection/upsells` collection (the product is taken from the single-product location), up to 4 items, product cards as in 6.6, 2-up at 375 and up to 4 columns at 1280. It renders nothing when the product has no upsells. WooCommerce 11.2 would also print its classic `woocommerce_upsell_display()` ("You may also like…") after the tabs in block templates, so `functions.php` opts that one hook out through WooCommerce's documented `woocommerce_blocks_hook_compatibility_additional_data` filter (block templates only; no data changes).
+
+### 6.12 Cart cross-sells
+The cart page's WooCommerce Cart block already contains WooCommerce's default cross-sells inner block (a Product Collection in the `woocommerce/product-collection/cross-sells` collection, heading "You may be interested in…"). It lives in the cart page content, not in a theme template, so the theme only styles it: product cards from 6.6, 2-up at 375. It renders nothing when the cart items have no cross-sells. The cart's quantity input has its side padding reset (theme.json global CSS) so the theme's text-input padding doesn't widen WooCommerce's fixed 132 px mobile cart column, which had caused 7 px of horizontal scroll at 375.
 
 ## 7. Asset loading (C15 performance note)
 
@@ -190,7 +195,7 @@ Everything under the gallery/summary columns sits in one wide group, `.lpg-produ
 | `assets/css/lpg-blocks.css` | `lpg/spec-table`, `lpg/product-documents` or `lpg/compatible-products` renders | `wp_enqueue_block_style()` per block, handle `lpg-storefront-blocks` |
 | `assets/css/product-card.css` | `woocommerce/product-template` or `lpg/compatible-products` renders | `wp_enqueue_block_style()`, handle `lpg-storefront-product-card` |
 | `assets/css/catalog.css` | `woocommerce/product-collection`, `woocommerce/product-filters` or `woocommerce/product-categories` renders | `wp_enqueue_block_style()`, handle `lpg-storefront-catalog` |
-| `assets/css/single-product.css` | `woocommerce/product-details` renders | `wp_enqueue_block_style()`, handle `lpg-storefront-single` |
+| `assets/css/single-product.css` | `woocommerce/product-details` or `lpg/product-warranty` renders | `wp_enqueue_block_style()`, handle `lpg-storefront-single` |
 
 On WP 7.1 with a block theme, `wp_should_load_block_assets_on_demand()` is true. `wp_enqueue_block_style()` then hooks `render_block` for that block name only. Block templates render before `wp_head`, so the style still prints in the head. Because `path` is passed, core inlines these small files (`<style id="…-inline-css">`) instead of adding a request. In the editor (`is_admin`), the styles load through `enqueue_block_assets`. No JavaScript is added, and there are no web fonts or CDN requests.
 

@@ -180,3 +180,19 @@ html body .lpg-product-sections .wp-block-woocommerce-product-details.is-style-m
 .lpg-product-meta > * {
 	margin: 0;
 }
+
+/*
+ * Warranty line (lpg/product-warranty, §12.4), directly under the meta row in
+ * the summary. Same small muted text as the meta; the label is bold like a
+ * term prefix would read, and the value keeps the plugin's line breaks.
+ */
+.lpg-product-warranty {
+	margin-block: var(--wp--preset--spacing--20) 0;
+	color: var(--wp--preset--color--muted);
+	font-size: var(--wp--preset--font-size--small);
+	overflow-wrap: anywhere;
+}
+
+.lpg-product-warranty__label {
+	font-weight: 600;
+}
