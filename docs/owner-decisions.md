@@ -49,3 +49,7 @@ Note: the owner's original brief document is not in the repo. Homepage and navig
 | W-010 | 2026-11-01 14:13 | Carried over: switching the site DB off the shared MySQL user (Phase 2 F4) | Shared user stays |
 | W-011 | 2026-11-01 16:06 | Optional 2-minute manual check when back: in a product's Linked Products tab, type in "Compatible products" and confirm suggestions appear (automation could not trigger the dropdown) | Deferred to Phase 7 Playwright if not done |
 | W-012 | 2026-11-01 16:22 | Should enquiry-only products ever show an indicative price ("from KSh …"), or always show "Enquire" only? | "Enquire" label only, no price, in all cards (P-015) |
+
+
+## Owner-provided (real owner, 2026-11-01)
+- **W-002 (WhatsApp number): provided by the owner.** Stored in the site DB in plugin settings (`lpg_settings.whatsapp_number`, digits-only international format). It is deliberately **not** written in the repo. Phase 5 uses it for the WhatsApp enquiry links and the header "WhatsApp us" link (P-017).
