@@ -131,5 +131,40 @@ cPanel guide: DB, HTTPS, SMTP, backups, caching, production wp-config, deploy (G
 - **Tests:** `composer test` passes 81 tests (231 assertions). `composer lint` is clean. On the dev site, the seed is idempotent across 3 runs and the debug log is clean.
 - **Not tested:** admin JS in a browser (row editor, media picker), a real uninstall run.
 
+## Phase 3B report (2026-11-01)
+
+**Agents:** lpg-domain (blocks), lpg-theme (single-product template, block CSS), lpg-security (review: M1/H1/SD1, fixed as C15), lpg-qa (rendered-block acceptance; browser run in progress), Lead (build setup, ESLint config, Registry repeat-registration fix, reviews), lpg-owner-proxy (gate conditions P-001/P-002).
+
+**Delivered:**
+- **Blocks:** `lpg/spec-table`, `lpg/compatible-products`, `lpg/product-documents`. They are dynamic, with PHP renderers that escape all output. They render nothing for password-protected, non-viewable or empty products.
+- **Build:** `@wordpress/scripts` 36.1.0, with `build/blocks` committed (21 files, including the manifest and editor scripts). Node 22.23.4 via nvm.
+- **Theme:** a `single-product` block template that places the blocks after the summary and around the product tabs, plus `lpg-blocks.css` (3.2 KB, theme tokens only).
+- **Rulings:** C13–C16.
+
+**Tests executed (fresh run 2026-11-01, after the build):**
+
+| Check | Result |
+|---|---|
+| `composer test` | 104 tests, 369 assertions, all passed |
+| `composer lint` | exit 0 |
+| `npm run lint:js` | exit 0 |
+| Rendered-page acceptance (test-plan §2.12, AB-01..11) | 9/9 areas passed: spec table position and units, documents, compatible cards and the Enquire label, empty product, password protection, draft returns 404, escaping on a rendered page, block CSS only where used, no PHP notices |
+| Product page time to first byte | median 0.552 s |
+| debug.log | No new lines (56; all older known entries) |
+
+**Not tested / deferred** (owner proxy P-002):
+- BLK-012 theme switch → Phase 7
+- A real uninstall run → Phase 7
+- DEF-002 / SEO-005 → Phase 4 SEO pass
+- Browser matrix beyond Chrome → Phase 7
+- Theme stylesheet loading on every page → Phase 4 performance
+
+**Pending for the Phase 3 gate (P-001):**
+- Browser checks: the editor (BLK-010), the admin JS (CAT-085), and the product page at 375/768/1280
+- Mapping the CAT INT rows in the test plan to the PHPUnit tests that cover them
+
 ## Next tasks
-- 3B: `@wordpress/scripts` setup, the `lpg/spec-table`, `lpg/compatible-products` and `lpg/product-documents` blocks (lpg-domain), then a minimal single-product template placing them (lpg-theme). Then QA acceptance against docs/test-plan.md and a security review.
+- Close the Phase 3 gate (browser results → owner-proxy approval).
+- Phase 4 kickoff per the owner-proxy direction (P-003..P-011 in docs/owner-decisions.md):
+  - The design-system checkpoint first: tokens and contrast, plus the header, a product card and the spec table at 375 and 1280.
+  - Templates start after the proxy's one-round reply.
