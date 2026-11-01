@@ -109,6 +109,53 @@ return array(
 		'editorScript' => 'file:./index.js',
 		'render' => 'file:./render.php'
 	),
+	'product-warranty' => array(
+		'$schema' => 'https://schemas.wp.org/trunk/block.json',
+		'apiVersion' => 3,
+		'name' => 'lpg/product-warranty',
+		'version' => '0.4.0',
+		'title' => 'Product warranty',
+		'category' => 'woocommerce',
+		'icon' => 'shield',
+		'description' => 'The product\'s warranty text. Shows nothing when the product has no warranty.',
+		'keywords' => array(
+			'warranty',
+			'guarantee',
+			'lpg'
+		),
+		'textdomain' => 'lpg-commerce-core',
+		'attributes' => array(
+			'label' => array(
+				'type' => 'string',
+				'default' => 'Warranty:'
+			)
+		),
+		'usesContext' => array(
+			'postId',
+			'postType'
+		),
+		'supports' => array(
+			'html' => false,
+			'align' => array(
+				'wide',
+				'full'
+			),
+			'spacing' => array(
+				'margin' => true,
+				'padding' => true
+			),
+			'typography' => array(
+				'fontSize' => true
+			)
+		),
+		'example' => array(
+			'attributes' => array(
+				'label' => 'Warranty:'
+			)
+		),
+		'editorScript' => 'file:./index.js',
+		'render' => 'file:./render.php'
+	),
 	'spec-table' => array(
 		'$schema' => 'https://schemas.wp.org/trunk/block.json',
 		'apiVersion' => 3,

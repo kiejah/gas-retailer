@@ -369,3 +369,4 @@ For products where `EnquiryOnly::is_enquiry_only()` is true, the plugin (new ser
 - **Markup:** `<p class="lpg-product-warranty"><span class="lpg-product-warranty__label">Warranty:</span> <span class="lpg-product-warranty__value">{esc_html(_lpg_warranty), line breaks preserved}</span></p>`.
 - **Attribute:** `label` (string, default "Warranty:").
 - **Placement:** the theme puts it in the single-product summary, after the product meta.
+- Empty `label` hides the label span (same as an empty heading hides the `<h2>`). Confirmed by Lead.

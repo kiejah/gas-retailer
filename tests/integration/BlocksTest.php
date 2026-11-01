@@ -20,7 +20,7 @@ class BlocksTest extends WP_UnitTestCase {
 
 	use LpgFixtures;
 
-	private const BLOCK_NAMES = array( 'lpg/spec-table', 'lpg/compatible-products', 'lpg/product-documents' );
+	private const BLOCK_NAMES = array( 'lpg/spec-table', 'lpg/compatible-products', 'lpg/product-documents', 'lpg/product-warranty' );
 
 	public function tear_down(): void {
 		unset( $GLOBALS['product'], $_COOKIE[ 'wp-postpass_' . COOKIEHASH ] );
@@ -406,7 +406,7 @@ class BlocksTest extends WP_UnitTestCase {
 		$this->assertFalse( has_filter( 'block_type_metadata', array( Registry::class, 'strip_source_assets' ) ) );
 	}
 
-	public function test_registry_register_blocks_registers_all_three(): void {
+	public function test_registry_register_blocks_registers_all_blocks(): void {
 		$this->unregister_lpg_blocks();
 		if ( ! is_readable( Registry::build_dir() . '/blocks-manifest.php' ) ) {
 			$this->assertFileDoesNotExist( Registry::build_dir() . '/blocks-manifest.php' );
