@@ -10,8 +10,9 @@ Architecture details are in [architecture.md](architecture.md).
 | 1 Discovery & Architecture | **Complete** — approved by the owner 2026-11-01 (all decisions accepted) |
 | 2 Foundation | **Complete** (2026-11-01): see the Phase 2 report below |
 | 3 Product catalogue | **Complete**: 3A and 3B delivered and tested. Gate approved by owner proxy 2026-11-01 (P-012, provisional, pending owner ratification) |
-| 4 Storefront | Built and tested; **awaiting the owner-proxy gate** (acceptance §2.15: P-009 #2–#10 pass, #1 partial) |
-| 5–8 | Not started |
+| 4 Storefront | **Complete**. Gate approved by owner proxy 2026-11-02 (P-018, provisional). Carried: A11Y-005 320px reflow into the Phase 5 acceptance pass (P-018); the rest of the §2.15 not-tested list → Phase 7 |
+| 5 Business workflows | **In progress** (contract §13; P-023 guard-rails) |
+| 6–8 | Not started |
 
 ## Agent roles and coordination
 

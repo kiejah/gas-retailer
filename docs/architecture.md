@@ -467,3 +467,16 @@ Builds on §5. Owner inputs are recorded in docs/owner-decisions.md (W-002/W-003
 
 ### 13.10 Hardening
 - **`Security\RestHardening`:** anonymous requests to `/wp/v2/users` (list and single) get 401. Logged-in users with `list_users` are unaffected (security L1).
+
+### 13.11 Phase 5 services (registered in `Plugin::SERVICES`, Lead-owned)
+- `Settings\SettingsTab` (the WooCommerce settings tab; `Settings\Settings` is a static getter, not a service).
+- `Taxonomies\CylinderBrand`.
+- `Enquiries\RfqPostType`, `Enquiries\EnquiryPostType`, `Enquiries\AdminScreens`, `Enquiries\Notifications`.
+- `Rest\RfqController`, `Rest\EnquiryController`.
+- `Privacy\Exporters`, `Privacy\Retention`.
+- `Security\RestHardening`.
+- New blocks are added to `Blocks\Registry::BLOCKS`.
+
+**Phase 5 split.** 5A (lpg-domain): settings, cylinder brands, MessageBuilder, RestHardening. 5B (lpg-domain): records, REST, notifications, admin, privacy (owns the Installer/uninstall changes for caps). 5C: blocks (lpg-domain) plus theme placement and pages (lpg-theme). Then security review and QA acceptance (including A11Y-005, per P-018).
+
+**Shipping (§13.9) is configured on dev (Lead, 2026-11-02):** zone "Nairobi" (KE:KE30) with flat_rate KSh 300, free_shipping min KSh 10,000, local_pickup (placeholder address).

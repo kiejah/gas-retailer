@@ -32,6 +32,17 @@ final class Plugin {
 		Commerce\EnquiryDisplay::class,
 		Commerce\ProductFields::class,
 		Seo\StructuredData::class,
+		Settings\SettingsTab::class,
+		Taxonomies\CylinderBrand::class,
+		Enquiries\RfqPostType::class,
+		Enquiries\EnquiryPostType::class,
+		Enquiries\AdminScreens::class,
+		Enquiries\Notifications::class,
+		Rest\RfqController::class,
+		Rest\EnquiryController::class,
+		Privacy\Exporters::class,
+		Privacy\Retention::class,
+		Security\RestHardening::class,
 		Blocks\Registry::class,
 	);
 
