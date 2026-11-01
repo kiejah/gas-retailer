@@ -25,6 +25,12 @@ These items are collected during development so Phase 8 doesn't miss them. Confi
 - [ ] **LPG settings** (WooCommerce → Settings → LPG): WhatsApp number, phone, Sales and Owner notification emails, address, hours. These are entered on the server; they are not in Git.
 - [ ] Run `wp lpg seed` once (idempotent), then replace the placeholder content with the owner's real content (the W-series in owner-decisions.md).
 
+## Caching and proxies (Phase 5 security M2)
+- [ ] The page cache must **never** store logged-in responses: bypass on `wordpress_logged_in_*`, `wp-*`, and WooCommerce session/cart cookies (`woocommerce_*`, `wp_woocommerce_session_*`).
+- [ ] Cache TTL is **under 12 hours** for pages with the RFQ, exchange or enquiry blocks (they embed the anonymous REST nonce), or exclude those pages from the page cache.
+- [ ] Behind Cloudflare or a host reverse proxy, define `LPG_TRUSTED_PROXIES` in wp-config (proxy IPs/CIDRs). Otherwise every visitor shares one rate-limit bucket and real users can be blocked.
+- [ ] Set up SPF/DKIM/DMARC for the sending domain, so RFQ notifications aren't marked as spam.
+
 ## Security hardening
 - [ ] A strong admin password plus 2FA; login rate limiting (host or plugin) (security L1).
 - [ ] Block anonymous `/wp/v2/users` (plugin hardening service; scheduled for Phase 5).
