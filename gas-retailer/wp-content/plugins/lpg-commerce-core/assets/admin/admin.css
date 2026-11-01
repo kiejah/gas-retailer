@@ -1,0 +1,7 @@
+/* LPG Commerce Core admin styles. */
+.lpg-fields-table td { vertical-align: top; }
+.lpg-fields-table textarea[hidden] { display: none; }
+.lpg-row-actions { white-space: nowrap; }
+.lpg-row-actions .button-link { margin-right: 6px; }
+.lpg-documents-table td { vertical-align: middle; }
+#lpg_specs_product_data .lpg-specs-notice { margin: 12px; }

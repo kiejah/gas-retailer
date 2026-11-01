@@ -21,7 +21,18 @@ final class Plugin {
 	 *
 	 * @var array<int, class-string<Service>>
 	 */
-	private const SERVICES = array();
+	private const SERVICES = array(
+		Taxonomies\Segment::class,
+		Specs\ProfilePostType::class,
+		Specs\ProductSpecsPanel::class,
+		Specs\AttributeSync::class,
+		Relations\Compatibility::class,
+		Relations\Documents::class,
+		Commerce\EnquiryOnly::class,
+		Commerce\ProductFields::class,
+		Seo\StructuredData::class,
+		Blocks\Registry::class,
+	);
 
 	/**
 	 * Whether boot() has already run.
@@ -48,6 +59,10 @@ final class Plugin {
 
 		foreach ( self::services() as $service_class ) {
 			( new $service_class() )->register();
+		}
+
+		if ( defined( 'WP_CLI' ) && WP_CLI && class_exists( Cli\SeedCommand::class ) ) {
+			\WP_CLI::add_command( 'lpg seed', Cli\SeedCommand::class );
 		}
 
 		/**

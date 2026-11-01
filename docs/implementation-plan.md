@@ -9,7 +9,8 @@ Architecture details are in [architecture.md](architecture.md).
 |---|---|
 | 1 Discovery & Architecture | **Complete** — approved by the owner 2026-11-01 (all decisions accepted) |
 | 2 Foundation | **Complete** (2026-11-01): see the Phase 2 report below |
-| 3–8 | Not started |
+| 3 Product catalogue | In progress. **3A (data layer and admin) complete 2026-11-01**: lpg-domain built it; Lead and lpg-security reviewed it; 81 tests pass. 3B (blocks) waits on Node ≥ 22.22.2 |
+| 4–8 | Not started |
 
 ## Agent roles and coordination
 
@@ -55,13 +56,13 @@ The main Claude Code session acts as Lead Architect.
 | Test bootstrap: WP test suite against a `gas_retailer_test` DB | QA | One sample integration test passes |
 
 ### Phase 3 — Product catalogue
-Taxonomies (segment, manufacturer, cylinder brand) → spec profiles CPT plus seeding (field definitions only) → product spec panel → attribute sync for filterable fields → compatibility, documents, warranty → enquiry-only rule → `spec-table`, `compatible-products`, `product-documents` blocks. Demo products are labelled **[DEMO]** and have no invented specs.
+Taxonomy `lpg_segment` (manufacturers = native `product_brand`, A6) → spec profiles CPT plus seeding (field definitions only) → product spec panel → attribute sync for filterable fields → compatibility, documents, warranty → enquiry-only rule → `spec-table`, `compatible-products`, `product-documents` blocks. Demo products are labelled **[DEMO]** and have no invented specs.
 
 ### Phase 4 — Storefront
 Design system sign-off → header, nav, search → homepage patterns → segment landing pages → category/archive templates with WooCommerce filter blocks → single product template → responsive pass.
 
 ### Phase 5 — Business workflows
-WhatsApp MessageBuilder plus `enquiry-button` → `lpg_enquiry` log + REST → RFQ CPT/statuses/REST/form/email → exchange form → privacy exporter/eraser.
+`lpg_cylinder_brand` taxonomy → WhatsApp MessageBuilder plus `enquiry-button` → `lpg_enquiry` log + REST → RFQ CPT/statuses/REST/form/email → exchange form → privacy exporter/eraser.
 
 ### Phase 6 — Administration
 LPG settings tab, admin list columns and filters for RFQs and enquiries, RFQ status workflow, capability review, operator walkthrough doc.
@@ -122,7 +123,13 @@ cPanel guide: DB, HTTPS, SMTP, backups, caching, production wp-config, deploy (G
 
 **Not tested:** theme viewport and visual checks, Site Editor block validation, Theme Check.
 
-**Next phase:** Phase 3, the product catalogue. It starts with the taxonomies (`lpg_segment`, `lpg_manufacturer`, `lpg_cylinder_brand`) and spec profiles, which are lpg-domain work. Before Phase 3 the owner should install Node 22 or newer for the block build.
+**Next phase:** Phase 3, the product catalogue. It starts with the `lpg_segment` taxonomy and spec profiles (manufacturers use `product_brand` per A6; `lpg_cylinder_brand` moved to Phase 5), which are lpg-domain work. Before Phase 3 the owner should install Node 22 or newer for the block build.
+
+## Phase 3A summary (2026-11-01)
+- **Built:** `lpg_segment`, spec profiles (CPT, field editor, category defaults), the product spec panel, attribute sync, two-way compatibility, PDF documents, warranty, enquiry-only, the structured-data specs, `wp lpg seed`, uninstall.
+- **Rulings:** §11.12 C1–C12. The security review found 4 low findings (L1–L4), all fixed.
+- **Tests:** `composer test` passes 81 tests (231 assertions). `composer lint` is clean. On the dev site, the seed is idempotent across 3 runs and the debug log is clean.
+- **Not tested:** admin JS in a browser (row editor, media picker), a real uninstall run.
 
 ## Next tasks
-- Phase 3 kickoff: Lead defines the shared interfaces (taxonomy slugs, meta keys, spec profile schema) in architecture.md, then lpg-domain implements them.
+- 3B: `@wordpress/scripts` setup, the `lpg/spec-table`, `lpg/compatible-products` and `lpg/product-documents` blocks (lpg-domain), then a minimal single-product template placing them (lpg-theme). Then QA acceptance against docs/test-plan.md and a security review.

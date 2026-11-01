@@ -202,3 +202,131 @@ Rely on WordPress/WooCommerce core output: canonicals, WooCommerce product JSON-
 | D4 | M-Pesa as a separate plugin, scheduled later | Accepted 2026-11-01 |
 | D5 | Exactly one SEO plugin (Yoast or Rank Math). Pick it in Phase 4 after checking WP 7.1 support; LPG code only extends WooCommerce product structured data | Accepted 2026-11-01 |
 | D6 | Test stack: PHPUnit + WP test suite now, Playwright in Phase 7 | Accepted 2026-11-01 |
+| A6 | Manufacturers use WooCommerce's native `product_brand` taxonomy instead of `lpg_manufacturer` (see §11.1) | Accepted by Lead 2026-11-01 |
+
+---
+
+## 11. Phase 3 interface contract (Lead Architect, 2026-11-01)
+
+These names and data formats are binding for Phase 3. Changing them needs Lead approval and an update to this section.
+
+### 11.1 Adjustment to §4.4: manufacturers use WooCommerce Brands (A6)
+
+WooCommerce 11.2 ships a native **`product_brand`** taxonomy (hierarchical, REST-enabled, `/brand/` archives, built-in filter block). Reusing it follows the "don't recreate WooCommerce functionality" rule, so there is **no `lpg_manufacturer` taxonomy**. `lpg_cylinder_brand` (exchange-form options) moves to Phase 5, where it is used.
+
+### 11.2 Taxonomy
+
+| Slug | Object | Settings | Seeded terms |
+|---|---|---|---|
+| `lpg_segment` | `product` | non-hierarchical, public, `show_in_rest`, `show_admin_column`, rewrite `segment`, caps = WooCommerce `manage_product_terms`/`edit_product_terms`/`delete_product_terms`/`assign_product_terms` | `household` "Household", `commercial` "Commercial", `industrial` "Industrial". Created on install if missing; never overwritten |
+
+### 11.3 Spec profiles
+
+- **CPT `lpg_spec_profile`:** `public` false, `show_ui` true, menu under Products, `supports` title only, `show_in_rest` false, `capability_type` `lpg_spec_profile` with `map_meta_cap` true. The primitive caps are granted to `administrator` and `shop_manager` on install and removed on uninstall.
+- **Field definitions:** post meta **`_lpg_fields`**, an ordered list of:
+  ```
+  { key: string    /^[a-z][a-z0-9_]{0,27}$/  (≤28 chars: also the pa_ attribute name)
+    label: string
+    type: "text" | "number" | "select" | "boolean"
+    unit: string            (optional, e.g. "mbar", "kg", "kW")
+    options: string[]       (select only)
+    filterable: bool        (mirrored to a WooCommerce global attribute)
+    help: string }          (optional admin hint)
+  ```
+  Keys are unique within a profile. The same key in different profiles means the same thing and shares one `pa_{key}` attribute.
+- **Category default:** `product_cat` term meta **`lpg_spec_profile_id`** (int).
+- **Product override:** post meta **`_lpg_spec_profile_id`** (int; 0 or empty = inherit).
+- **Resolution order:**
+  1. The product override.
+  2. Otherwise, the product's categories ordered by depth (deepest first), then `term_id` ascending. For each category, walk up its ancestors; the first term with a profile wins.
+  3. Otherwise, no profile.
+- **Values:** post meta **`_lpg_spec_{key}`**, stored on the parent product only (v1: no per-variation specs). Stored form:
+
+  | Type | Stored as |
+  |---|---|
+  | text | `sanitize_text_field` |
+  | number | numeric string (`.` decimal) |
+  | select | must be one of the field's `options` |
+  | boolean | `yes` / `no` |
+
+  Empty means not set; it is never displayed and the meta is deleted.
+- **Filterable sync:** when a profile is saved, a missing global attribute `pa_{key}` is created (`wc_create_attribute`, type select, label = field label). When a product is saved, each filterable field with a value is set as product attribute `pa_{key}`. The term name is the display value (e.g. `37 mbar`, `Yes`), `is_visible` false, `is_variation` false. Other attributes on the product are left untouched. Clearing a value removes the attribute.
+- **Seed (`wp lpg seed`):** a WP-CLI command, never automatic. Idempotent. It creates:
+  - The four profiles from the brief (Regulator, Burner, Gas Cooker, Cylinder), with **field definitions only and no values**.
+  - The starter `product_cat` tree from §4.1, with default profiles assigned (Regulators → Regulator, Burners → Burner, Cookers & Ovens → Gas Cooker, Cylinders → Cylinder).
+
+### 11.4 Other product meta
+
+| Meta key | Type | Admin UI |
+|---|---|---|
+| `_lpg_compatible_ids` | int[] product IDs | "Linked Products" tab, WooCommerce product search select. **Two-way:** adding or removing B on A mirrors onto B. Filter `lpg_compatibility_bidirectional` (default true) |
+| `_lpg_documents` | list of `{attachment_id:int, type:"datasheet"\|"manual"\|"certificate"\|"other", label:string}` | Meta box with media picker. Only `application/pdf` attachments are accepted on save; requires `upload_files` to add |
+| `_lpg_warranty` | string (`sanitize_textarea_field`) | General tab |
+| `_lpg_enquiry_only` | `yes` / `no` | General tab checkbox |
+
+Recommended products = native upsells. Accessories = native cross-sells. Manufacturer = `product_brand`.
+
+### 11.5 Enquiry-only rule
+
+`woocommerce_is_purchasable` returns false when `_lpg_enquiry_only` is `yes` or the price is empty. Filter **`lpg_is_enquiry_only`** `( bool $enquiry_only, WC_Product $product )`. The price stored in the database is never changed.
+
+### 11.6 Public PHP API (used by plugin blocks; the theme must not call it)
+
+```php
+LPG\Commerce\Specs\ProductSpecs::get( int $product_id ): array
+// → list of [ 'key', 'label', 'type', 'unit', 'value' (stored), 'display' (formatted, unescaped) ]
+//   only fields that have a value, in profile order.
+LPG\Commerce\Specs\ProfileResolver::for_product( int $product_id ): ?int   // profile post ID
+LPG\Commerce\Commerce\EnquiryOnly::is_enquiry_only( WC_Product $product ): bool
+LPG\Commerce\Relations\Compatibility::get_ids( int $product_id ): int[]   // published, visible only
+LPG\Commerce\Relations\Documents::get( int $product_id ): array          // valid PDF attachments only
+```
+
+### 11.7 Services (registered in `Plugin::SERVICES`, Lead-owned)
+
+`Taxonomies\Segment`, `Specs\ProfilePostType`, `Specs\ProductSpecsPanel`, `Specs\AttributeSync`, `Relations\Compatibility`, `Relations\Documents`, `Commerce\EnquiryOnly`, `Commerce\ProductFields` (warranty and enquiry-only fields), `Seo\StructuredData`, `Blocks\Registry`. WP-CLI: `Cli\SeedCommand`, registered only when `WP_CLI` is defined.
+
+### 11.8 Structured data
+
+`Seo\StructuredData` hooks `woocommerce_structured_data_product` and adds one `additionalProperty` `PropertyValue` per spec (`name`, `value`, `unitText`). It adds nothing else.
+
+### 11.9 Blocks (Phase 3B, after Node ≥ 22.22.2 is available)
+
+These are dynamic blocks built with `@wordpress/scripts`. Source is in `blocks/<name>/` (block.json, index.js, render.php) and output in `build/blocks/<name>/`, registered through the metadata collection manifest. Each block uses `usesContext: ["postId"]`, and the editor preview uses ServerSideRender.
+
+| Block | Attributes | Renders |
+|---|---|---|
+| `lpg/spec-table` | `heading` (string, default "Technical specifications") | `<table>` of `ProductSpecs::get()`. Outputs nothing if there are no specs |
+| `lpg/compatible-products` | `heading`, `columns` 2–6 (default 4), `limit` 1–12 (default 8) | Product cards (image, name, price/"Enquire") |
+| `lpg/product-documents` | `heading` | A list of PDF links with type and file size |
+
+CSS class prefix: `lpg-` (e.g. `.lpg-spec-table`). The theme styles these classes and never changes their markup.
+
+### 11.10 Uninstall
+
+When `delete_data_on_uninstall` is on, uninstall deletes:
+- `lpg_spec_profile` posts
+- all `_lpg_*` post meta
+- `lpg_spec_profile_id` term meta
+- `lpg_segment` terms
+
+Global `pa_*` attributes are kept, because WooCommerce owns them.
+
+### 11.12 Clarifications (Lead, 2026-11-01, answering QA's open questions)
+
+| # | Question | Ruling |
+|---|---|---|
+| C1 | Profile save with some invalid field rows | Invalid rows are dropped and valid rows are saved. An admin notice lists each rejected row and the reason |
+| C2 | Product override points at a missing, trashed or wrong-type post | The override is ignored and resolution falls back to the category chain |
+| C3 | Boolean "not set" vs "No" | The boolean UI is a select (— / Yes / No), so empty means not set and the meta is deleted. `no` is stored, displayed as "No" and synced as the `pa_` term "No" |
+| C4 | Number input | `2,5` is normalised to `2.5`. Negative values are allowed. Exponents, thousands separators and any non-numeric text are rejected (value not saved, admin notice) |
+| C5 | Orphaned values after a profile or field change | `_lpg_spec_*` meta is **kept** but not displayed (only fields of the current profile show). `pa_` attributes added by LPG are tracked in product meta **`_lpg_synced_attributes`** (string[] of taxonomy names). On save, tracked attributes that are no longer a filterable field with a value are removed. Untracked attributes are never touched |
+| C6 | Price `0` | Not empty: `0` is a valid price. Only `''` counts as empty |
+| C7 | Variable products | `_lpg_enquiry_only` on the parent applies to all its variations (also filter `woocommerce_variation_is_purchasable`). Empty variation prices are already non-purchasable in WooCommerce natively |
+| C8 | Seed behaviour | Creates missing items only. Never overwrites existing profiles, field definitions or category assignments |
+| C9 | Seeded field reference list | The brief's lists (Part 2.3), reproduced in the Phase 3A task: Regulator, Burner, Gas Cooker and Cylinder fields as named there. Brand and manufacturer come from `product_brand` |
+| C10 | Field label change | Does **not** rename an existing `pa_` attribute, which may be shared across profiles. Admins rename it under Products → Attributes |
+| C11 | Warranty in two places (Gas Cooker spec field and the `_lpg_warranty` General-tab field) | Single source: `_lpg_warranty`. The `warranty` spec field is removed from the seed and from the dev site's Gas Cooker profile |
+| C12 | Phase 3A security review (L1–L4) | All fixed in 3A: compatibility only writes onto products the user can edit (L1); reserved field keys, starting with `profile_id` (L2); numbers capped at 20 significant digits, with a JSON-LD fallback (L3); spec-profile caps granted only on activation or first install (L4). `Documents::get()` also skips `woocommerce_uploads/` files, and a deleted product is removed from other products' compatibility lists |
+
+**Phase 3B block output rules (from the security review):** WooCommerce REST `meta_data` can write `_lpg_*` keys without our sanitising, so blocks must escape everything on output: `esc_html` for labels, warranty and spec display, `esc_url` for document links, `esc_attr` for attributes. Never echo meta raw.

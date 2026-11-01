@@ -7,6 +7,9 @@
 
 namespace LPG\Commerce;
 
+use LPG\Commerce\Specs\ProfilePostType;
+use LPG\Commerce\Taxonomies\Segment;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -28,6 +31,7 @@ final class Installer {
 	 * Activation hook.
 	 */
 	public static function activate(): void {
+		ProfilePostType::add_caps();
 		self::install();
 	}
 
@@ -42,6 +46,16 @@ final class Installer {
 	 * Create or upgrade plugin state.
 	 */
 	public static function install(): void {
+		// Caps are granted on activation or first install only, so an upgrade
+		// never re-grants caps an operator removed (L4).
+		if ( false === get_option( self::VERSION_OPTION ) ) {
+			ProfilePostType::add_caps();
+		}
+		Segment::seed_terms();
+
+		// Rebuild rewrite rules on the next request (segment archives).
+		delete_option( 'rewrite_rules' );
+
 		if ( false === get_option( self::SETTINGS_OPTION ) ) {
 			add_option( self::SETTINGS_OPTION, self::default_settings(), '', false );
 		}
