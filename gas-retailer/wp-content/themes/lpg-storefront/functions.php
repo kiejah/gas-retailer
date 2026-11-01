@@ -11,10 +11,11 @@
  * - WooCommerce treats any block theme as supported
  *   (wc_current_theme_supports_woocommerce_or_fse()), so
  *   add_theme_support( 'woocommerce' ) is not needed.
- * - Styles come from theme.json, plus two small component stylesheets
- *   that load only where their blocks render: assets/css/lpg-blocks.css
- *   (lpg-commerce-core blocks) and assets/css/product-card.css (product
- *   cards).
+ * - Styles come from theme.json, plus small component stylesheets that
+ *   load only where their blocks render: assets/css/lpg-blocks.css
+ *   (lpg-commerce-core blocks), assets/css/product-card.css (product cards),
+ *   assets/css/catalog.css (listings, filters, category links) and
+ *   assets/css/single-product.css (product tabs and reviews).
  *
  * @package lpg_storefront
  */
@@ -59,6 +60,14 @@ function lpg_storefront_enqueue_block_styles() {
 		'lpg-storefront-product-card' => array(
 			'file'   => 'assets/css/product-card.css',
 			'blocks' => array( 'woocommerce/product-template', 'lpg/compatible-products' ),
+		),
+		'lpg-storefront-catalog'      => array(
+			'file'   => 'assets/css/catalog.css',
+			'blocks' => array( 'woocommerce/product-collection', 'woocommerce/product-filters', 'woocommerce/product-categories' ),
+		),
+		'lpg-storefront-single'       => array(
+			'file'   => 'assets/css/single-product.css',
+			'blocks' => array( 'woocommerce/product-details' ),
 		),
 	);
 

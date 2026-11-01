@@ -1,0 +1,182 @@
+/*
+ * Single product: WooCommerce tabs (Description, Additional information,
+ * Reviews). Loaded only when woocommerce/product-details renders
+ * (functions.php). The tabs share the .lpg-product-sections width with the
+ * LPG blocks (P-013 #3). Reviews keep WooCommerce's default behaviour until
+ * the owner decides (W-008); only the look follows the design system (P-013 #4).
+ *
+ * WooCommerce's "minimal" tab style uses `html body …` selectors, so these
+ * rules add .lpg-product-sections to outrank it without !important.
+ */
+
+/* Space between the gallery/summary columns and the sections below. */
+main .lpg-product-sections {
+	margin-block-start: var(--wp--preset--spacing--60);
+}
+
+.lpg-product-sections > .wp-block-woocommerce-product-details {
+	margin-block: var(--wp--preset--spacing--60);
+}
+
+/* ---------- Tab list ---------- */
+
+html body .lpg-product-sections .wp-block-woocommerce-product-details.is-style-minimal ul.tabs.wc-tabs {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0 var(--wp--preset--spacing--40);
+	margin: 0;
+	border-bottom: 1px solid var(--wp--preset--color--border);
+	list-style: none;
+}
+
+html body .lpg-product-sections .wp-block-woocommerce-product-details.is-style-minimal ul.tabs.wc-tabs li {
+	display: block;
+	margin: 0 0 -1px;
+	border: solid transparent;
+	border-width: 0 0 2px;
+	color: var(--wp--preset--color--muted);
+	opacity: 1;
+}
+
+html body .lpg-product-sections .wp-block-woocommerce-product-details.is-style-minimal ul.tabs.wc-tabs li a {
+	display: flex;
+	align-items: center;
+	min-height: 44px;
+	padding: 0.5rem 0;
+	font-weight: 600;
+}
+
+html body .lpg-product-sections .wp-block-woocommerce-product-details.is-style-minimal ul.tabs.wc-tabs li:hover {
+	color: var(--wp--preset--color--contrast);
+}
+
+html body .lpg-product-sections .wp-block-woocommerce-product-details.is-style-minimal ul.tabs.wc-tabs li.active {
+	border-color: var(--wp--preset--color--contrast);
+	color: var(--wp--preset--color--contrast);
+}
+
+/* ---------- Panels ---------- */
+
+/* Outranks WooCommerce's `.woocommerce div.product .woocommerce-tabs .panel`. */
+.lpg-product-sections .wp-block-woocommerce-product-details .woocommerce-tabs .woocommerce-Tabs-panel.panel {
+	margin: 0;
+	padding: var(--wp--preset--spacing--50) 0 0;
+}
+
+.lpg-product-sections .woocommerce-Tabs-panel > h2,
+.lpg-product-sections .woocommerce-Reviews-title {
+	margin: 0 0 var(--wp--preset--spacing--40);
+	font-size: var(--wp--preset--font-size--x-large);
+}
+
+/* Readable line length for description text inside the wide column. */
+.lpg-product-sections .woocommerce-Tabs-panel :is(p, ul, ol) {
+	max-width: 75ch;
+}
+
+/* Additional information table uses the design-system table look. */
+.lpg-product-sections .woocommerce-product-attributes {
+	width: 100%;
+	max-width: 760px;
+	border-collapse: collapse;
+	font-size: var(--wp--preset--font-size--small);
+}
+
+.lpg-product-sections .woocommerce-product-attributes :is(th, td) {
+	padding: var(--wp--preset--spacing--30) var(--wp--preset--spacing--40);
+	border: 1px solid var(--wp--preset--color--border);
+	text-align: start;
+}
+
+.lpg-product-sections .woocommerce-product-attributes th {
+	width: 38%;
+	background: var(--wp--preset--color--surface);
+	color: var(--wp--preset--color--steel);
+}
+
+/* ---------- Reviews (WooCommerce default behaviour, W-008) ---------- */
+
+.lpg-product-sections .woocommerce-noreviews {
+	color: var(--wp--preset--color--muted);
+}
+
+.lpg-product-sections #review_form_wrapper {
+	max-width: 40rem;
+	margin-block-start: var(--wp--preset--spacing--50);
+	padding: var(--wp--preset--spacing--50);
+	border: 1px solid var(--wp--preset--color--border);
+	border-radius: var(--wp--preset--border-radius--medium);
+}
+
+.lpg-product-sections .comment-reply-title {
+	display: block;
+	margin-block-end: var(--wp--preset--spacing--30);
+	font-size: var(--wp--preset--font-size--large);
+	font-weight: 700;
+	line-height: 1.3;
+}
+
+.lpg-product-sections .comment-form > * {
+	margin: 0 0 var(--wp--preset--spacing--40);
+}
+
+.lpg-product-sections .comment-notes {
+	color: var(--wp--preset--color--muted);
+	font-size: var(--wp--preset--font-size--small);
+}
+
+.lpg-product-sections .comment-form label {
+	display: block;
+	margin-block-end: var(--wp--preset--spacing--10);
+	font-size: var(--wp--preset--font-size--small);
+	font-weight: 600;
+}
+
+.lpg-product-sections .comment-form :is(input[type="text"], input[type="email"], textarea, select) {
+	box-sizing: border-box;
+	width: 100%;
+	min-height: var(--wp--custom--control--height);
+}
+
+.lpg-product-sections .comment-form .required {
+	color: var(--wp--preset--color--error);
+	text-decoration: none;
+}
+
+.lpg-product-sections .comment-form-cookies-consent {
+	display: flex;
+	align-items: flex-start;
+	gap: var(--wp--preset--spacing--20);
+}
+
+.lpg-product-sections .comment-form-cookies-consent input {
+	flex: none;
+	width: 1.25rem;
+	height: 1.25rem;
+	margin: 0.15rem 0 0;
+}
+
+.lpg-product-sections .comment-form-cookies-consent label {
+	margin: 0;
+	font-weight: 400;
+}
+
+.lpg-product-sections .comment-form .form-submit {
+	margin-block-end: 0;
+}
+
+.lpg-product-sections .comment-form .form-submit .wp-element-button {
+	min-height: 44px;
+	cursor: pointer;
+}
+
+/* Single product meta (SKU, category, tags, brand). */
+.lpg-product-meta {
+	gap: var(--wp--preset--spacing--10) var(--wp--preset--spacing--40);
+	color: var(--wp--preset--color--muted);
+	font-size: var(--wp--preset--font-size--small);
+}
+
+.lpg-product-meta > * {
+	margin: 0;
+}

@@ -1,0 +1,62 @@
+<!-- wp:template-part {"slug":"header","area":"header","tagName":"header"} /-->
+
+<!-- wp:group {"tagName":"main","className":"lpg-catalog","style":{"spacing":{"padding":{"top":"var:preset|spacing|50","bottom":"var:preset|spacing|70"}}},"layout":{"type":"constrained"}} -->
+<main class="wp-block-group lpg-catalog" style="padding-top:var(--wp--preset--spacing--50);padding-bottom:var(--wp--preset--spacing--70)">
+	<!-- wp:woocommerce/breadcrumbs {"align":"wide"} /-->
+
+	<!-- wp:query-title {"type":"archive","showPrefix":false,"align":"wide"} /-->
+
+	<!-- wp:woocommerce/product-categories {"align":"wide","hasCount":false,"className":"lpg-category-links lpg-category-links--top"} /-->
+
+	<!-- wp:woocommerce/store-notices {"align":"wide"} /-->
+
+	<!-- wp:columns {"align":"wide","className":"lpg-catalog__layout","style":{"spacing":{"blockGap":{"left":"var:preset|spacing|60"}}}} -->
+	<div class="wp-block-columns alignwide lpg-catalog__layout">
+		<!-- wp:column {"width":"16rem","className":"lpg-catalog__filters"} -->
+		<div class="wp-block-column lpg-catalog__filters" style="flex-basis:16rem">
+			<!-- wp:pattern {"slug":"lpg-storefront/product-filters"} /-->
+		</div>
+		<!-- /wp:column -->
+
+		<!-- wp:column {"className":"lpg-catalog__results"} -->
+		<div class="wp-block-column lpg-catalog__results">
+			<!-- wp:woocommerce/product-collection {"queryId":0,"query":{"perPage":12,"pages":0,"offset":0,"postType":"product","order":"asc","orderBy":"title","search":"","exclude":[],"inherit":true,"taxQuery":{},"isProductCollectionBlock":true,"featured":false,"woocommerceOnSale":false,"woocommerceStockStatus":["instock","outofstock","onbackorder"],"woocommerceAttributes":[],"woocommerceHandPickedProducts":[]},"tagName":"div","displayLayout":{"type":"flex","columns":3,"shrinkColumns":true},"dimensions":{"widthType":"fill","fixedWidth":""},"queryContextIncludes":["collection"],"className":"lpg-catalog__grid"} -->
+			<div class="wp-block-woocommerce-product-collection lpg-catalog__grid">
+				<!-- wp:group {"className":"lpg-catalog__toolbar","layout":{"type":"flex","flexWrap":"wrap","justifyContent":"space-between","verticalAlignment":"center"}} -->
+				<div class="wp-block-group lpg-catalog__toolbar">
+					<!-- wp:woocommerce/product-results-count /-->
+
+					<!-- wp:woocommerce/catalog-sorting {"useLabel":true} /-->
+				</div>
+				<!-- /wp:group -->
+
+				<!-- wp:woocommerce/product-template -->
+					<!-- wp:woocommerce/product-image {"showSaleBadge":false,"imageSizing":"thumbnail","isDescendentOfQueryLoop":true} -->
+						<!-- wp:woocommerce/product-sale-badge {"isDescendentOfQueryLoop":true,"align":"right"} /-->
+					<!-- /wp:woocommerce/product-image -->
+					<!-- wp:post-title {"level":2,"isLink":true,"fontSize":"medium","__woocommerceNamespace":"woocommerce/product-collection/product-title"} /-->
+					<!-- wp:post-terms {"term":"product_brand","className":"lpg-card__brand"} /-->
+					<!-- wp:woocommerce/product-sku {"className":"lpg-card__sku"} /-->
+					<!-- wp:woocommerce/product-price {"isDescendentOfQueryLoop":true} /-->
+					<!-- wp:woocommerce/product-button {"isDescendentOfQueryLoop":true} /-->
+				<!-- /wp:woocommerce/product-template -->
+
+				<!-- wp:query-pagination {"paginationArrow":"arrow","layout":{"type":"flex","justifyContent":"center"}} -->
+					<!-- wp:query-pagination-previous /-->
+					<!-- wp:query-pagination-numbers /-->
+					<!-- wp:query-pagination-next /-->
+				<!-- /wp:query-pagination -->
+
+				<!-- wp:woocommerce/product-collection-no-results -->
+					<!-- wp:pattern {"slug":"lpg-storefront/no-products"} /-->
+				<!-- /wp:woocommerce/product-collection-no-results -->
+			</div>
+			<!-- /wp:woocommerce/product-collection -->
+		</div>
+		<!-- /wp:column -->
+	</div>
+	<!-- /wp:columns -->
+</main>
+<!-- /wp:group -->
+
+<!-- wp:template-part {"slug":"footer","area":"footer","tagName":"footer"} /-->

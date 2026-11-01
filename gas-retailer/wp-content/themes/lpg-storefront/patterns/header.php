@@ -9,8 +9,13 @@
  *
  * Navigation is a core/navigation block with inner link blocks (no `ref`), so
  * no wp_navigation post is needed and core never creates a fallback menu.
- * Links are built from the terms that exist at render time; a missing term
- * (or an inactive LPG plugin, for segments) simply drops that item.
+ * The items come from inc/nav-items.php (shared with the mobile menu).
+ *
+ * Submenus open on click/tap (P-014): "Products" is a button with
+ * aria-expanded, and the first submenu item is "All products". Below 600 px
+ * the menu opens the "Mobile menu" template part (parts/mobile-menu.html)
+ * instead of core's default overlay, because core's default overlay always
+ * shows every submenu expanded.
  *
  * @package lpg_storefront
  */
@@ -23,69 +28,26 @@ defined( 'ABSPATH' ) || exit;
  * logo and brand colours. Change the name under Settings > General.
  */
 
-$lpg_cat_slugs = array(
-	'cylinders',
-	'cookers-ovens',
-	'burners',
-	'regulators',
-	'hoses-fittings',
-	'manifolds-changeover',
-	'valves-piping',
-	'gauges-monitoring',
-	'safety-equipment',
-	'lpg-accessories',
-	'refills-exchange',
-);
-
-$lpg_terms = array(
-	'product_cat' => array(),
-	'lpg_segment' => array(),
-);
-
-$lpg_lookups = array(
-	'product_cat' => $lpg_cat_slugs,
-	'lpg_segment' => array( 'household', 'commercial', 'industrial' ),
-);
-
-foreach ( $lpg_lookups as $lpg_tax => $lpg_slugs ) {
-	$lpg_found = taxonomy_exists( $lpg_tax ) ? get_terms(
-		array(
-			'taxonomy'   => $lpg_tax,
-			'slug'       => $lpg_slugs,
-			'hide_empty' => false,
-		)
-	) : array();
-	foreach ( is_wp_error( $lpg_found ) ? array() : $lpg_found as $lpg_term ) {
-		$lpg_link = get_term_link( $lpg_term );
-		if ( ! is_wp_error( $lpg_link ) ) {
-			$lpg_terms[ $lpg_tax ][ $lpg_term->slug ] = array(
-				'label' => html_entity_decode( $lpg_term->name, ENT_QUOTES, 'UTF-8' ),
-				'url'   => $lpg_link,
-			);
-		}
-	}
-}
+$lpg_nav = require get_theme_file_path( 'inc/nav-items.php' );
 
 /**
  * Prints a core/navigation-link block.
  *
- * @param string $label Link text (plain text).
- * @param string $url   Link URL.
+ * @param array $item Item with `label` (plain text) and `url`.
  * @return void
  */
-$lpg_nav_link = static function ( $label, $url ) {
+$lpg_nav_link = static function ( $item ) {
 	echo '<!-- wp:navigation-link ' . serialize_block_attributes( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- serialize_block_attributes() escapes for block comment delimiters.
 		array(
-			'label' => esc_html( $label ),
-			'url'   => esc_url_raw( $url ),
+			'label' => esc_html( $item['label'] ),
+			'url'   => esc_url_raw( $item['url'] ),
 		)
 	) . " /-->\n";
 };
 
-$lpg_shop_url = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'shop' ) : home_url( '/shop/' );
 $lpg_products = array(
 	'label' => esc_html__( 'Products', 'lpg-storefront' ),
-	'url'   => esc_url_raw( $lpg_shop_url ),
+	'url'   => esc_url_raw( $lpg_nav['shop_url'] ),
 );
 ?>
 <!-- wp:group {"tagName":"div","align":"full","className":"lpg-header","style":{"spacing":{"padding":{"top":"var:preset|spacing|30","bottom":"var:preset|spacing|20"}},"border":{"bottom":{"color":"var:preset|color|border","width":"1px"}}},"backgroundColor":"base","layout":{"type":"constrained"}} -->
@@ -108,33 +70,18 @@ $lpg_products = array(
 		</div>
 		<!-- /wp:group -->
 
-		<!-- wp:navigation {"metadata":{"ignoredHookedBlocks":["woocommerce/customer-account","woocommerce/mini-cart"]},"overlayMenu":"mobile","overlayBackgroundColor":"base","overlayTextColor":"contrast","className":"lpg-header__nav","ariaLabel":"<?php echo esc_attr_x( 'Primary', 'navigation landmark label', 'lpg-storefront' ); ?>","style":{"spacing":{"blockGap":"var:preset|spacing|40"}},"layout":{"type":"flex","flexWrap":"wrap","justifyContent":"left"}} -->
+		<!-- wp:navigation {"metadata":{"ignoredHookedBlocks":["woocommerce/customer-account","woocommerce/mini-cart"]},"overlayMenu":"mobile","overlay":"mobile-menu","submenuVisibility":"click","overlayBackgroundColor":"base","overlayTextColor":"contrast","className":"lpg-header__nav","ariaLabel":"<?php echo esc_attr_x( 'Primary', 'navigation landmark label', 'lpg-storefront' ); ?>","style":{"spacing":{"blockGap":"var:preset|spacing|40"}},"layout":{"type":"flex","flexWrap":"wrap","justifyContent":"left"}} -->
 		<!-- wp:navigation-submenu <?php echo serialize_block_attributes( $lpg_products ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- serialized block attributes. ?> -->
 		<?php
-		$lpg_nav_link( __( 'All products', 'lpg-storefront' ), $lpg_shop_url );
-		foreach ( $lpg_cat_slugs as $lpg_slug ) {
-			if ( isset( $lpg_terms['product_cat'][ $lpg_slug ] ) ) {
-				$lpg_nav_link( $lpg_terms['product_cat'][ $lpg_slug ]['label'], $lpg_terms['product_cat'][ $lpg_slug ]['url'] );
-			}
+		foreach ( $lpg_nav['products'] as $lpg_item ) {
+			$lpg_nav_link( $lpg_item );
 		}
 		?>
 		<!-- /wp:navigation-submenu -->
 		<?php
-		$lpg_top = array(
-			array( 'lpg_segment', 'household', __( 'Household', 'lpg-storefront' ) ),
-			array( 'lpg_segment', 'commercial', __( 'Commercial', 'lpg-storefront' ) ),
-			array( 'lpg_segment', 'industrial', __( 'Industrial', 'lpg-storefront' ) ),
-			array( 'product_cat', 'lpg-accessories', __( 'LPG Accessories', 'lpg-storefront' ) ),
-			array( 'product_cat', 'safety-equipment', __( 'Safety Equipment', 'lpg-storefront' ) ),
-			array( 'product_cat', 'refills-exchange', __( 'Refills & Exchange', 'lpg-storefront' ) ),
-		);
-		foreach ( $lpg_top as $lpg_item ) {
-			if ( isset( $lpg_terms[ $lpg_item[0] ][ $lpg_item[1] ] ) ) {
-				$lpg_nav_link( $lpg_item[2], $lpg_terms[ $lpg_item[0] ][ $lpg_item[1] ]['url'] );
-			}
+		foreach ( $lpg_nav['top'] as $lpg_item ) {
+			$lpg_nav_link( $lpg_item );
 		}
-		// The Request a quote page is created in Phase 5 (RFQ form block).
-		$lpg_nav_link( __( 'Request a quote', 'lpg-storefront' ), home_url( '/request-a-quote/' ) );
 		?>
 		<!-- /wp:navigation -->
 	</div>

@@ -1,6 +1,6 @@
 # Design system v1: lpg-storefront
 
-**Status:** Phase 4 design-system checkpoint (P-008). Provisional until the owner proxy answers, and confirmed at the Phase 4 gate.
+**Status:** v1 approved provisionally with changes (P-013, 2026-11-01). v1.1 (Phase 4 step 2, templates) applies those changes and adds the listing, homepage and product-tab components below. Final approval at the Phase 4 gate.
 **Source of truth:** `gas-retailer/wp-content/themes/lpg-storefront/theme.json`. This document explains it. If the two disagree, theme.json wins and this file must be corrected.
 **Direction (P-004):** an industrial/commercial equipment catalogue. Charcoal and steel neutrals on white and light-grey surfaces, one orange accent for CTAs only, system fonts, 2–4 px radii, thin borders instead of shadows, tabular figures for prices and specs.
 
@@ -139,8 +139,10 @@ White fill, `contrast` text, 1 px `border-strong` border (3.66:1), 2 px radius, 
 - Wordmark: the core Site Title ("Gas-Plug", from Settings > General), **placeholder** pending W-001. No logo image.
 - Search: core Search with the WooCommerce product-search variation (searches products only). It sits outside the nav overlay, so it is visible at every width (P-005/P-006).
 - Tools: WooCommerce Customer account (icon) and Mini-cart (icon, price hidden). Tap targets are at least 44 × 44 px.
-- Nav: core/navigation with inner link/submenu blocks and **no `ref`**, so it needs no `wp_navigation` post and core creates no fallback. The order follows P-006. Products ▾ opens a dropdown (4 px radius, thin border, overlay shadow) with All products plus the 11 top-level categories. Segment items go to `/segment/<slug>/`. LPG Accessories, Safety Equipment and Refills & Exchange go to their category archives. Request a quote goes to `/request-a-quote/` (the page is created in Phase 5). Links are built from the terms that exist, so a missing term drops its item.
-- Mobile overlay: white with charcoal text, 20 px side padding. Items are at least 44 px tall (measured 58 px). The submenu is shown expanded.
+- Nav: core/navigation with inner link/submenu blocks and **no `ref`**, so it needs no `wp_navigation` post and core creates no fallback. The order follows P-006. Items come from `inc/nav-items.php`, shared with the mobile menu, and are built from the terms that exist, so a missing term drops its item. Segment items go to `/segment/<slug>/`. LPG Accessories, Safety Equipment and Refills & Exchange go to their category archives.
+- **Products ▾ opens on click/tap** (`submenuVisibility: "click"`, P-014). "Products" is a `<button>` with `aria-expanded` (false → true on click, Enter or Space; Escape closes and returns focus). The dropdown (4 px radius, thin border, overlay shadow) lists **All products first**, then the 11 top-level categories.
+- **Request a quote** appears only when a published page with the slug `request-a-quote` exists, checked when the header renders (§12.2, P-013 #1). No page is created by the theme.
+- **Mobile menu (< 600 px):** the nav uses a custom overlay template part, `parts/mobile-menu.html` (area `navigation-overlay`, WP 7.0+) → `patterns/mobile-menu.php`. Reason: core's default overlay always reports every submenu as open (`isSubmenuOpen` is true while the overlay is open), so the 12 Products items pushed the segments off-screen at 375. The custom overlay has a close button (core `navigation-overlay-close`), then **Products as a native `<details>/<summary>` disclosure, collapsed when the menu opens**, then Household, Commercial, Industrial, LPG Accessories, Safety Equipment, Refills & Exchange (and Request a quote when the page exists). All six are visible without scrolling at 375 (last one ends at 464 px of a 697 px viewport). The summary toggles on tap, Enter or Space, and the browser exposes its expanded/collapsed state; no JavaScript is added. Rows are at least 44 px tall. White full-screen panel, charcoal text, a chevron that flips when open.
 - WooCommerce block hooks would otherwise inject a second account icon after the nav. The nav sets `metadata.ignoredHookedBlocks` to prevent that.
 
 ### 6.6 Product card (`assets/css/product-card.css`)
@@ -149,8 +151,11 @@ One look for WooCommerce product-template cards (shop, archives, related product
 - **Image well:** square, `surface` background, `object-fit: contain`, so the product sits on a plain background and is never cropped.
 - **Name:** 16 px/600 `contrast`, wraps in full (technical names are not truncated). Underlined on hover.
 - **Price:** 16 px/700 `contrast`, tabular figures. A sale shows the struck-through old price in `muted` before the new one.
-- **Enquire** (§11.9, enquiry-only products in compatible-products cards): a neutral label, not a button. Uppercase `x-small`, `steel` text, 1 px `border-strong` border, 2 px radius.
-- **Button** (WooCommerce cards only, see 6.1). The plugin's compatible-products markup has no button.
+- **Brand and SKU** (P-004, WooCommerce cards): `small`, `muted`, under the name. Each renders nothing when empty.
+- **Sale badge:** small `contrast` tag with white uppercase `x-small` text, top right of the image. Never the accent.
+- **Enquire** (enquiry-only products): a neutral label, not a button. Uppercase `x-small`, `steel` text, 1 px `border-strong` border, 2 px radius. Used for `.lpg-compatible-products__price--enquire` and for the plugin's `.lpg-enquire-label` (§12.1), which replaces the price in WooCommerce cards and on the single product page (that rule is global in theme.json because it appears outside cards).
+- **Button** (WooCommerce cards only, see 6.1). For enquiry-only products the plugin replaces it with `.lpg-enquire-link` "View details": same place, full width, 44 px tall, outline look as "Read more". The plugin's compatible-products markup has no button.
+- **Grid:** WooCommerce Product Collection with `shrinkColumns: true`, so every grid (shop, archives, homepage, related) is 2 columns at 375 and up to its column count on wide screens (P-013 #2).
 - Loaded only when `woocommerce/product-template` or `lpg/compatible-products` renders.
 
 ### 6.7 Spec table (`assets/css/lpg-blocks.css`)
@@ -161,6 +166,22 @@ One look for WooCommerce product-template cards (shop, archives, related product
 ### 6.8 Documents (`assets/css/lpg-blocks.css`)
 Rows are separated by 1 px rules and are at least 44 px tall. Each starts with a `steel` "PDF" badge. Only `__label` is underlined. `__meta` (type and size) is plain `muted` small text that never wraps internally, and drops to its own line at narrow widths (QA design note).
 
+### 6.9 Catalogue listings (`assets/css/catalog.css`)
+Templates `archive-product` (shop), `taxonomy-product_cat`, `taxonomy-lpg_segment`, `taxonomy-product_brand`, `product-search-results` share one layout: breadcrumbs, H1 (term name, no prefix), term description (`muted`, max 760 px), category links (shop: top-level categories with products; category: its subcategories with products), then a wide two-column area.
+- **Filters column** (16 rem; stacks above results below 782 px): native WooCommerce Product Filters only, pattern `lpg-storefront/product-filters`: active-filter chips with "Clear filters" (outline), Price (slider + inputs), Category, Brand, then one attribute filter per global `pa_` attribute (the filterable LPG specs, read when the pattern renders). Each filter hides itself when the current results have no options. Groups are separated by 1 px rules; headings `medium`/700; checkbox borders `border-strong` (3:1) via WooCommerce's variable; focus ring on checkboxes. Below 600 px WooCommerce collapses the filters behind an outline "Filter products" button (44 px) that opens its dialog. When no filter has options (e.g. an empty category) the whole column is hidden.
+- **Toolbar:** results count (`muted`, small) and sorting (labelled select, 44 px) above the grid.
+- **Pagination:** bordered 44 × 44 px numbers, current page with a `contrast` border and bold.
+- **Empty state** (patterns `no-products`, `no-search-results`, inside the Product Collection "No results" block): `surface` panel with a thin border, an H2, a short explanation, and "Browse all products" (outline). Search adds a product search field.
+
+### 6.10 Homepage sections (`templates/front-page.html`, P-005 order)
+Hero (`surface` band, catalogue-led H1, primary "Browse products", outline "Request a quote" only when that page exists) → segment tiles (3-column grid of bordered tiles; the whole tile is the link) → category links (chips; the section is left out while no category has products) → Featured products → RFQ band (left 4 px `contrast` rule; button only when the page exists, otherwise "Contact us for bulk and project orders." with no contact details) → New products → safety strip (`surface` band) → delivery with a small Refills & Exchange note tile → trust strip (three placeholder tiles, visually hidden H2). Product grids keep their heading inside the Product Collection block, so a grid with zero products renders nothing at all. All copy is placeholder and marked `[Placeholder]`, `[Placeholder copy]` or `[PLACEHOLDER: …]` (italic `muted`). Sections are spaced with `spacing-70`. These small rules live in theme.json global CSS.
+
+### 6.11 Single product sections (`assets/css/single-product.css`)
+Everything under the gallery/summary columns sits in one wide group, `.lpg-product-sections`, so the spec table, WooCommerce tabs, documents, compatible products and related products share the columns' width (P-013 #3; measured 28–1252 px at 1280 and 20–355 px at 375). Order is unchanged (§11.9).
+- **Tabs** (WooCommerce "minimal" style, restyled): a row of tab links over a 1 px `border` rule; inactive `muted`, active `contrast` with a 2 px `contrast` underline; 44 px tall. Panel headings `x-large`; text limited to 75 ch.
+- **Reviews** (WooCommerce default behaviour, W-008): title `x-large`, "no reviews" in `muted`, the form in a bordered panel up to 40 rem wide inside the shared column (not full-width), labels above fields, inputs full width at 44 px, required marks in `error`, primary "Submit".
+- **Meta** (SKU, category, tags, brand): `small` `muted`, wrapping row.
+
 ## 7. Asset loading (C15 performance note)
 
 | File | Loaded when | How |
@@ -168,6 +189,8 @@ Rows are separated by 1 px rules and are at least 44 px tall. Each starts with a
 | theme.json global styles | Every page (inline) | Core |
 | `assets/css/lpg-blocks.css` | `lpg/spec-table`, `lpg/product-documents` or `lpg/compatible-products` renders | `wp_enqueue_block_style()` per block, handle `lpg-storefront-blocks` |
 | `assets/css/product-card.css` | `woocommerce/product-template` or `lpg/compatible-products` renders | `wp_enqueue_block_style()`, handle `lpg-storefront-product-card` |
+| `assets/css/catalog.css` | `woocommerce/product-collection`, `woocommerce/product-filters` or `woocommerce/product-categories` renders | `wp_enqueue_block_style()`, handle `lpg-storefront-catalog` |
+| `assets/css/single-product.css` | `woocommerce/product-details` renders | `wp_enqueue_block_style()`, handle `lpg-storefront-single` |
 
 On WP 7.1 with a block theme, `wp_should_load_block_assets_on_demand()` is true. `wp_enqueue_block_style()` then hooks `render_block` for that block name only. Block templates render before `wp_head`, so the style still prints in the head. Because `path` is passed, core inlines these small files (`<style id="…-inline-css">`) instead of adding a request. In the editor (`is_admin`), the styles load through `enqueue_block_assets`. No JavaScript is added, and there are no web fonts or CDN requests.
 
@@ -180,4 +203,5 @@ On WP 7.1 with a block theme, `wp_should_load_block_assets_on_demand()` is true.
 | Brand colours | Orange `#C2410C` accent and charcoal/steel neutrals | W-001 |
 | Product photography | WooCommerce placeholder or neutral grey | W-006 |
 | WhatsApp header link (P-006 utility) | Not added. Waits for the number (W-002) and the Phase 5 WhatsApp link generation | W-002 |
-| Request a quote page | Nav link to `/request-a-quote/`, page not created | Phase 5 |
+| Request a quote page | Nav item, hero button and RFQ button hidden until a published `request-a-quote` page exists; RFQ band shows a neutral line meanwhile | Phase 5 |
+| Homepage copy, safety, delivery and trust content | Marked placeholders, no claims | W-004, W-005, W-003, W-006 |

@@ -1,0 +1,223 @@
+/*
+ * Catalogue listings: shop, category, segment, brand and search templates
+ * (filters column, toolbar, category links, pagination, empty state) and
+ * section titles of product grids. Loaded only when a Product Collection,
+ * Product Filters or Product Categories block renders (functions.php).
+ * Markup is owned by WooCommerce; this file only styles it.
+ */
+
+/* ---------- Layout ---------- */
+
+.lpg-catalog__layout {
+	margin-block-start: var(--wp--preset--spacing--50);
+}
+
+/*
+ * Hide the whole filters column when no filter has options for the current
+ * results (e.g. an empty category). WooCommerce marks each empty filter with
+ * .wc-block-product-filter--hidden.
+ */
+.lpg-catalog__filters:not(:has(:is(.wp-block-woocommerce-product-filter-price, .wp-block-woocommerce-product-filter-taxonomy, .wp-block-woocommerce-product-filter-attribute):not(.wc-block-product-filter--hidden))) {
+	display: none;
+}
+
+.lpg-catalog__description {
+	max-width: 760px;
+	color: var(--wp--preset--color--muted);
+}
+
+.lpg-catalog__toolbar {
+	margin-block-end: var(--wp--preset--spacing--40);
+	font-size: var(--wp--preset--font-size--small);
+}
+
+.lpg-catalog__toolbar > * {
+	margin: 0;
+}
+
+.lpg-catalog__toolbar .woocommerce-result-count {
+	color: var(--wp--preset--color--muted);
+}
+
+.lpg-catalog__toolbar .woocommerce-ordering {
+	display: flex;
+	align-items: center;
+	gap: var(--wp--preset--spacing--20);
+	margin: 0;
+}
+
+.lpg-catalog__toolbar .woocommerce-ordering select {
+	min-height: var(--wp--custom--control--height);
+	font-size: var(--wp--preset--font-size--medium);
+}
+
+/* ---------- Filters ---------- */
+
+.lpg-filters {
+	/* Checkbox and chip borders reach 3:1 (WCAG 1.4.11) via WooCommerce's own variables. */
+	--wc-product-filter-checkbox-list-option-element-border: var(--wp--preset--color--border-strong);
+	font-size: var(--wp--preset--font-size--small);
+}
+
+.lpg-filters input[type="checkbox"].wc-block-product-filter-checkbox-list__input:focus-visible {
+	outline: var(--wp--custom--focus--width) solid var(--wp--preset--color--focus);
+	outline-offset: var(--wp--custom--focus--offset);
+}
+
+.lpg-filters .lpg-filters__title {
+	margin: 0 0 var(--wp--preset--spacing--30);
+}
+
+.lpg-filters .wc-block-product-filters__overlay-content {
+	gap: var(--wp--preset--spacing--40);
+}
+
+.lpg-filters :is(.wp-block-woocommerce-product-filter-price, .wp-block-woocommerce-product-filter-taxonomy, .wp-block-woocommerce-product-filter-attribute) {
+	padding-block-start: var(--wp--preset--spacing--40);
+	border-top: 1px solid var(--wp--preset--color--border);
+}
+
+.lpg-filters .lpg-filters__heading {
+	margin: 0 0 var(--wp--preset--spacing--20);
+	font-size: var(--wp--preset--font-size--medium);
+	letter-spacing: 0;
+}
+
+/* Checkbox rows: at least 24 px tall (WCAG 2.5.8) with a clear label. */
+.lpg-filters .wc-block-product-filter-checkbox-list__item {
+	min-height: 1.75rem;
+}
+
+.lpg-filters .wc-block-product-filter-checkbox-list__label {
+	color: var(--wp--preset--color--contrast);
+}
+
+/* The mobile "Filter products" button: an outline button, 44 px tall. */
+.lpg-filters .wc-block-product-filters__open-overlay {
+	min-height: 44px;
+	padding: 0.5rem 1rem;
+	border: 1px solid var(--wp--preset--color--contrast);
+	border-radius: var(--wp--preset--border-radius--medium);
+	background: transparent;
+	color: var(--wp--preset--color--contrast);
+	font-size: var(--wp--preset--font-size--medium);
+	font-weight: 600;
+}
+
+.lpg-filters .wc-block-product-filters__open-overlay:hover {
+	background: var(--wp--preset--color--surface);
+}
+
+/* ---------- Category links (chips) ---------- */
+
+.lpg-category-links {
+	margin-block: var(--wp--preset--spacing--30) 0;
+}
+
+.lpg-category-links .wc-block-product-categories-list {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--wp--preset--spacing--20);
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+/* Top-level categories only; subcategories are reached from their parent. */
+.lpg-category-links--top .wc-block-product-categories-list .wc-block-product-categories-list {
+	display: none;
+}
+
+.lpg-category-links .wc-block-product-categories-list-item {
+	margin: 0;
+}
+
+.lpg-category-links .wc-block-product-categories-list-item > a {
+	display: inline-flex;
+	align-items: center;
+	min-height: 44px;
+	padding: 0.25rem 1rem;
+	border: 1px solid var(--wp--preset--color--border);
+	border-radius: var(--wp--preset--border-radius--medium);
+	background: var(--wp--preset--color--base);
+	color: var(--wp--preset--color--contrast);
+	font-size: var(--wp--preset--font-size--small);
+	font-weight: 600;
+	text-decoration: none;
+}
+
+.lpg-category-links .wc-block-product-categories-list-item > a:hover {
+	border-color: var(--wp--preset--color--border-strong);
+	text-decoration: underline;
+}
+
+/* ---------- Pagination ---------- */
+
+.lpg-catalog .wp-block-query-pagination {
+	gap: var(--wp--preset--spacing--20);
+	margin-block-start: var(--wp--preset--spacing--50);
+}
+
+.lpg-catalog .wp-block-query-pagination :is(a, .page-numbers) {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 44px;
+	min-height: 44px;
+	padding: 0 0.75rem;
+	margin: 0;
+	border: 1px solid var(--wp--preset--color--border);
+	border-radius: var(--wp--preset--border-radius--medium);
+	color: var(--wp--preset--color--contrast);
+	text-decoration: none;
+	font-variant-numeric: tabular-nums;
+}
+
+.lpg-catalog .wp-block-query-pagination a:hover {
+	border-color: var(--wp--preset--color--border-strong);
+	text-decoration: underline;
+}
+
+.lpg-catalog .wp-block-query-pagination .page-numbers.current {
+	border-color: var(--wp--preset--color--contrast);
+	font-weight: 700;
+}
+
+.lpg-catalog .wp-block-query-pagination .page-numbers.dots {
+	border-color: transparent;
+}
+
+/* ---------- Empty state ---------- */
+
+.lpg-empty-state {
+	padding: var(--wp--preset--spacing--50);
+	background: var(--wp--preset--color--surface);
+	border: 1px solid var(--wp--preset--color--border);
+	border-radius: var(--wp--preset--border-radius--medium);
+}
+
+.lpg-empty-state > * {
+	margin-block: 0;
+}
+
+.lpg-empty-state > * + * {
+	margin-block-start: var(--wp--preset--spacing--30);
+}
+
+.lpg-empty-state .lpg-empty-state__search {
+	max-width: 32rem;
+}
+
+/* ---------- Product grids in sections (homepage, related) ---------- */
+
+.lpg-product-grid > .lpg-section__title {
+	margin-block: 0 var(--wp--preset--spacing--40);
+}
+
+/*
+ * WooCommerce inserts an empty notices region at the top of each Product
+ * Collection (for add-to-cart messages). Remove its gap until it holds one.
+ */
+:is(.lpg-product-grid, .lpg-catalog__grid) > .wc-block-components-notices:not(:has(.wc-block-components-notice-banner)) {
+	margin: 0;
+}

@@ -5,7 +5,6 @@
  */
 
 :is(.lpg-spec-table, .lpg-product-documents, .lpg-compatible-products) {
-	max-width: var(--wp--style--global--wide-size, 1280px);
 	margin-block: var(--wp--preset--spacing--60);
 }
 
