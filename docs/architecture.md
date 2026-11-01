@@ -338,3 +338,5 @@ Global `pa_*` attributes are kept, because WooCommerce owns them.
   - `lpg-compatible-products__{heading,list,item,link,image,name,price}`, plus `__price--enquire` and the inline `--lpg-columns`
   - `lpg-product-documents__{heading,list,item,link,label,meta}`, plus `__item--{type}`
 - **Attribute ranges:** enforced by the PHP clamp and the editor controls, not by block.json `minimum`/`maximum`, because those would make the block-renderer REST endpoint return 400.
+| C13 | DEF-001: a document row with an unknown type | **Normalise to `other`** (current behaviour is accepted). The admin UI only offers valid types, so an unknown type can only come from crafted or REST input, and keeping the PDF is more useful than dropping it |
+| C14 | DEF-002: `&` appears as `&amp;` inside the product JSON-LD | This comes from WooCommerce core's encoding, not our code. Accepted for now; reviewed in the Phase 4 SEO pass (check how Google's Rich Results Test reads it) |

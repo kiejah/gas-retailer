@@ -85,7 +85,7 @@ Status values: **Not run** · **Passed (date, evidence)** · **Failed (DEF-nnn)*
 | CAT-001 | 3A | INT | Plugin active | `get_taxonomy('lpg_segment')` | Registered on `product`; non-hierarchical; public; `show_in_rest` true; `show_admin_column` true; rewrite slug `segment`; caps `manage_product_terms`/`edit_product_terms`/`delete_product_terms`/`assign_product_terms` | Not run |
 | CAT-002 | 3A | INT | Fresh install | Run installer | Terms `household` "Household", `commercial` "Commercial", `industrial` "Industrial" exist | Not run |
 | CAT-003 | 3A | INT | Segment terms exist; rename "Household" to "Homes", delete `industrial` | Run installer again | "Homes" not renamed back (never overwritten); missing `industrial` recreated; no duplicates | Not run |
-| CAT-004 | 3A | INT | FX-PRODUCT | Assign `household` and `commercial` | Product has both terms; `/segment/household/` and `/segment/commercial/` both list it | Not run |
+| CAT-004 | 3A | INT | FX-PRODUCT | Assign `household` and `commercial` | Product has both terms; `/segment/household/` and `/segment/commercial/` both list it | Passed (2026-11-01, CLI on dev site, partial: only `household` assigned; `/segment/household/` 200 lists it, `/segment/commercial/` does not. See AC-04) |
 | CAT-005 | 3A | INT | Plugin active | Check `taxonomy_exists('lpg_manufacturer')`, `taxonomy_exists('product_brand')` | `lpg_manufacturer` does **not** exist (A6); `product_brand` exists (WooCommerce) | Not run |
 | CAT-006 | 3A | INT | — | `taxonomy_exists('lpg_cylinder_brand')` | Not registered in Phase 3 (moved to Phase 5) | Not run |
 | CAT-007 | 3A | INT | User with `edit_posts` only (author) | Try `wp_insert_term` / assign `lpg_segment` via capability check | Denied (`manage_product_terms` / `assign_product_terms` required) | Not run |
@@ -110,9 +110,9 @@ Status values: **Not run** · **Passed (date, evidence)** · **Failed (DEF-nnn)*
 
 | ID | Phase | Level | Preconditions | Steps | Expected | Status |
 |---|---|---|---|---|---|---|
-| CAT-030 | 3A | INT | FX-PRODUCT, two profiles P1, P2; category default P1 | Set `_lpg_spec_profile_id` = P2; call `ProfileResolver::for_product()` | Returns P2 (override wins) | Not run |
+| CAT-030 | 3A | INT | FX-PRODUCT, two profiles P1, P2; category default P1 | Set `_lpg_spec_profile_id` = P2; call `ProfileResolver::for_product()` | Returns P2 (override wins) | Passed (2026-11-01, CLI on dev site, `for_product` = override profile #20 over category default #16. See AC-01) |
 | CAT-031 | 3A | INT | As above | Set override to `0`, then delete the meta | Both cases return P1 (0/empty = inherit) | Not run |
-| CAT-032 | 3A | INT | FX-CATS; Parent has `lpg_spec_profile_id` P1; product only in Grandchild | Resolve | P1 (walks ancestors) | Not run |
+| CAT-032 | 3A | INT | FX-CATS; Parent has `lpg_spec_profile_id` P1; product only in Grandchild | Resolve | P1 (walks ancestors) | Passed (2026-11-01, CLI on dev site, product only in new subcategory under Regulators resolves to Regulator #16. See AC-01) |
 | CAT-033 | 3A | INT | Parent → P1, Grandchild → P2; product in Grandchild | Resolve | P2 (nearest ancestor first) | Not run |
 | CAT-034 | 3A | INT | Product in Child (P1, depth 1) and Sibling (P2, depth 0) | Resolve | P1 (deepest category first) | Not run |
 | CAT-035 | 3A | INT | Product in two categories of equal depth, each with a profile, lower `term_id` → P1 | Resolve | P1 (`term_id` ascending tiebreak); result is stable across calls | Not run |
@@ -124,12 +124,12 @@ Status values: **Not run** · **Passed (date, evidence)** · **Failed (DEF-nnn)*
 
 | ID | Phase | Level | Preconditions | Steps | Expected | Status |
 |---|---|---|---|---|---|---|
-| CAT-040 | 3A | INT | FX-PRODUCT resolved to FX-PROFILE | Save `test_pressure`=`37`, `test_type`=`A`, `test_note`=`hello`, `test_flag` checked | Meta `_lpg_spec_test_pressure`=`37`, `_lpg_spec_test_type`=`A`, `_lpg_spec_test_note`=`hello`, `_lpg_spec_test_flag`=`yes` | Not run |
-| CAT-041 | 3A | INT | As above | Save `test_flag` unchecked | `_lpg_spec_test_flag`=`no` (or deleted — see Q4) | Not run |
-| CAT-042 | 3A | INT | — | Save number `2.5`, `2,5`, `abc`, `1e3`, `-1` | `2.5` stored; non-numeric `abc` rejected/not stored; `2,5` handling per Lead decision (Q5); stored form uses `.` decimal | Not run |
-| CAT-043 | 3A | INT | — | Save select value `C` (not in options) and `a` (case differs) | Rejected; previous value unchanged | Not run |
-| CAT-044 | 3A | INT | — | Save text `<b>x</b><script>y</script>` | Stored via `sanitize_text_field` (tags stripped) | Not run |
-| CAT-045 | 3A | INT | Value previously set | Save empty string | Meta `_lpg_spec_{key}` deleted (not stored empty) | Not run |
+| CAT-040 | 3A | INT | FX-PRODUCT resolved to FX-PROFILE | Save `test_pressure`=`37`, `test_type`=`A`, `test_note`=`hello`, `test_flag` checked | Meta `_lpg_spec_test_pressure`=`37`, `_lpg_spec_test_type`=`A`, `_lpg_spec_test_note`=`hello`, `_lpg_spec_test_flag`=`yes` | Passed (2026-11-01, CLI on dev site, QA fields `qa_rating`/`qa_kind`/`qa_note`/`qa_flag`: stored `2.5`, `QA-A`, `qa "quoted"`, `yes`. See AC-02) |
+| CAT-041 | 3A | INT | As above | Save `test_flag` unchecked | `_lpg_spec_test_flag`=`no` (or deleted — see Q4) | Passed (2026-11-01, CLI on dev site, boolean select `no` stored as `no` (C3); synced as `pa_` term "No". See AC-02/03) |
+| CAT-042 | 3A | INT | — | Save number `2.5`, `2,5`, `abc`, `1e3`, `-1` | `2.5` stored; non-numeric `abc` rejected/not stored; `2,5` handling per Lead decision (Q5); stored form uses `.` decimal | Passed (2026-11-01, CLI on dev site, partial: `2,5`→`2.5`, `-1.5` kept, `1e3` and `1,000` rejected with error, previous value kept; `abc` not run. See AC-02) |
+| CAT-043 | 3A | INT | — | Save select value `C` (not in options) and `a` (case differs) | Rejected; previous value unchanged | Passed (2026-11-01, CLI on dev site, `QA-C` and `qa-a` rejected with error; previous `QA-A` kept. See AC-02) |
+| CAT-044 | 3A | INT | — | Save text `<b>x</b><script>y</script>` | Stored via `sanitize_text_field` (tags stripped) | Passed (2026-11-01, CLI on dev site, `qa </script><script>alert(1)</script> "quoted"` stored as `qa "quoted"`. See AC-02) |
+| CAT-045 | 3A | INT | Value previously set | Save empty string | Meta `_lpg_spec_{key}` deleted (not stored empty) | Passed (2026-11-01, CLI on dev site, empty `qa_note` deletes the meta row (`metadata_exists` false). See AC-02) |
 | CAT-046 | 3A | INT | Variable product with 2 variations | Save specs | Meta only on parent; none on variations | Not run |
 | CAT-047 | 3A | INT | Values set | `ProductSpecs::get($id)` | Only fields with values, in profile order, each with `key,label,type,unit,value,display`; `display` for number includes unit (e.g. `37 mbar`), boolean `Yes`/`No` | Not run |
 | CAT-048 | 3A | INT | Values set; product moved to category resolving to a different profile | `ProductSpecs::get()` | Returns only fields of the new profile; old `_lpg_spec_*` meta not deleted (data retained) — confirm (Q6) | Not run |
@@ -144,27 +144,27 @@ Status values: **Not run** · **Passed (date, evidence)** · **Failed (DEF-nnn)*
 | CAT-060 | 3A | INT | No `pa_test_pressure` exists | Save FX-PROFILE | Global attributes `pa_test_pressure`, `pa_test_type`, `pa_test_flag` created via `wc_create_attribute`, type select, label = field label; none for `test_note` | Not run |
 | CAT-061 | 3A | INT | Attribute already exists | Save profile again | No duplicate attribute; existing label not changed (or as Lead specifies) | Not run |
 | CAT-062 | 3A | INT | Same key `test_type` in two profiles | Save both | One shared `pa_test_type` | Not run |
-| CAT-063 | 3A | INT | CAT-040 values | Save product | Product attributes include `pa_test_pressure` term `37 mbar`, `pa_test_type` term `A`, `pa_test_flag` term `Yes`; each `is_visible` false, `is_variation` false | Not run |
+| CAT-063 | 3A | INT | CAT-040 values | Save product | Product attributes include `pa_test_pressure` term `37 mbar`, `pa_test_type` term `A`, `pa_test_flag` term `Yes`; each `is_visible` false, `is_variation` false | Passed (2026-11-01, CLI on dev site, terms `2.5 qau`, `QA-A`, `Yes` (and `QA-B`, `No` on 2nd product); all `is_visible` false, `is_variation` false. See AC-03) |
 | CAT-064 | 3A | INT | Product already has a custom local attribute and an unrelated `pa_colour` (used for variations) | Save specs | Other attributes untouched, including variation attributes | Not run |
 | CAT-065 | 3A | INT | `pa_test_pressure` set | Clear `test_pressure` and save | `pa_test_pressure` removed from the product; term itself may remain | Not run |
-| CAT-066 | 3A | INT | Non-filterable `test_note` set | Save | No `pa_test_note` attribute created or assigned | Not run |
-| CAT-067 | 3A | CLI | Two `[DEMO]` products with different `test_type` | Shop archive with `?filter_test_type=a` (native layered nav) | Only matching product listed (native WC filtering, no custom query) | Not run |
-| CAT-068 | 3A | INT | — | Value change `37` → `50` | Product now has term `50 mbar` only (old term unassigned) | Not run |
+| CAT-066 | 3A | INT | Non-filterable `test_note` set | Save | No `pa_test_note` attribute created or assigned | Passed (2026-11-01, CLI on dev site, non-filterable `qa_note`: no `pa_qa_note` attribute created or assigned. See AC-03) |
+| CAT-067 | 3A | CLI | Two `[DEMO]` products with different `test_type` | Shop archive with `?filter_test_type=a` (native layered nav) | Only matching product listed (native WC filtering, no custom query) | Passed (2026-11-01, CLI on dev site, `/shop/?filter_qa_kind=qa-a` lists only P2; `=qa-b` only P4; `filter_qa_flag=yes` only P2. See AC-03) |
+| CAT-068 | 3A | INT | — | Value change `37` → `50` | Product now has term `50 mbar` only (old term unassigned) | Passed (2026-11-01, CLI on dev site, `2.5`→`-1.5`→`2.5`: product ends with term `2.5 qau` only. See AC-03) |
 
 #### Compatibility, documents, warranty, relations
 
 | ID | Phase | Level | Preconditions | Steps | Expected | Status |
 |---|---|---|---|---|---|---|
-| CAT-070 | 3A | INT | Products A, B, C | Set A `_lpg_compatible_ids` = [B] | B's `_lpg_compatible_ids` contains A | Not run |
-| CAT-071 | 3A | INT | A↔B linked | Remove B from A | A removed from B; B's other links untouched | Not run |
+| CAT-070 | 3A | INT | Products A, B, C | Set A `_lpg_compatible_ids` = [B] | B's `_lpg_compatible_ids` contains A | Passed (2026-11-01, CLI on dev site, `Compatibility::save(21,[22,24])` → 22 and 24 store `[21]`. See AC-06) |
+| CAT-071 | 3A | INT | A↔B linked | Remove B from A | A removed from B; B's other links untouched | Passed (2026-11-01, CLI on dev site, `save(21,[24])` → 22 `[]`, 24 keeps `[21]`; `save(21,[])` → all empty. See AC-06) |
 | CAT-072 | 3A | INT | Filter `lpg_compatibility_bidirectional` returns false | Set A → [C] | C unchanged | Not run |
 | CAT-073 | 3A | INT | — | Set A → [A] (self), [999999] (non-existent), [a page ID], `"abc"` | Self, non-existent and non-product IDs dropped; stored as int[] | Not run |
 | CAT-074 | 3A | INT | A → [B (draft), C (private), D (catalog visibility hidden), E (published)] | `Compatibility::get_ids(A)` | Returns [E] only | Not run |
 | CAT-075 | 3A | INT | A↔B linked | Trash/delete B | `get_ids(A)` excludes B; no fatal | Not run |
 | CAT-076 | 3A | INT | A↔B linked | Mirror on save must not loop | Saving A triggers B update once; no recursion / timeout | Not run |
-| CAT-077 | 3A | INT | FX-PDF | Save `_lpg_documents` = [{FX-PDF, `datasheet`, "Datasheet"}] | Stored as list of `{attachment_id:int, type, label}` | Not run |
-| CAT-078 | 3A | INT | FX-IMG | Save document pointing to a JPEG | Rejected (only `application/pdf`) | Not run |
-| CAT-079 | 3A | INT | — | Save type `brochure`, label with HTML, non-existent attachment ID | Invalid type rejected; label sanitized; missing attachment dropped | Not run |
+| CAT-077 | 3A | INT | FX-PDF | Save `_lpg_documents` = [{FX-PDF, `datasheet`, "Datasheet"}] | Stored as list of `{attachment_id:int, type, label}` | Passed (2026-11-01, CLI on dev site, PDF row stored as `{attachment_id:25,type,label}`; label HTML stripped; `Documents::get()` returns it. See AC-09) |
+| CAT-078 | 3A | INT | FX-IMG | Save document pointing to a JPEG | Rejected (only `application/pdf`) | Passed (2026-11-01, CLI on dev site, PNG used instead of JPEG: `sanitize_rows` returns `[]`, row dropped on `Documents::apply`. See AC-09) |
+| CAT-079 | 3A | INT | — | Save type `brochure`, label with HTML, non-existent attachment ID | Invalid type rejected; label sanitized; missing attachment dropped | Failed (DEF-001, Low): invalid type `brochure` kept as `other` instead of rejected; label sanitised and missing attachment 999999 dropped as expected. 2026-11-01, CLI, see AC-09 |
 | CAT-080 | 3A | INT | User without `upload_files` but can edit product | Add a document | Not added; existing documents unchanged | Not run |
 | CAT-081 | 3A | INT | Document saved, then attachment deleted / mime changed | `Documents::get()` | Only valid PDF attachments returned | Not run |
 | CAT-082 | 3A | INT | — | Save `_lpg_warranty` multi-line text with `<script>` | Stored via `sanitize_textarea_field` (newlines kept, tags stripped) | Not run |
@@ -176,13 +176,13 @@ Status values: **Not run** · **Passed (date, evidence)** · **Failed (DEF-nnn)*
 
 | ID | Phase | Level | Preconditions | Steps | Expected | Status |
 |---|---|---|---|---|---|---|
-| CAT-090 | 3A | INT | FX-PRODUCT | Set `_lpg_enquiry_only`=`yes` | `is_purchasable()` false; `EnquiryOnly::is_enquiry_only()` true; `_price`/`_regular_price` unchanged in DB | Not run |
-| CAT-091 | 3A | INT | `_lpg_enquiry_only`=`no`, price empty | Check | Not purchasable; enquiry-only true | Not run |
-| CAT-092 | 3A | INT | `no`, price 1000 | Check | Purchasable | Not run |
-| CAT-093 | 3A | INT | Price `0` | Check | Purchasable (0 is not empty) — confirm (Q7) | Not run |
+| CAT-090 | 3A | INT | FX-PRODUCT | Set `_lpg_enquiry_only`=`yes` | `is_purchasable()` false; `EnquiryOnly::is_enquiry_only()` true; `_price`/`_regular_price` unchanged in DB | Passed (2026-11-01, CLI on dev site, flagged product: `is_purchasable` false, `is_enquiry_only` true, `_price`/`_regular_price` still `1000`. See AC-07) |
+| CAT-091 | 3A | INT | `_lpg_enquiry_only`=`no`, price empty | Check | Not purchasable; enquiry-only true | Passed (2026-11-01, CLI on dev site, empty price: `is_purchasable` false, `is_enquiry_only` true. See AC-07) |
+| CAT-092 | 3A | INT | `no`, price 1000 | Check | Purchasable | Passed (2026-11-01, CLI on dev site, price 1000, not flagged: purchasable; Store API 201. See AC-07) |
+| CAT-093 | 3A | INT | Price `0` | Check | Purchasable (0 is not empty) — confirm (Q7) | Passed (2026-11-01, CLI on dev site, price `0`: purchasable, Store API 201 (C6). See AC-07) |
 | CAT-094 | 3A | INT | Filter `lpg_is_enquiry_only` returns false for a `yes` product, and true for a normal one | Check | Filter result wins; receives `(bool, WC_Product)` | Not run |
 | CAT-095 | 3A | INT | Variable product, one variation with empty price | Check variation and parent | Variation not purchasable; behaviour of parent per Lead (Q8) | Not run |
-| CAT-096 | 3A | CLI | Enquiry-only `[DEMO]` product | Store API `POST /wp-json/wc/store/v1/cart/add-item` with its ID; also `?add-to-cart=ID` | Rejected with error; cart unchanged | Not run |
+| CAT-096 | 3A | CLI | Enquiry-only `[DEMO]` product | Store API `POST /wp-json/wc/store/v1/cart/add-item` with its ID; also `?add-to-cart=ID` | Rejected with error; cart unchanged | Passed (2026-11-01, CLI on dev site, Store API add-item → 400 `woocommerce_rest_product_not_purchasable` for flagged and empty-price products; `?add-to-cart=21` leaves cart empty. See AC-07) |
 | CAT-097 | 3A | INT | Product in cart, then switched to enquiry-only | Load cart / checkout | Item removed or checkout blocked by WC purchasable check | Not run |
 
 #### Seed command
@@ -191,7 +191,7 @@ Status values: **Not run** · **Passed (date, evidence)** · **Failed (DEF-nnn)*
 |---|---|---|---|---|---|---|
 | CAT-100 | 3A | INT/CLI | Clean test DB | Run `SeedCommand` (CLI: `wp lpg seed`) | Profiles Regulator, Burner, Gas Cooker, Cylinder created with `_lpg_fields` only; zero products and zero `_lpg_spec_*` values created | Not run |
 | CAT-101 | 3A | INT | Clean DB | Run seed | §4.1 `product_cat` tree created; term meta `lpg_spec_profile_id`: Regulators→Regulator, Burners→Burner, Cookers & Ovens→Gas Cooker, Cylinders→Cylinder | Not run |
-| CAT-102 | 3A | INT | FX-SEEDED | Run seed again | Same counts of profiles, terms, term meta; no duplicates; exit success | Not run |
+| CAT-102 | 3A | INT | FX-SEEDED | Run seed again | Same counts of profiles, terms, term meta; no duplicates; exit success | Passed (2026-11-01, CLI on dev site, `wp lpg seed` rerun: "Profiles: 0 created, 4 already present. Categories: 0 created, 11 already present. Default profiles: 0 assigned, 4 left unchanged"; counts and term meta unchanged. See AC-10) |
 | CAT-103 | 3A | INT | FX-SEEDED; admin edited Regulator fields and renamed a category | Run seed again | Edits preserved (not overwritten) — confirm (Q9) | Not run |
 | CAT-104 | 3A | INT | Plugin activated / admin page loaded | No seed command run | No profiles or categories created automatically | Not run |
 | CAT-105 | 3A | INT | Non-CLI request | Check `WP_CLI` undefined | `Cli\SeedCommand` not registered | Not run |
@@ -299,7 +299,7 @@ REST shapes beyond §5 are not yet in architecture.md; refine these cases when t
 |---|---|---|---|---|---|---|
 | PERF-001 | 7 | CLI | Warm OPcache, no page cache | `curl -w '%{time_starttransfer}'` ×5 on home, archive, product, cart | TTFB median < 600 ms locally; record values for production comparison | Not run |
 | PERF-002 | 3B/7 | CLI/INT | Query Monitor (dev only) or `SAVEQUERIES` | Product page with spec table, 8 compatible products, documents | Query count recorded; no N+1 (compatible products primed in one query; specs via one `get_post_meta`) | Not run |
-| PERF-003 | 3A/7 | CLI | Plugin active | `wp db query "SELECT option_name, LENGTH(option_value) FROM wp_options WHERE autoload IN ('yes','on','auto-on','auto') AND option_name LIKE 'lpg%'"` | Only the WhatsApp-number entry (if split) autoloaded; `lpg_settings` not autoloaded; total autoload size recorded | Not run |
+| PERF-003 | 3A/7 | CLI | Plugin active | `wp db query "SELECT option_name, LENGTH(option_value) FROM wp_options WHERE autoload IN ('yes','on','auto-on','auto') AND option_name LIKE 'lpg%'"` | Only the WhatsApp-number entry (if split) autoloaded; `lpg_settings` not autoloaded; total autoload size recorded | Passed (2026-11-01, CLI on dev site, `lpg_commerce_version` and `lpg_settings` both autoload `off`; 0 autoloaded `lpg%` options; site autoload 297 options / 65,534 bytes. See AC-11) |
 | PERF-004 | 4/7 | MAN | — | Lighthouse mobile on home and product | LCP < 2.5 s, CLS < 0.1, total page weight recorded; images lazy, sized, responsive `srcset` | Not run |
 | PERF-005 | 4/7 | CLI | — | Count enqueued JS/CSS on home | No jQuery from theme; LPG block assets only where used | Not run |
 | PERF-006 | 3A | INT | 200 products | Save a profile with filterable fields | Completes within PHP `max_execution_time` 30 s and 256M; does not resave all products on page load | Not run |
@@ -310,10 +310,10 @@ REST shapes beyond §5 are not yet in architecture.md; refine these cases when t
 
 | ID | Phase | Level | Preconditions | Steps | Expected | Status |
 |---|---|---|---|---|---|---|
-| SEO-001 | 3A | INT | Product with specs (number with unit, select, boolean, text) | Apply `woocommerce_structured_data_product` filter (`WC_Structured_Data::generate_product_data`) | One `additionalProperty` `PropertyValue` per spec with `name` = label, `value`, `unitText` = unit when present | Not run |
+| SEO-001 | 3A | INT | Product with specs (number with unit, select, boolean, text) | Apply `woocommerce_structured_data_product` filter (`WC_Structured_Data::generate_product_data`) | One `additionalProperty` `PropertyValue` per spec with `name` = label, `value`, `unitText` = unit when present | Passed (2026-11-01, CLI on dev site, front-end JSON-LD, not the INT filter test: 4 `PropertyValue`s, `name` = label, `unitText` `qau` on the number, number/boolean typed. See AC-08) |
 | SEO-002 | 3A | INT | Product without specs / no profile | Generate | No `additionalProperty` key added; rest of WC markup unchanged | Not run |
 | SEO-003 | 3A | INT | Product that already has other markup keys | Generate | Plugin adds nothing besides `additionalProperty` (offers, brand, etc. untouched) | Not run |
-| SEO-004 | 3A | INT | Spec values containing quotes, `</script>` | Generate + render JSON-LD | Valid JSON; no script break-out | Not run |
+| SEO-004 | 3A | INT | Spec values containing quotes, `</script>` | Generate + render JSON-LD | Valid JSON; no script break-out | Passed (2026-11-01, CLI on dev site, `"` JSON-escaped; `</script>` value injected through WC REST `meta_data` is stripped on read; JSON-LD parses. See AC-08 and DEF-002) |
 | SEO-005 | 3A | CLI | `[DEMO]` product | curl product page, extract `application/ld+json`, validate with schema.org validator / Rich Results test | Valid Product; `additionalProperty` present | Not run |
 | SEO-006 | 3A | INT | Enquiry-only product with empty price | Generate | No invalid `offers` (empty price) — record WC behaviour | Not run |
 | SEO-101 | 4 | CLI | SEO plugin chosen | Home, archive, product, segment page | Unique `<title>`, meta description, single canonical, OG tags; no duplicate titles/descriptions from theme + plugin | Not run |
@@ -343,13 +343,39 @@ REST shapes beyond §5 are not yet in architecture.md; refine these cases when t
 | ADM-002 | 6 | MAN | Enquiries exist | Enquiry list filters by type/date | Correct results | Not run |
 | ADM-003 | 6 | MAN | Shop manager | Full operator walkthrough | All tasks possible without admin role | Not run |
 
+### 2.11 Phase 3A acceptance run on the dev site (CLI), 2026-11-01
+
+Run by lpg-qa against http://gas-retailer.test (`gas_retailer_db`) without `composer test`, because the test DB was in use. The writes used the admin save code paths through `wp eval` / `wp eval-file --user=1`: `ProfilePostType::save_fields()`, `ProductSpecsPanel::apply()` + `ProductFields::apply()` + `$product->save()` (so `AttributeSync` ran on `woocommerce_before_product_object_save`), `Compatibility::save()`, `Documents::apply()`/`sanitize_rows()`, `wp post term set`, `wp wc product update`, and `wp media import`. The front end and Store API were checked with curl.
+
+**Fixtures** (all named `[QA TEST]`, test-only values): profile #20 with `qa_rating` (number, unit `qau`, filterable), `qa_kind` (select `QA-A`/`QA-B`, filterable), `qa_note` (text) and `qa_flag` (boolean, filterable). Also subcategory #30 under Regulators, brand #31, and four products: P1 #21 (Regulators, enquiry-only flag, 1000), P2 #22 (Regulators + override #20, 1000, specs), P3 #23 (subcategory, empty price) and P4 #24 (Regulators + override #20, price 0). There were also PDF #25 and PNG #26. Seeded profiles, categories and segments were not changed.
+
+| ID | Covers | Evidence (key output) | Status |
+|---|---|---|---|
+| AC-01 | Profile resolution: CAT-030, CAT-032 | `ProfileResolver::for_product`: P1 (Regulators, no override) → 16; P2 (override 20) → 20; P3 (only in subcategory #30, no term meta) → 16 | Passed (2026-11-01) |
+| AC-02 | Spec values per §11.3/C3/C4: CAT-040..045 | `2,5`→`2.5`; `1e3` and `1,000` gave 1 error each and kept `2.5`; `-1.5` stored; `QA-C`/`qa-a` gave errors and kept `QA-A`; `maybe` gave an error; `yes`/`no` stored; `''` deleted the meta row; text tags stripped | Passed (2026-11-01) |
+| AC-03 | Attribute sync and layered nav: CAT-063, 066, 067, 068 | `pa_qa_rating`/`pa_qa_kind`/`pa_qa_flag` were created with the profile. P2 attributes: `2.5 qau`, `QA-A`, `Yes`, all `visible=false variation=false`. `_lpg_synced_attributes` lists the 3. `/shop/?filter_qa_kind=qa-a` → P2 only; `=qa-b` → P4 only; `filter_qa_flag=yes` → P2 only; `filter_qa_kind=qa-a,qa-b&query_type_qa_kind=or` → P2 and P4. WC 11.2 syntax `filter_<slug without pa_>=<term-slug>` (attribute lookup table off: `woocommerce_attribute_lookup_enabled=no`) | Passed (2026-11-01) |
+| AC-04 | `lpg_segment`: CAT-004 (partial) | `wp post term set 22 lpg_segment household` → `/segment/household/` 200 lists P2; `/segment/commercial/` 200 and doesn't list it | Passed (2026-11-01) |
+| AC-05 | `product_brand` | `wp post term set 22 product_brand qa-test-brand` → `/brand/qa-test-brand/` 200 lists P2 | Passed (2026-11-01) |
+| AC-06 | Two-way compatibility: CAT-070, 071 | `save(21,[22,24])` → 21 `[22,24]`, 22 `[21]`, 24 `[21]`; `get_ids(22)` `[21]`; `save(21,[24])` → 22 `[]`; `save(21,[])` → all `[]` | Passed (2026-11-01) |
+| AC-07 | Enquiry-only: CAT-090..093, 096 | `is_purchasable`: P1 flagged false, P3 empty price false, P4 price 0 true, P2 true; `_regular_price` of P1 still `1000`. Store API (Nonce header from GET `/cart`): add-item P1 and P3 → HTTP 400 `woocommerce_rest_product_not_purchasable`; P4 and P2 → 201. `?add-to-cart=21` → cart empty. Single-product pages of P1/P3 show no add-to-cart form; P2/P4 do | Passed (2026-11-01) |
+| AC-08 | Structured data: SEO-001, SEO-004 | `/product/qa-test-p2/` has 1 `ld+json` block. Product `additionalProperty`: `[QA TEST] Rating` 2.5 `unitText` `qau`, `Kind` "QA-A", `Note` "qa \"quoted\"", `Flag` true. After `wp wc product update 22 --meta_data` wrote `QA x</script><script>alert(1)</script> & y` raw to `_lpg_spec_qa_note`: the page contains 0 `alert(1)`, the JSON-LD parses, and the value is `"QA x &amp; y"` (tags stripped by `ProductSpecs::get` read-time sanitising; WC also uses `JSON_HEX_TAG`). `&amp;` is DEF-002 (upstream). An external schema validator (SEO-005) was not run | Passed (2026-11-01) |
+| AC-09 | Documents: CAT-077, 078, 079 | `sanitize_rows([PNG #26])` → `[]`. `apply` with [PNG, PDF #25 type `brochure` label `<b>[QA TEST]</b> Datasheet`, missing 999999] → stored and `get()` = `[{"attachment_id":25,"type":"other","label":"[QA TEST] Datasheet"}]`. `can_add=false` with a new PDF → `[]` | Passed for the PDF-only rule; type handling is DEF-001 |
+| AC-10 | Seed idempotent: CAT-102 | `wp lpg seed` exit 0: "Profiles: 0 created, 4 already present. Categories: 0 created, 11 already present. Default profiles: 0 assigned, 4 left unchanged." Term meta 22→16, 21→17, 20→18, 19→19 unchanged | Passed (2026-11-01) |
+| AC-11 | Performance spot check: PERF-003, plus PERF-001/002 baselines | Autoload: `lpg_commerce_version` off, `lpg_settings` off (0 autoloaded `lpg%`); site total 297 autoloaded options, 65,534 B. Queries (SAVEQUERIES via `wp --exec`, `$wp->main()` + template-loader render, 4 test products): `/shop/` 14 for the main query and 40 in total after bootstrap (21.2 ms SQL); `/product/qa-test-p2/` 55 after bootstrap (45.5 ms SQL). Bootstrap in WP-CLI is 44. TTFB ×5 (warm): `/` 0.452–0.561 s (median 0.478); `/shop/` 0.527–0.642 s (median 0.552); `/product/qa-test-p2/` 0.552–0.756 s (median 0.597) | Recorded (baseline; no threshold in 3A) |
+| AC-12 | Single product page | P1–P4 `/product/qa-test-pN/` all 200 with 0 PHP notice/warning strings in the HTML. No new `logs/debug.log` entries from HTTP requests. The only 2 new lines are `Undefined array key "SERVER_NAME"` from the CLI render simulation in AC-11, not the site. LPG blocks are not placed yet (no `lpg-spec-table`/`wp-block-lpg` markup; only the theme's `lpg-blocks.css`), which is expected before 3B | Passed (2026-11-01) |
+
+**Cleanup (verified 2026-11-01):** I force-deleted posts 20–26 and terms 30 and 31, deleted attributes `pa_qa_*` (11–13) with `wc_delete_attribute`, and deleted the guest WC session my Store API cart created (after emptying the cart). Afterwards: 0 products and 0 variations; 0 posts and 0 terms named `[QA TEST]`/`qa-test`; 0 `pa_qa_*` term taxonomies; 0 orphan postmeta, termmeta and term relationships; `wc_product_meta_lookup` 0 rows; attachments only #8 (placeholder); 4 seeded profiles, 12 categories, 0 brands, 10 attributes (pre-existing); no `qa-test` files left in uploads.
+
+**Not run in this pass:** everything that needs INT (`composer test`) or MAN, plus CAT-031 (`0` override), CAT-033..038, CAT-047/048, CAT-064/065, CAT-072..076, CAT-080/081 (real user without `upload_files`), CAT-084 (`_lpg_manufacturer` absence check), CAT-094/095/097, SEC-*, SEO-002/003/005/006.
+
 ---
 
 ## 3. Defect log
 
 | ID | Date | Case | Severity | Summary | Steps to reproduce | Owner | Status |
 |---|---|---|---|---|---|---|---|
-| — | | | | | | | |
+| DEF-001 | 2026-11-01 | CAT-079 | Low | A document row with an invalid `type` is kept and stored as `other` instead of being rejected. §11.4 lists the allowed values but doesn't say whether to reject or normalise, so the Lead needs to rule on it (either fix the code or change the expectation) | `wp eval --user=1`: `$p=wc_get_product($id); Documents::apply($p, [["attachment_id"=>$pdf,"type"=>"brochure","label"=>"<b>[QA TEST]</b> Datasheet"]], true); $p->save();` **Expected (test plan):** the row is rejected. **Actual (observed):** stored `{"attachment_id":25,"type":"other","label":"[QA TEST] Datasheet"}` | Lead (ruling), then lpg-domain | Closed: accepted as designed (C13) |
+| DEF-002 | 2026-11-01 | SEO-004 / AC-08 | Low | `&` in a spec value appears as `&amp;` inside the JSON-LD string. This is upstream WooCommerce behaviour: `WC_Structured_Data` outputs `wc_esc_json( wp_json_encode(...), true )`, which HTML-escapes with double-encoding. JSON-LD consumers will read the literal `&amp;`. The plugin is not the cause. Product names with `&` were not checked | Set a text spec to `QA x & y` and curl the product page. **Expected:** JSON-LD `"value":"QA x & y"`. **Actual:** `"value":"QA x &amp; y"` | Lead (accept upstream / note for Phase 4 SEO) | Deferred to Phase 4 SEO (C14) |
 
 ---
 
