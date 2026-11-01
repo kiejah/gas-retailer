@@ -20,7 +20,7 @@ These items are collected during development so Phase 8 doesn't miss them. Confi
 - [ ] Search-replace the dev URL (`http://gas-retailer.test`) to the production URL, including serialized data (`wp search-replace`).
 - [ ] Check for Site Editor overrides: `wp post list --post_type=wp_template,wp_template_part,wp_navigation`. Saved edits may contain dev URLs (security I2).
 - [ ] `blog_public` = 1 (allow indexing) **only at launch**.
-- [ ] Yoast: author archives **disabled** (security L1; already done on dev). Exclude cart, checkout and my-account from the sitemap and set them noindex. Set title and meta-description templates with real content.
+- [ ] Yoast: author archives **disabled** (security L1; already done on dev). Exclude cart, checkout and my-account from the sitemap and set them noindex. Set title and meta-description templates with real content. The homepage title template is `%%sitename%% %%page%%` until a tagline exists; add `%%sep%% %%sitedesc%%` back once the client provides one (DEF-008).
 - [ ] WooCommerce: store address and currency (KES); shipping zone "Nairobi" per architecture §13.9 (flat KSh 300, free over KSh 10,000, local pickup); payment gateways (M-Pesa scheduled by the owner).
 - [ ] **LPG settings** (WooCommerce → Settings → LPG): WhatsApp number, phone, Sales and Owner notification emails, address, hours. These are entered on the server; they are not in Git.
 - [ ] Run `wp lpg seed` once (idempotent), then replace the placeholder content with the owner's real content (the W-series in owner-decisions.md).

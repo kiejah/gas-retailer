@@ -32,6 +32,24 @@ if ( ! $lpg_tests_dir ) {
 
 require $lpg_tests_dir . '/includes/functions.php';
 
+// Isolate uploads (DEF-009): the test suite deletes attachments and their files,
+// so it must never share the dev site's wp-content/uploads directory.
+$lpg_test_uploads = sys_get_temp_dir() . '/lpg-test-uploads';
+if ( ! is_dir( $lpg_test_uploads ) ) {
+	mkdir( $lpg_test_uploads, 0777, true );
+}
+tests_add_filter(
+	'upload_dir',
+	static function ( array $dirs ) use ( $lpg_test_uploads ): array {
+		$base_url        = 'http://example.org/lpg-test-uploads';
+		$dirs['path']    = $lpg_test_uploads . $dirs['subdir'];
+		$dirs['url']     = $base_url . $dirs['subdir'];
+		$dirs['basedir'] = $lpg_test_uploads;
+		$dirs['baseurl'] = $base_url;
+		return $dirs;
+	}
+);
+
 tests_add_filter(
 	'muplugins_loaded',
 	static function () {

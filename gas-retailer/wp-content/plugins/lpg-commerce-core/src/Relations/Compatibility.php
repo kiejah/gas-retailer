@@ -38,8 +38,13 @@ final class Compatibility implements Service {
 	 * @return int[]
 	 */
 	public static function get_ids( int $product_id ): array {
-		$ids = array();
-		foreach ( self::stored_ids( $product_id ) as $id ) {
+		$ids    = array();
+		$stored = self::stored_ids( $product_id );
+		if ( $stored ) {
+			// Load posts, meta and terms for all linked products in a few queries instead of per product (DEF-007).
+			_prime_post_caches( $stored, true, true );
+		}
+		foreach ( $stored as $id ) {
 			$product = wc_get_product( $id );
 			if ( $product instanceof \WC_Product && 'publish' === $product->get_status() && $product->is_visible() ) {
 				$ids[] = $id;
