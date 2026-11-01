@@ -5,7 +5,12 @@
  * Categories: lpg-storefront, footer
  * Block Types: core/template-part/footer
  * Inserter: no
- * Description: Site title, placeholder for business information, copyright line.
+ * Description: Site title, business information and WhatsApp link (plugin blocks), copyright line.
+ *
+ * The lpg/business-info block prints the address, opening hours and phone from the
+ * plugin settings (WooCommerce > Settings > LPG); the address and hours stay
+ * marked placeholders until the owner confirms them (W-002). lpg/whatsapp-link
+ * renders nothing while no number is set. No contact data is in the theme.
  *
  * @package lpg_storefront
  */
@@ -18,9 +23,13 @@ defined( 'ABSPATH' ) || exit;
 	<div class="wp-block-group alignwide">
 		<!-- wp:site-title {"level":0} /-->
 
-		<!-- wp:paragraph {"fontSize":"small"} -->
-		<p class="has-small-font-size"><?php echo esc_html__( '[PLACEHOLDER] Business information (address, phone, opening hours) will be added here once confirmed by the owner.', 'lpg-storefront' ); ?></p>
-		<!-- /wp:paragraph -->
+		<!-- wp:group {"className":"lpg-footer__contact","style":{"spacing":{"margin":{"top":"var:preset|spacing|40"},"blockGap":"var:preset|spacing|50"}},"layout":{"type":"flex","flexWrap":"wrap","verticalAlignment":"top","justifyContent":"space-between"}} -->
+		<div class="wp-block-group lpg-footer__contact" style="margin-top:var(--wp--preset--spacing--40)">
+			<!-- wp:lpg/business-info /-->
+
+			<!-- wp:lpg/whatsapp-link {"className":"lpg-footer__whatsapp"} /-->
+		</div>
+		<!-- /wp:group -->
 
 		<!-- wp:separator {"backgroundColor":"steel","style":{"spacing":{"margin":{"top":"var:preset|spacing|50","bottom":"var:preset|spacing|40"}}}} -->
 		<hr class="wp-block-separator has-text-color has-steel-color has-alpha-channel-opacity has-steel-background-color has-background" style="margin-top:var(--wp--preset--spacing--50);margin-bottom:var(--wp--preset--spacing--40)"/>

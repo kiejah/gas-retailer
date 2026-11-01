@@ -15,8 +15,10 @@
  * - Styles come from theme.json, plus small component stylesheets that
  *   load only where their blocks render: assets/css/lpg-blocks.css
  *   (lpg-commerce-core blocks), assets/css/product-card.css (product cards),
- *   assets/css/catalog.css (listings, filters, category links) and
- *   assets/css/single-product.css (product tabs, reviews, meta and warranty).
+ *   assets/css/catalog.css (listings, filters, category links),
+ *   assets/css/single-product.css (product tabs, reviews, meta and warranty),
+ *   assets/css/lpg-forms.css (enquiry button, quote and exchange forms) and
+ *   assets/css/lpg-contact.css (WhatsApp link and business information).
  *
  * @package lpg_storefront
  */
@@ -69,6 +71,14 @@ function lpg_storefront_enqueue_block_styles() {
 		'lpg-storefront-single'       => array(
 			'file'   => 'assets/css/single-product.css',
 			'blocks' => array( 'woocommerce/product-details', 'lpg/product-warranty' ),
+		),
+		'lpg-storefront-forms'        => array(
+			'file'   => 'assets/css/lpg-forms.css',
+			'blocks' => array( 'lpg/enquiry-button', 'lpg/rfq-form', 'lpg/exchange-form' ),
+		),
+		'lpg-storefront-contact'      => array(
+			'file'   => 'assets/css/lpg-contact.css',
+			'blocks' => array( 'lpg/whatsapp-link', 'lpg/business-info' ),
 		),
 	);
 

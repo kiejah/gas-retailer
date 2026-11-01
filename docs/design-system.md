@@ -1,6 +1,6 @@
 # Design system v1: lpg-storefront
 
-**Status:** v1 approved provisionally with changes (P-013, 2026-11-01). v1.1 (Phase 4 step 2, templates) applies those changes and adds the listing, homepage and product-tab components below. Final approval at the Phase 4 gate.
+**Status:** v1 approved provisionally with changes (P-013, 2026-11-01). v1.1 (Phase 4 step 2, templates) applies those changes and adds the listing, homepage and product-tab components below. v1.2 (Phase 5C) adds the forms, WhatsApp link, business information, delivery strip and page patterns (§6.13–6.16).
 **Source of truth:** `gas-retailer/wp-content/themes/lpg-storefront/theme.json`. This document explains it. If the two disagree, theme.json wins and this file must be corrected.
 **Direction (P-004):** an industrial/commercial equipment catalogue. Charcoal and steel neutrals on white and light-grey surfaces, one orange accent for CTAs only, system fonts, 2–4 px radii, thin borders instead of shadows, tabular figures for prices and specs.
 
@@ -129,16 +129,16 @@ White fill, `contrast` text, 1 px `border-strong` border (3.66:1), 2 px radius, 
 
 ### 6.5 Header (`parts/header.html` → `patterns/header.php`)
 ```
-< 600 px   [☰] Gas-Plug ............ [account] [cart]
+< 600 px   [☰] Gas-Plug ....... [wa] [account] [cart]
            [ Search products, e.g. regulator     (⌕) ]
-≥ 600 px   Gas-Plug   [ Search products …  (⌕) ]   [account] [cart]
+≥ 600 px   Gas-Plug   [ Search products …  (⌕) ]   [wa WhatsApp us] [account] [cart]
            ───────────────────────────────────────────────────────
            Products ▾  Household  Commercial  Industrial  LPG Accessories
            Safety Equipment  Refills & Exchange  Request a quote
 ```
 - Wordmark: the core Site Title ("Gas-Plug", from Settings > General), **placeholder** pending W-001. No logo image.
 - Search: core Search with the WooCommerce product-search variation (searches products only). It sits outside the nav overlay, so it is visible at every width (P-005/P-006). Core removes the input's outline, so the theme draws the 2 px `focus` ring (offset 2 px) around the whole field (`.wp-block-search__inside-wrapper`) when the input has keyboard focus, and on the search button when it has focus (DEF-003). Applies to every core Search in the theme, including the empty-state search.
-- Tools: WooCommerce Customer account (icon) and Mini-cart (icon, price hidden). Both are 44 × 44 px (the account rule targets `.wc-block-customer-account__link`, DEF-005).
+- Tools: the plugin's `lpg/whatsapp-link` (§6.14), WooCommerce Customer account (icon) and Mini-cart (icon, price hidden). All are at least 44 × 44 px (the account rule targets `.wc-block-customer-account__link`, DEF-005).
 - **Mini-cart drawer:** WooCommerce 11.2.1 hides the closed drawer with opacity only, so its controls stayed in the Tab order. The theme adds `visibility: hidden` to `.wc-block-components-drawer__screen-overlay--is-hidden`, delayed by the 0.3 s fade-out, so the closed drawer is skipped by Tab and the open/close animation is unchanged (DEF-004, CSS only).
 - **Desktop/tablet nav (≥ 600 px):** top-level items are at least 44 px tall (flex, centred); wrapped rows at 768 have no extra row gap (DEF-005).
 - Nav: core/navigation with inner link/submenu blocks and **no `ref`**, so it needs no `wp_navigation` post and core creates no fallback. The order follows P-006. Items come from `inc/nav-items.php`, shared with the mobile menu, and are built from the terms that exist, so a missing term drops its item. Segment items go to `/segment/<slug>/`. LPG Accessories, Safety Equipment and Refills & Exchange go to their category archives.
@@ -176,13 +176,14 @@ Templates `archive-product` (shop), `taxonomy-product_cat`, `taxonomy-lpg_segmen
 - **Empty state** (patterns `no-products`, `no-search-results`, inside the Product Collection "No results" block): `surface` panel with a thin border, an H2, a short explanation, and "Browse all products" (outline). Search adds a product search field.
 
 ### 6.10 Homepage sections (`templates/front-page.html`, P-005 order)
-Hero (`surface` band, catalogue-led H1, primary "Browse products", outline "Request a quote" only when that page exists) → segment tiles (3-column grid of bordered tiles; the whole tile is the link) → category links (chips; the section is left out while no category has products) → Featured products → RFQ band (left 4 px `contrast` rule; button only when the page exists, otherwise "Contact us for bulk and project orders." with no contact details) → New products → safety strip (`surface` band) → delivery with a small Refills & Exchange note tile → trust strip (three placeholder tiles, visually hidden H2). Product grids keep their heading inside the Product Collection block, so a grid with zero products renders nothing at all. All copy is placeholder and marked `[Placeholder]`, `[Placeholder copy]` or `[PLACEHOLDER: …]` (italic `muted`). Sections are spaced with `spacing-70`. These small rules live in theme.json global CSS.
+Hero (`surface` band, catalogue-led H1, primary "Browse products", outline "Request a quote" only when that page exists) → segment tiles (3-column grid of bordered tiles; the whole tile is the link) → category links (chips; the section is left out while no category has products) → Featured products → RFQ band (left 4 px `contrast` rule; button only when the page exists, otherwise "Contact us for bulk and project orders." with no contact details) → New products → safety strip (`surface` band) → delivery strip (§6.15) with a small Refills & Exchange note tile → trust strip (three placeholder tiles, visually hidden H2). Product grids keep their heading inside the Product Collection block, so a grid with zero products renders nothing at all. All copy is placeholder and marked `[Placeholder]`, `[Placeholder copy]` or `[PLACEHOLDER: …]` (italic `muted`). Sections are spaced with `spacing-70`. These small rules live in theme.json global CSS.
 
 ### 6.11 Single product sections (`assets/css/single-product.css`)
 Everything under the gallery/summary columns sits in one wide group, `.lpg-product-sections`, so the spec table, WooCommerce tabs, documents, compatible products, upsells and related products share the columns' width (P-013 #3; measured 28–1252 px at 1280 and 20–355 px at 375). Order: spec table → tabs → documents → compatible products → upsells → related products (§11.9, P-009 #4).
 - **Tabs** (WooCommerce "minimal" style, restyled): a row of tab links over a 1 px `border` rule; inactive `muted`, active `contrast` with a 2 px `contrast` underline; 44 px tall. Panel headings `x-large`; text limited to 75 ch.
 - **Reviews** (WooCommerce default behaviour, W-008): title `x-large`, "no reviews" in `muted`, the form in a bordered panel up to 40 rem wide inside the shared column (not full-width), labels above fields, inputs full width at 44 px, required marks in `error`, primary "Submit".
 - **Meta** (SKU, category, tags, brand): `small` `muted`, wrapping row.
+- **Enquiry button** (`lpg/enquiry-button`, §13.6): in the summary directly after the add-to-cart form. By default it renders only for enquiry-only products, which have no add-to-cart form, so it takes the cart button's place. Styled in §6.13.
 - **Warranty** (`lpg/product-warranty`, §12.4): directly under the meta row in the summary. Same `small` `muted` text as the meta; `__label` ("Warranty:") is 600 weight; `__value` keeps the plugin's line breaks (`nl2br`) and wraps long words. The block renders nothing without a warranty value.
 - **Upsells** (pattern `lpg-storefront/upsell-products`, heading "You may also need"): WooCommerce Product Collection in its native `woocommerce/product-collection/upsells` collection (the product is taken from the single-product location), up to 4 items, product cards as in 6.6, 2-up at 375 and up to 4 columns at 1280. It renders nothing when the product has no upsells. WooCommerce 11.2 would also print its classic `woocommerce_upsell_display()` ("You may also like…") after the tabs in block templates, so `functions.php` opts that one hook out through WooCommerce's documented `woocommerce_blocks_hook_compatibility_additional_data` filter (block templates only; no data changes).
 
@@ -191,6 +192,36 @@ The cart page's WooCommerce Cart block already contains WooCommerce's default cr
 
 ### 6.12 Checkout page (`templates/page-checkout.html`)
 Theme override of WooCommerce 11.2.1's checkout template: WooCommerce's minimal checkout header part, then the page title as the only H1 ("Checkout"), then the page content with WooCommerce's Checkout block unchanged (DEF-006). The cart uses WooCommerce's template, which already has one H1.
+
+### 6.13 Forms and the enquiry button (`assets/css/lpg-forms.css`)
+Applies to `lpg/enquiry-button` (`.lpg-enquiry`), `lpg/rfq-form` (`.lpg-rfq-form`) and `lpg/exchange-form` (`.lpg-exchange-form`). The plugin owns the markup; the rules are scoped to these roots and keyed to elements and attributes (`aria-invalid`, `aria-busy`, `disabled`, `hidden`, `role="alert"`), plus a few defensive class patterns (`__error`, `__success`, `__item`/`__row`, `honeypot`), so they don't depend on exact inner class names.
+- **Layout:** mobile-first single column, `spacing-40` between fields. Main actions (submit, "Enquire on WhatsApp") are full width below 600 px and auto width from 600 px.
+- **Labels** sit above the fields, 600 weight. Hints, the privacy notice and small print are `small` `muted`. Required marks are `error`.
+- **Inputs, selects, textareas:** same look as §6.3 (white, 1 px `border-strong`, 2 px radius, 16 px text), full width, at least 44 px tall. Textareas start at 7.5 rem and resize vertically. Selects get a charcoal chevron. Focus is the global 2 px `focus` ring.
+- **Radios and the consent checkbox:** 20 px controls in `contrast` (`accent-color`). A label that wraps its control is a 44 px row with the text beside the control. Radio groups (exchange/new) sit in a borderless fieldset with a `large` legend and wrap side by side.
+- **Errors (not colour alone):** an invalid field (`aria-invalid="true"`) gets an `error` 2 px border. The field's error text is `error`, `small`, 600 weight, with a round "!" badge before it. A form-level `role="alert"` message gets a panel with a 4 px `error` left rule.
+- **Success:** panel with a 1 px `success` border, 4 px left rule, a ✓ in `success` and `contrast` text.
+- **Disabled/sending:** disabled buttons and the submit button of a form that is `aria-busy="true"` (or `.is-sending`) drop to 60 % opacity, can't be clicked, and show a `not-allowed`/`progress` cursor.
+- **Quote item rows:** each row is a `surface` panel with a thin border. Fields stack below 600 px; from 600 px they sit side by side (the quantity field is 7 rem) with the remove button at the end. Add/remove buttons use the outline look (§6.1), so Submit stays the only accent button.
+- **Enquiry button:** "Enquire on WhatsApp" is a primary button. The panel (label, textarea, privacy notice, "Open WhatsApp") is a `surface` panel with a thin border. When the panel is open (`aria-expanded="true"`), the toggle switches to the outline look so that "Open WhatsApp" is the one accent button (§2).
+- The honeypot is moved off-screen if the plugin hasn't hidden it already.
+
+### 6.14 WhatsApp link and business information (`assets/css/lpg-contact.css`)
+- **Header (P-017/P-023):** `lpg/whatsapp-link` first in the tools row. A quiet text link with its small icon ("WhatsApp us"), 600 weight, no underline until hover, 44 px tall. **Never a floating bubble, never green.** Below 600 px it shows only the icon (24 px) in a 44 × 44 px target; the text stays inside the link (`font-size: 0`), so it remains the accessible name. The optional phone link is hidden in the header. The block renders nothing while no number is set.
+- **Footer:** `lpg/business-info` and `lpg/whatsapp-link` side by side in a wrapping row (`.lpg-footer__contact`), stacked at 375. White text and links on the dark band, `small` size, `focus-inverse` focus ring.
+- **Business information** (`<address class="lpg-business-info">`): upright (not italic) `small` text, labels 600 weight, wraps long values. Address and hours print the placeholders from the plugin settings as-is (W-002). Phone links are 44 px tall.
+- **Contact page** (`.lpg-contact`, pattern `page-contact`): the same blocks in a bordered panel at body text size, with `showPhone: true`.
+
+### 6.15 Homepage delivery strip (theme.json global CSS, P-023)
+In `patterns/home-delivery.php`: a `[Placeholder copy]` tag over a core List named **"Delivery info strip (editable)"** in List View (class `lpg-delivery-strip`): "Delivery within Nairobi · Free delivery on orders over KSh 10,000 · Pickup available". Text is 600 weight, no bullets; the items stack below 600 px and sit on one line from 600 px with `muted` middle-dot separators (CSS, hidden from screen readers). It matches the WooCommerce shipping zone (§13.9). **No delivery times, no tracking language.** To change it, edit that list in the Site Editor (or the pattern file) and keep it in line with the shipping settings. The Refills & Exchange tile beside it links to the `refills-exchange` page when it is published, otherwise to the product category.
+
+### 6.16 Page patterns (for the Lead's Phase 5 pages)
+Offered for new pages (`Block Types: core/post-content`, `Post Types: page`). The page title (H1) comes from the template, so the patterns start below it. All copy is `[Placeholder copy]`.
+| Pattern | Content |
+|---|---|
+| `lpg-storefront/page-request-a-quote` | Lead paragraph and a short instruction, then `lpg/rfq-form`. No claims about prices, stock or response times |
+| `lpg-storefront/page-refills-exchange` | Explainer: arranged on WhatsApp, separate from equipment orders; delivery within Nairobi only; no times. Then `lpg/exchange-form` and a link to the Refills & Exchange category |
+| `lpg-storefront/page-contact` | `.lpg-contact` panel with `lpg/business-info` and `lpg/whatsapp-link {showPhone:true}`, then a note linking to Request a quote (the page's permalink, or `/request-a-quote/` if it isn't published yet) |
 
 ## 7. Asset loading (C15 performance note)
 
@@ -201,6 +232,8 @@ Theme override of WooCommerce 11.2.1's checkout template: WooCommerce's minimal 
 | `assets/css/product-card.css` | `woocommerce/product-template` or `lpg/compatible-products` renders | `wp_enqueue_block_style()`, handle `lpg-storefront-product-card` |
 | `assets/css/catalog.css` | `woocommerce/product-collection`, `woocommerce/product-filters` or `woocommerce/product-categories` renders | `wp_enqueue_block_style()`, handle `lpg-storefront-catalog` |
 | `assets/css/single-product.css` | `woocommerce/product-details` or `lpg/product-warranty` renders | `wp_enqueue_block_style()`, handle `lpg-storefront-single` |
+| `assets/css/lpg-forms.css` | `lpg/enquiry-button`, `lpg/rfq-form` or `lpg/exchange-form` renders | `wp_enqueue_block_style()`, handle `lpg-storefront-forms` |
+| `assets/css/lpg-contact.css` | `lpg/whatsapp-link` or `lpg/business-info` renders (header and footer, so on most pages; small, inlined) | `wp_enqueue_block_style()`, handle `lpg-storefront-contact` |
 
 On WP 7.1 with a block theme, `wp_should_load_block_assets_on_demand()` is true. `wp_enqueue_block_style()` then hooks `render_block` for that block name only. Block templates render before `wp_head`, so the style still prints in the head. Because `path` is passed, core inlines these small files (`<style id="…-inline-css">`) instead of adding a request. In the editor (`is_admin`), the styles load through `enqueue_block_assets`. No JavaScript is added, and there are no web fonts or CDN requests.
 
@@ -212,6 +245,7 @@ On WP 7.1 with a block theme, `wp_should_load_block_assets_on_demand()` is true.
 | Logo | None (no image) | W-001 |
 | Brand colours | Orange `#C2410C` accent and charcoal/steel neutrals | W-001 |
 | Product photography | WooCommerce placeholder or neutral grey | W-006 |
-| WhatsApp header link (P-006 utility) | Not added. Waits for the number (W-002) and the Phase 5 WhatsApp link generation | W-002 |
+| WhatsApp header link (P-006 utility) | Placed (P-023): plugin block, renders only when the number is set in plugin settings | W-002 (number provided) |
+| Address and opening hours | Plugin-settings placeholders shown as-is in the footer and contact page | W-002 |
 | Request a quote page | Nav item, hero button and RFQ button hidden until a published `request-a-quote` page exists; RFQ band shows a neutral line meanwhile | Phase 5 |
-| Homepage copy, safety, delivery and trust content | Marked placeholders, no claims | W-004, W-005, W-003, W-006 |
+| Homepage copy, safety, delivery and trust content | Marked placeholders, no claims. Delivery strip matches the shipping settings and may be revised by the client | W-004, W-005, W-003, W-006 |

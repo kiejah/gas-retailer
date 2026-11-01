@@ -5,7 +5,7 @@
  * Categories: lpg-storefront, header
  * Block Types: core/template-part/header
  * Inserter: no
- * Description: Wordmark, product search (visible at every width), account, mini-cart and the primary navigation.
+ * Description: Wordmark, product search (visible at every width), WhatsApp link, account, mini-cart and the primary navigation.
  *
  * Navigation is a core/navigation block with inner link blocks (no `ref`), so
  * no wp_navigation post is needed and core never creates a fallback menu.
@@ -16,6 +16,11 @@
  * the menu opens the "Mobile menu" template part (parts/mobile-menu.html)
  * instead of core's default overlay, because core's default overlay always
  * shows every submenu expanded.
+ *
+ * The WhatsApp link (lpg/whatsapp-link, plugin block, P-017/P-023) is a modest
+ * text/icon link in the tools row, never a floating bubble. Below 600 px it
+ * shows the icon only and keeps its text as the accessible name. It renders
+ * nothing while no WhatsApp number is set in the plugin settings.
  *
  * @package lpg_storefront
  */
@@ -64,6 +69,8 @@ $lpg_products = array(
 
 		<!-- wp:group {"className":"lpg-header__tools","style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"flex","flexWrap":"nowrap","justifyContent":"right"}} -->
 		<div class="wp-block-group lpg-header__tools">
+			<!-- wp:lpg/whatsapp-link {"className":"lpg-header__whatsapp"} /-->
+
 			<!-- wp:woocommerce/customer-account {"displayStyle":"icon_only","iconClass":"wc-block-customer-account__account-icon"} /-->
 
 			<!-- wp:woocommerce/mini-cart {"hasHiddenPrice":true} /-->
