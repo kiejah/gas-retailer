@@ -18,6 +18,10 @@ final class Markup {
 	 * Resolve the product to render: the block context `postId` first, then
 	 * the global product (single product pages).
 	 *
+	 * Returns null for password-protected products until the visitor has
+	 * entered the password (M1), and for products the current user may not
+	 * view, e.g. drafts for logged-out visitors (H1, as WooCommerce's blocks).
+	 *
 	 * @param int|null $product_id Product ID from block context, if any.
 	 */
 	public static function product( ?int $product_id ): ?\WC_Product {
@@ -28,9 +32,15 @@ final class Markup {
 		if ( $product_id <= 0 || 'product' !== get_post_type( $product_id ) ) {
 			return null;
 		}
+		if ( post_password_required( $product_id ) ) {
+			return null;
+		}
 		$product = wc_get_product( $product_id );
+		if ( ! $product instanceof \WC_Product || ! $product->is_viewable() ) {
+			return null;
+		}
 
-		return $product instanceof \WC_Product ? $product : null;
+		return $product;
 	}
 
 	/**

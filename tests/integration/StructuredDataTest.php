@@ -6,6 +6,7 @@
  */
 
 require_once __DIR__ . '/LpgFixtures.php';
+require_once ABSPATH . WPINC . '/class-phpass.php';
 
 use LPG\Commerce\Seo\StructuredData;
 
@@ -79,5 +80,30 @@ class StructuredDataTest extends WP_UnitTestCase {
 		$markup  = apply_filters( 'woocommerce_structured_data_product', array( '@type' => 'Product' ), $product );
 
 		$this->assertSame( array( '@type' => 'Product' ), $markup );
+	}
+
+	public function test_password_protected_product_adds_no_properties_until_password_is_entered(): void {
+		$profile = $this->create_profile( array( $this->field( 'material', 'text', '', false, array(), 'Material' ) ) );
+		$product = $this->create_product( array( $this->create_category( 0, $profile ) ), array( '_lpg_spec_material' => 'Brass' ) );
+		wp_update_post(
+			array(
+				'ID'            => $product->get_id(),
+				'post_password' => 'secret',
+			)
+		);
+		$product = wc_get_product( $product->get_id() );
+		$input   = array(
+			'@type' => 'Product',
+			'name'  => 'X',
+		);
+
+		$this->assertSame( $input, StructuredData::add_properties( $input, $product ) );
+
+		$hasher                                 = new PasswordHash( 8, true );
+		$_COOKIE[ 'wp-postpass_' . COOKIEHASH ] = $hasher->HashPassword( 'secret' );
+		$markup                                 = StructuredData::add_properties( $input, $product );
+		unset( $_COOKIE[ 'wp-postpass_' . COOKIEHASH ] );
+
+		$this->assertSame( 'Material', $markup['additionalProperty'][0]['name'] );
 	}
 }

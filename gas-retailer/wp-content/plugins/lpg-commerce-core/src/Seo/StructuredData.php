@@ -36,6 +36,11 @@ final class StructuredData implements Service {
 		if ( ! $product instanceof \WC_Product ) {
 			return $markup;
 		}
+		// Specs of a password-protected product stay hidden until the password is entered (C15).
+		$owner_id = $product->get_parent_id() ? $product->get_parent_id() : $product->get_id();
+		if ( post_password_required( $owner_id ) ) {
+			return $markup;
+		}
 		$specs = ProductSpecs::get( $product->get_id() );
 		if ( ! $specs ) {
 			return $markup;

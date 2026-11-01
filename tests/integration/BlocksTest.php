@@ -6,6 +6,7 @@
  */
 
 require_once __DIR__ . '/LpgFixtures.php';
+require_once ABSPATH . WPINC . '/class-phpass.php';
 
 use LPG\Commerce\Blocks\CompatibleProducts;
 use LPG\Commerce\Blocks\ProductDocuments;
@@ -22,7 +23,7 @@ class BlocksTest extends WP_UnitTestCase {
 	private const BLOCK_NAMES = array( 'lpg/spec-table', 'lpg/compatible-products', 'lpg/product-documents' );
 
 	public function tear_down(): void {
-		unset( $GLOBALS['product'] );
+		unset( $GLOBALS['product'], $_COOKIE[ 'wp-postpass_' . COOKIEHASH ] );
 		parent::tear_down();
 	}
 
@@ -469,5 +470,112 @@ class BlocksTest extends WP_UnitTestCase {
 		$this->assertStringContainsString( 'alignwide', $html );
 		$this->assertStringContainsString( '--lpg-columns:3', $html );
 		$this->assertStringContainsString( 'lpg-compatible-products__item', $html );
+	}
+
+	// ----- Access: password-protected and non-viewable products (C15) -----------------
+
+	/**
+	 * A product with specs, one PDF document and one compatible product.
+	 */
+	private function product_with_all_data(): WC_Product_Simple {
+		$product = $this->product_with_specs();
+		$related = $this->create_product();
+		update_post_meta( $product->get_id(), Compatibility::META, array( $related->get_id() ) );
+		update_post_meta(
+			$product->get_id(),
+			Documents::META,
+			array(
+				array(
+					'attachment_id' => $this->pdf( 'datasheet.pdf' ),
+					'type'          => 'datasheet',
+					'label'         => 'Datasheet',
+				),
+			)
+		);
+
+		return $product;
+	}
+
+	/**
+	 * Output of all three renderers for a product ID.
+	 *
+	 * @return array<string, string>
+	 */
+	private function render_all( int $product_id ): array {
+		return array(
+			'spec-table'          => SpecTable::render( array(), $product_id ),
+			'compatible-products' => CompatibleProducts::render( array(), $product_id ),
+			'product-documents'   => ProductDocuments::render( array(), $product_id ),
+		);
+	}
+
+	private function assert_all_render( int $product_id, bool $expected ): void {
+		foreach ( $this->render_all( $product_id ) as $block => $html ) {
+			if ( $expected ) {
+				$this->assertStringContainsString( 'lpg-' . $block, $html, $block );
+			} else {
+				$this->assertSame( '', $html, $block );
+			}
+		}
+	}
+
+	public function test_password_protected_product_renders_nothing_until_password_is_entered(): void {
+		$product = $this->product_with_all_data();
+		$this->assert_all_render( $product->get_id(), true );
+
+		wp_update_post(
+			array(
+				'ID'            => $product->get_id(),
+				'post_password' => 'secret',
+			)
+		);
+		$this->assert_all_render( $product->get_id(), false );
+
+		$GLOBALS['product'] = wc_get_product( $product->get_id() );
+		$this->assertSame( '', SpecTable::render( array(), null ), 'Global product fallback is protected too.' );
+
+		// Same cookie core's wp-login.php?action=postpass sets.
+		$hasher                                 = new PasswordHash( 8, true );
+		$_COOKIE[ 'wp-postpass_' . COOKIEHASH ] = $hasher->HashPassword( 'wrong' );
+		$this->assert_all_render( $product->get_id(), false );
+
+		$_COOKIE[ 'wp-postpass_' . COOKIEHASH ] = $hasher->HashPassword( 'secret' );
+		$this->assert_all_render( $product->get_id(), true );
+	}
+
+	public function test_password_protected_product_inside_render_block_renders_nothing(): void {
+		$product = $this->product_with_all_data();
+		wp_update_post(
+			array(
+				'ID'            => $product->get_id(),
+				'post_password' => 'secret',
+			)
+		);
+		$context = static function ( array $context ) use ( $product ): array {
+			$context['postId'] = $product->get_id();
+			return $context;
+		};
+		add_filter( 'render_block_context', $context );
+
+		$html = do_blocks( '<!-- wp:lpg/spec-table /--><!-- wp:lpg/compatible-products /--><!-- wp:lpg/product-documents /-->' );
+
+		remove_filter( 'render_block_context', $context );
+
+		$this->assertSame( '', trim( $html ) );
+	}
+
+	public function test_draft_product_renders_only_for_users_who_can_edit_it(): void {
+		$product = $this->product_with_all_data();
+		$product->set_status( 'draft' );
+		$product->save();
+
+		wp_set_current_user( 0 );
+		$this->assert_all_render( $product->get_id(), false );
+
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'customer' ) ) );
+		$this->assert_all_render( $product->get_id(), false );
+
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		$this->assert_all_render( $product->get_id(), true );
 	}
 }
