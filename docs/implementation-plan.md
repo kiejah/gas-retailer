@@ -10,7 +10,7 @@ Architecture details are in [architecture.md](architecture.md).
 | 1 Discovery & Architecture | **Complete** — approved by the owner 2026-11-01 (all decisions accepted) |
 | 2 Foundation | **Complete** (2026-11-01): see the Phase 2 report below |
 | 3 Product catalogue | **Complete**: 3A and 3B delivered and tested. Gate approved by owner proxy 2026-11-01 (P-012, provisional, pending owner ratification) |
-| 4 Storefront | In progress: design-system checkpoint (P-008) with lpg-theme; extra permission and escaping tests (P-012 condition) with lpg-qa |
+| 4 Storefront | Built and tested; **awaiting the owner-proxy gate** (acceptance §2.15: P-009 #2–#10 pass, #1 partial) |
 | 5–8 | Not started |
 
 ## Agent roles and coordination
@@ -163,6 +163,31 @@ cPanel guide: DB, HTTPS, SMTP, backups, caching, production wp-config, deploy (G
 **Phase 3 gate:** all P-001 conditions met (browser checks §2.13, 66 INT rows mapped to tests, the uncovered list in §2.14). Approved P-012. Carried forward:
 - **Phase 4 gate:** PHPUnit tests for CAT-007, CAT-020, CAT-049/SEC-003, SEC-001, CAT-076, CAT-097; PERF-002 in the performance pass; SEO-006 in the SEO pass.
 - **Phase 7:** the remaining §2.14 rows, a manual or Playwright check of the search dropdown, BLK-012, a real uninstall run, other browsers.
+
+## Phase 4 report (2026-11-01)
+
+**Agents:** lpg-theme (design system, header, templates, fixes), lpg-domain (EnquiryDisplay, warranty block), lpg-security (review), lpg-qa (acceptance and retest), Lead (contract §12, Yoast choice §12.3, DEF-007/008/009 fixes, reviews), lpg-owner-proxy (P-008/P-013..P-017 direction).
+
+**Delivered:**
+- Design system v1 (`docs/design-system.md`, AA contrast).
+- Header with always-visible search and tap-to-open menus.
+- Homepage in P-005 order.
+- Segment, category, shop, brand and search templates with native WooCommerce filters.
+- Single product page with warranty, specs, documents, compatible products, upsells and related products.
+- Cart cross-sells; checkout H1.
+- The "Enquire" label for enquiry-only products (§12.1).
+- Yoast SEO free (§12.3).
+- Block CSS loaded on demand.
+
+**Tests:**
+- `composer test`: 156 tests, 743 assertions. PHPCS and ESLint clean.
+- Acceptance: 10 page types × 3 widths, no horizontal scroll, AA contrast, keyboard menus and filters, 44 px primary targets.
+- Site Editor: 0 invalid blocks. Content audit clean.
+- Performance: TTFB 0.32–0.42 s; product with 8 compatible products costs 69 queries.
+
+**Defects:** DEF-003..009 found and all closed after retest. DEF-002 (upstream `&amp;` in JSON-LD, Low) is open pending a decision.
+
+**Not tested / deferred to Phase 7:** A11Y-005 (200% zoom / 320 px reflow), PERF-004 (Lighthouse), external rich-results validation, screen-reader announcements, real devices and other browsers, Theme Check.
 
 ## Carried into Phase 5 (from the Phase 4 security review)
 - Plugin hardening service: block anonymous `/wp/v2/users` (L1). Reduce the repeated `request-a-quote` page check in the theme to one helper in `inc/` (maintenance note).
