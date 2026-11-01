@@ -2,7 +2,7 @@
 /**
  * LPG Storefront theme setup.
  *
- * Presentation only: theme supports and pattern registration. All business
+ * Presentation only: theme supports, pattern registration and asset enqueueing. All business
  * logic lives in the lpg-commerce-core plugin.
  *
  * Notes:
@@ -11,8 +11,10 @@
  * - WooCommerce treats any block theme as supported
  *   (wc_current_theme_supports_woocommerce_or_fse()), so
  *   add_theme_support( 'woocommerce' ) is not needed.
- * - Styles come from theme.json, plus one small stylesheet for the
- *   lpg-commerce-core blocks (assets/css/lpg-blocks.css).
+ * - Styles come from theme.json, plus two small component stylesheets
+ *   that load only where their blocks render: assets/css/lpg-blocks.css
+ *   (lpg-commerce-core blocks) and assets/css/product-card.css (product
+ *   cards).
  *
  * @package lpg_storefront
  */
@@ -38,21 +40,40 @@ function lpg_storefront_register_pattern_categories() {
 add_action( 'init', 'lpg_storefront_register_pattern_categories' );
 
 /**
- * Enqueues base styles for the lpg-commerce-core blocks.
+ * Registers the theme's component stylesheets so each loads only when a block
+ * that needs it renders.
  *
- * Hooked to enqueue_block_assets so it loads on the front end and inside the
- * block editor canvas. Versioned by file modification time.
+ * The core function wp_enqueue_block_style() hooks `render_block` on the front end when block
+ * assets load on demand (the default for block themes), so a page without the
+ * block gets no stylesheet. Small files are inlined by core because `path` is
+ * set. In the editor the styles load through `enqueue_block_assets`.
  *
  * @return void
  */
 function lpg_storefront_enqueue_block_styles() {
-	$path = get_theme_file_path( 'assets/css/lpg-blocks.css' );
-
-	wp_enqueue_style(
-		'lpg-storefront-blocks',
-		get_theme_file_uri( 'assets/css/lpg-blocks.css' ),
-		array(),
-		file_exists( $path ) ? (string) filemtime( $path ) : wp_get_theme()->get( 'Version' )
+	$styles = array(
+		'lpg-storefront-blocks'       => array(
+			'file'   => 'assets/css/lpg-blocks.css',
+			'blocks' => array( 'lpg/spec-table', 'lpg/product-documents', 'lpg/compatible-products' ),
+		),
+		'lpg-storefront-product-card' => array(
+			'file'   => 'assets/css/product-card.css',
+			'blocks' => array( 'woocommerce/product-template', 'lpg/compatible-products' ),
+		),
 	);
+
+	foreach ( $styles as $handle => $style ) {
+		$path = get_theme_file_path( $style['file'] );
+		$args = array(
+			'handle' => $handle,
+			'src'    => get_theme_file_uri( $style['file'] ),
+			'path'   => $path,
+			'ver'    => file_exists( $path ) ? (string) filemtime( $path ) : wp_get_theme()->get( 'Version' ),
+		);
+
+		foreach ( $style['blocks'] as $block_name ) {
+			wp_enqueue_block_style( $block_name, $args );
+		}
+	}
 }
-add_action( 'enqueue_block_assets', 'lpg_storefront_enqueue_block_styles' );
+add_action( 'init', 'lpg_storefront_enqueue_block_styles' );

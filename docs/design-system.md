@@ -1,0 +1,183 @@
+# Design system v1: lpg-storefront
+
+**Status:** Phase 4 design-system checkpoint (P-008). Provisional until the owner proxy answers, and confirmed at the Phase 4 gate.
+**Source of truth:** `gas-retailer/wp-content/themes/lpg-storefront/theme.json`. This document explains it. If the two disagree, theme.json wins and this file must be corrected.
+**Direction (P-004):** an industrial/commercial equipment catalogue. Charcoal and steel neutrals on white and light-grey surfaces, one orange accent for CTAs only, system fonts, 2–4 px radii, thin borders instead of shadows, tabular figures for prices and specs.
+
+---
+
+## 1. Colour tokens
+
+Slugs are unchanged from the placeholder palette, so existing templates and content keep working. Changes: `border-strong` darkened from `#8A96A3` to `#7B8794` so form-control borders reach 3:1 (WCAG 1.4.11), and two new tokens were added: `focus` and `focus-inverse`.
+
+| Slug | Hex | Role |
+|---|---|---|
+| `base` | `#FFFFFF` | Page background, card background, text on dark |
+| `surface` | `#F3F5F7` | Image wells, spec-table label column, table headers, outline-button hover |
+| `border` | `#CBD2D9` | Card, table and divider lines (decorative, 1 px) |
+| `border-strong` | `#7B8794` | Input/select borders, card hover border, "Enquire" label border |
+| `muted` | `#4A5562` | Secondary text: breadcrumbs, captions, document meta, struck-through prices |
+| `steel` | `#2D3741` | Spec labels, PDF badge, link hover |
+| `contrast` | `#1C232B` | Body text, headings, links, prices, secondary-button border, footer background |
+| `accent` | `#C2410C` | **CTA fill only** (primary buttons) |
+| `accent-dark` | `#9A3412` | Primary-button hover |
+| `accent-light` | `#FDBA74` | Reserved. No longer used (footer links are now white). Kept so saved content doesn't break |
+| `success` | `#15803D` | Status text and icons (in stock, notice borders) |
+| `warning` | `#B45309` | Status text and icons |
+| `error` | `#B91C1C` | Form errors, error notices |
+| `focus` | `#1D4ED8` | Keyboard focus ring (functional, never decorative) |
+| `focus-inverse` | `#93C5FD` | Focus ring on `contrast`/`steel` backgrounds (footer) |
+
+### 1.1 Contrast ratios (WCAG 2.x, computed)
+
+AA needs 4.5:1 for body text, 3:1 for large text (≥ 24 px, or ≥ 18.66 px bold), and 3:1 for UI component boundaries and focus indicators.
+
+| Foreground | Background | Ratio | Use | Result |
+|---|---|---|---|---|
+| `contrast` #1C232B | `base` #FFFFFF | **15.85** | Body text, headings, links, prices | AAA |
+| `contrast` | `surface` #F3F5F7 | **14.51** | Text in wells and table headers | AAA |
+| `steel` #2D3741 | `base` | **12.11** | Spec labels, "Enquire" label | AAA |
+| `steel` | `surface` | **11.08** | Spec label column | AAA |
+| `muted` #4A5562 | `base` | **7.59** | Breadcrumbs, captions, meta | AAA |
+| `muted` | `surface` | **6.94** | Meta on grey | AA (AAA ≥ 7 missed narrowly) |
+| `base` #FFFFFF | `accent` #C2410C | **5.18** | Primary button text | AA |
+| `base` | `accent-dark` #9A3412 | **7.31** | Primary button hover | AAA |
+| `contrast` | `base` (transparent) | **15.85** | Secondary (outline) button text; 1 px `contrast` border | AAA |
+| `contrast` | `surface` | **14.51** | Secondary button hover | AAA |
+| `base` | `contrast` | **15.85** | Search button (icon), footer text, footer links | AAA |
+| `base` | `steel` | **12.11** | Search button hover, PDF badge | AAA |
+| `accent` | `base` | **5.18** | (Not used for text. Shown in case the owner wants accent text) | AA |
+| `success` #15803D | `base` | **5.02** | Status text | AA |
+| `warning` #B45309 | `base` | **5.02** | Status text | AA |
+| `error` #B91C1C | `base` | **6.47** | Error text | AA |
+| `border-strong` #7B8794 | `base` | **3.66** | Input/select border (UI boundary) | Passes 3:1 |
+| `border-strong` | `surface` | **3.35** | Input on a grey panel | Passes 3:1 |
+| `border` #CBD2D9 | `base` | 1.53 | Decorative card and table lines only, never the only cue for a control | n/a (decorative) |
+| `focus` #1D4ED8 | `base` | **6.70** | Focus ring, 2 px, 2 px offset | Passes 3:1 |
+| `focus` | `surface` | **6.13** | Focus ring on grey | Passes 3:1 |
+| `focus-inverse` #93C5FD | `contrast` | **8.79** | Focus ring in the footer | Passes 3:1 |
+| `accent-light` #FDBA74 | `contrast` | 9.40 | Reserved | — |
+
+Not themed: input placeholder text uses the browser default grey. Placeholders are examples ("e.g. regulator"), never the only label (the search has an accessible label).
+
+## 2. When to use the accent
+
+1. **Only primary CTAs:** Add to cart, Browse products, Place order, Submit (RFQ/exchange in Phase 5). At most one accent button per card or section.
+2. **Never** for links, prices, headings, icons, badges, borders, backgrounds of sections, nav items or hover states of non-CTA elements.
+3. Secondary actions (Request a quote next to Browse products, Read more and Select options on cards) use the **outline** button: transparent fill, 1 px `contrast` border, `contrast` text.
+4. Status uses `success`/`warning`/`error`, not the accent. Focus uses `focus`, not the accent.
+5. If the owner supplies brand colours (W-001), swap `accent`/`accent-dark` in theme.json and re-check the white-on-accent ratio (must stay ≥ 4.5:1).
+
+## 3. Typography
+
+System stack only, no web-font requests: `-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif`. Mono: `ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace`.
+
+| Slug | Size (min → max, fluid) | Use |
+|---|---|---|
+| `x-small` | 0.75rem (12 px) | Labels only: "Enquire", PDF badge, stacked spec labels (uppercase, tracked). Never paragraphs |
+| `small` | 0.875rem (14 px) | Card body, spec table, breadcrumbs, captions, meta |
+| `medium` | 1rem (16 px) | Body, inputs (16 px stops iOS zoom), buttons, card names and prices |
+| `large` | 1.125 → 1.25rem | Wordmark, lead text, single-product price |
+| `x-large` | 1.25 → 1.5rem | h3, LPG block headings |
+| `xx-large` | 1.5 → 2rem | h2 |
+| `xxx-large` | 1.875 → 2.5rem | h1 |
+
+Body line-height 1.6; headings 700, line-height 1.2, letter-spacing −0.01em; h6 uppercase small. Nav 0.9375rem/600. Wordmark 800, −0.02em. Prices and spec values use `font-variant-numeric: tabular-nums`.
+
+## 4. Spacing, radii, shadows, layout
+
+| Spacing slug | Value | | Radius slug | Value |
+|---|---|---|---|---|
+| `10` | 0.25rem | | `small` | 2 px: inputs, selects, badges, image wells |
+| `20` | 0.5rem | | `medium` | 4 px: buttons, cards, dropdowns |
+| `30` | 0.75rem | | | |
+| `40` | 1rem (default block gap) | | **Shadow** | |
+| `50` | clamp(1.25rem, 3vw, 1.75rem) (root side padding) | | `raised` | `0 1px 2px rgba(28,35,43,.08)` (rare) |
+| `60` | clamp(1.75rem, 5vw, 3rem) | | `overlay` | `0 6px 16px rgba(28,35,43,.14)`: dropdowns and drawers only |
+| `70` | clamp(2.5rem, 7vw, 4.5rem) | | | |
+| `80` | clamp(3.5rem, 10vw, 6.5rem) | | | |
+
+The `large` (8 px) radius was removed: nothing used it, and it was outside the 2–4 px rule. Layout: content 760 px, wide 1280 px. Custom properties: `--wp--custom--focus--{width,offset}` (2 px/2 px), `--wp--custom--control--height` (2.75rem = 44 px), `--wp--custom--card--{padding,gap,radius}`.
+
+## 5. Breakpoints
+
+| Width | What changes | Why |
+|---|---|---|
+| < 600 px | Header: menu button, wordmark, account and cart in row 1, full-width search in row 2. Nav in an overlay. Spec table rows stack. Card grids show 2 columns | 600 px is core Navigation's fixed overlay breakpoint, so the header and spec table follow it |
+| ≥ 600 px | Header: wordmark, search (max 40rem) and tools in row 1, the full nav in row 2. Spec table shows two columns | |
+| ≥ 782 px | Compatible-products grid uses its `columns` attribute (plugin CSS) | WordPress/plugin column breakpoint |
+| 1280 px | Wide max width | `wideSize` |
+
+Between 600 and about 1000 px the nav wraps to a second line (checked at 768: two rows, no overflow).
+
+## 6. Components
+
+### 6.1 Buttons (`styles.elements.button`, `core/button` outline variation)
+- **Primary:** `accent` fill, white 16 px/600 text, 1 px `accent` border, 4 px radius, padding 0.625rem × 1.25rem. Hover `accent-dark`. Focus: 2 px `focus` outline, 2 px offset.
+- **Secondary:** the `is-style-outline` variation: transparent fill, `contrast` text and 1 px border. Hover `surface` fill.
+- **Card buttons:** full width, at least 44 px tall, pinned to the bottom of the card. Add to cart is primary. Read more and Select options (any non-add-to-cart action) are outline.
+- **Search submit:** `contrast` fill with a white icon (it is a utility, not a CTA, so it is not orange).
+
+### 6.2 Links
+`contrast` text, 1 px underline at a 0.18em offset. On hover the underline thickens to 2 px and the colour becomes `steel`. Nav and card titles have no underline until hover. Breadcrumb links are `muted`.
+
+### 6.3 Forms (`elements.textInput`, `elements.select`)
+White fill, `contrast` text, 1 px `border-strong` border (3.66:1), 2 px radius, padding 0.5rem × 0.75rem, 16 px text, focus ring flush (offset 0). The element selectors have low specificity (`:root :where()`), so WooCommerce block checkout inputs keep their own floating-label layout and only inherit what they don't set. Error text uses `error`.
+
+### 6.4 Tables
+`core/table` and the WooCommerce classic `.shop_table`/`.woocommerce-table` share one look: 1 px `border` cells, padding 0.75rem × 1rem, `surface` header row, text at `small`.
+
+### 6.5 Header (`parts/header.html` → `patterns/header.php`)
+```
+< 600 px   [☰] Gas-Plug ............ [account] [cart]
+           [ Search products, e.g. regulator     (⌕) ]
+≥ 600 px   Gas-Plug   [ Search products …  (⌕) ]   [account] [cart]
+           ───────────────────────────────────────────────────────
+           Products ▾  Household  Commercial  Industrial  LPG Accessories
+           Safety Equipment  Refills & Exchange  Request a quote
+```
+- Wordmark: the core Site Title ("Gas-Plug", from Settings > General), **placeholder** pending W-001. No logo image.
+- Search: core Search with the WooCommerce product-search variation (searches products only). It sits outside the nav overlay, so it is visible at every width (P-005/P-006).
+- Tools: WooCommerce Customer account (icon) and Mini-cart (icon, price hidden). Tap targets are at least 44 × 44 px.
+- Nav: core/navigation with inner link/submenu blocks and **no `ref`**, so it needs no `wp_navigation` post and core creates no fallback. The order follows P-006. Products ▾ opens a dropdown (4 px radius, thin border, overlay shadow) with All products plus the 11 top-level categories. Segment items go to `/segment/<slug>/`. LPG Accessories, Safety Equipment and Refills & Exchange go to their category archives. Request a quote goes to `/request-a-quote/` (the page is created in Phase 5). Links are built from the terms that exist, so a missing term drops its item.
+- Mobile overlay: white with charcoal text, 20 px side padding. Items are at least 44 px tall (measured 58 px). The submenu is shown expanded.
+- WooCommerce block hooks would otherwise inject a second account icon after the nav. The nav sets `metadata.ignoredHookedBlocks` to prevent that.
+
+### 6.6 Product card (`assets/css/product-card.css`)
+One look for WooCommerce product-template cards (shop, archives, related products) and `lpg/compatible-products` cards:
+- White card, 1 px `border`, 4 px radius, 0.75rem padding, 0.5rem gap, left-aligned. The border goes to `border-strong` on hover (no shadow, no motion).
+- **Image well:** square, `surface` background, `object-fit: contain`, so the product sits on a plain background and is never cropped.
+- **Name:** 16 px/600 `contrast`, wraps in full (technical names are not truncated). Underlined on hover.
+- **Price:** 16 px/700 `contrast`, tabular figures. A sale shows the struck-through old price in `muted` before the new one.
+- **Enquire** (§11.9, enquiry-only products in compatible-products cards): a neutral label, not a button. Uppercase `x-small`, `steel` text, 1 px `border-strong` border, 2 px radius.
+- **Button** (WooCommerce cards only, see 6.1). The plugin's compatible-products markup has no button.
+- Loaded only when `woocommerce/product-template` or `lpg/compatible-products` renders.
+
+### 6.7 Spec table (`assets/css/lpg-blocks.css`)
+- **≥ 600 px:** two columns in a 1 px `border` frame. The label column (38%) is `surface`/`steel`/600 with a vertical rule. Values have tabular figures. Rows are separated by 1 px rules (no zebra striping).
+- **< 600 px:** each row stacks: a `surface` label strip (x-small, uppercase, tracked) above the value. Long values wrap with `overflow-wrap: anywhere`, with no horizontal scroll (checked at 375).
+- Block heading is `x-large`.
+
+### 6.8 Documents (`assets/css/lpg-blocks.css`)
+Rows are separated by 1 px rules and are at least 44 px tall. Each starts with a `steel` "PDF" badge. Only `__label` is underlined. `__meta` (type and size) is plain `muted` small text that never wraps internally, and drops to its own line at narrow widths (QA design note).
+
+## 7. Asset loading (C15 performance note)
+
+| File | Loaded when | How |
+|---|---|---|
+| theme.json global styles | Every page (inline) | Core |
+| `assets/css/lpg-blocks.css` | `lpg/spec-table`, `lpg/product-documents` or `lpg/compatible-products` renders | `wp_enqueue_block_style()` per block, handle `lpg-storefront-blocks` |
+| `assets/css/product-card.css` | `woocommerce/product-template` or `lpg/compatible-products` renders | `wp_enqueue_block_style()`, handle `lpg-storefront-product-card` |
+
+On WP 7.1 with a block theme, `wp_should_load_block_assets_on_demand()` is true. `wp_enqueue_block_style()` then hooks `render_block` for that block name only. Block templates render before `wp_head`, so the style still prints in the head. Because `path` is passed, core inlines these small files (`<style id="…-inline-css">`) instead of adding a request. In the editor (`is_admin`), the styles load through `enqueue_block_assets`. No JavaScript is added, and there are no web fonts or CDN requests.
+
+## 8. Still placeholder, pending the owner
+
+| Item | Placeholder now | Owner item |
+|---|---|---|
+| Business name and wordmark | "Gas-Plug" site title as text | W-001 |
+| Logo | None (no image) | W-001 |
+| Brand colours | Orange `#C2410C` accent and charcoal/steel neutrals | W-001 |
+| Product photography | WooCommerce placeholder or neutral grey | W-006 |
+| WhatsApp header link (P-006 utility) | Not added. Waits for the number (W-002) and the Phase 5 WhatsApp link generation | W-002 |
+| Request a quote page | Nav link to `/request-a-quote/`, page not created | Phase 5 |

@@ -1,138 +1,123 @@
-/* Base styles for lpg-commerce-core blocks. Markup is owned by the plugin. */
+/*
+ * lpg-commerce-core blocks: spec table, documents, compatible-products
+ * section. Loaded only when one of those blocks renders (functions.php).
+ * Card styles are in product-card.css. Markup is owned by the plugin.
+ */
 
-.lpg-spec-table,
-.lpg-product-documents,
-.lpg-compatible-products {
+:is(.lpg-spec-table, .lpg-product-documents, .lpg-compatible-products) {
 	max-width: var(--wp--style--global--wide-size, 1280px);
 	margin-block: var(--wp--preset--spacing--60);
 }
 
-.lpg-spec-table > h2,
-.lpg-product-documents > h2,
-.lpg-compatible-products > h2 {
-	font-size: var(--wp--preset--font-size--large);
+:is(.lpg-spec-table, .lpg-product-documents, .lpg-compatible-products) > h2 {
 	margin: 0 0 var(--wp--preset--spacing--40);
+	font-size: var(--wp--preset--font-size--x-large);
 }
 
-/* Spec table: scrolls inside its own box on narrow screens. */
-.lpg-spec-table {
-	overflow-x: auto;
+.lpg-compatible-products__list {
+	gap: var(--wp--preset--spacing--40);
 }
 
-.lpg-spec-table table {
-	width: 100%;
-	border-collapse: collapse;
+/* Spec table: label column on a grey surface, thin rules, tabular figures. */
+.lpg-spec-table__table {
 	border: 1px solid var(--wp--preset--color--border);
 	font-size: var(--wp--preset--font-size--small);
 }
 
-.lpg-spec-table th,
-.lpg-spec-table td {
+.lpg-spec-table__row + .lpg-spec-table__row {
+	border-top: 1px solid var(--wp--preset--color--border);
+}
+
+.lpg-spec-table__label,
+.lpg-spec-table__value {
 	padding: var(--wp--preset--spacing--30) var(--wp--preset--spacing--40);
-	border-bottom: 1px solid var(--wp--preset--color--border);
 	text-align: start;
 	vertical-align: top;
 	overflow-wrap: anywhere;
 }
 
-.lpg-spec-table th {
-	width: 40%;
+.lpg-spec-table__label {
+	width: 38%;
+	background: var(--wp--preset--color--surface);
+	border-inline-end: 1px solid var(--wp--preset--color--border);
+	color: var(--wp--preset--color--steel);
 	font-weight: 600;
 }
 
-.lpg-spec-table tbody tr:nth-child(odd) {
-	background: var(--wp--preset--color--surface);
+.lpg-spec-table__value {
+	font-variant-numeric: tabular-nums;
 }
 
-@media (max-width: 480px) {
-	.lpg-spec-table tr,
-	.lpg-spec-table th,
-	.lpg-spec-table td {
+/* Below 600px each row stacks: label strip above its value. */
+@media (max-width: 599.98px) {
+	.lpg-spec-table__table,
+	.lpg-spec-table__table tbody,
+	.lpg-spec-table__row,
+	.lpg-spec-table__label,
+	.lpg-spec-table__value {
 		display: block;
 		width: auto;
 	}
 
-	.lpg-spec-table th {
-		border-bottom: 0;
-		padding-bottom: 0;
+	.lpg-spec-table__label {
+		padding-block: var(--wp--preset--spacing--20);
+		border-inline-end: 0;
+		font-size: var(--wp--preset--font-size--x-small);
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
 	}
 }
 
-/* Documents. */
-.lpg-product-documents ul {
-	list-style: none;
+/* Documents: the label is the underlined link text; type and size are plain meta. */
+.lpg-product-documents__list {
 	margin: 0;
 	padding: 0;
+	list-style: none;
 	border-top: 1px solid var(--wp--preset--color--border);
 }
 
-.lpg-product-documents li {
+.lpg-product-documents__item {
 	border-bottom: 1px solid var(--wp--preset--color--border);
 }
 
-.lpg-product-documents a {
+.lpg-product-documents__link {
 	display: flex;
 	flex-wrap: wrap;
-	align-items: center;
-	gap: var(--wp--preset--spacing--20) var(--wp--preset--spacing--30);
+	align-items: baseline;
+	gap: var(--wp--preset--spacing--10) var(--wp--preset--spacing--30);
+	min-height: 44px;
 	padding: var(--wp--preset--spacing--30) 0;
+	color: var(--wp--preset--color--contrast);
+	text-decoration: none;
 }
 
-.lpg-product-documents a::before {
+.lpg-product-documents__link::before {
 	content: "PDF";
-	padding: 0.15em 0.45em;
-	border-radius: 2px;
-	background: var(--wp--preset--color--accent-dark);
+	flex: none;
+	padding: 0.125em 0.4em;
+	border-radius: var(--wp--preset--border-radius--small);
+	background: var(--wp--preset--color--steel);
 	color: var(--wp--preset--color--base);
-	font-size: 0.75em;
+	font-size: var(--wp--preset--font-size--x-small);
 	font-weight: 700;
 	letter-spacing: 0.05em;
 	line-height: 1.4;
 }
 
-.lpg-product-documents a :not(:first-child) {
+.lpg-product-documents__label {
+	min-width: 0;
+	overflow-wrap: anywhere;
+	text-decoration: underline;
+	text-decoration-thickness: 1px;
+	text-underline-offset: 0.18em;
+}
+
+.lpg-product-documents__link:hover .lpg-product-documents__label {
+	text-decoration-thickness: 2px;
+}
+
+.lpg-product-documents__meta {
 	color: var(--wp--preset--color--muted);
 	font-size: var(--wp--preset--font-size--small);
-}
-
-.lpg-product-documents a:focus-visible,
-.lpg-compatible-products a:focus-visible {
-	outline: 2px solid var(--wp--preset--color--accent);
-	outline-offset: 2px;
-}
-
-/* Compatible products grid. */
-.lpg-compatible-products :is(ul, ol) {
-	display: grid;
-	grid-template-columns: repeat(var(--lpg-columns, 4), minmax(0, 1fr));
-	gap: var(--wp--preset--spacing--40);
-	list-style: none;
-	margin: 0;
-	padding: 0;
-}
-
-@media (max-width: 600px) {
-	.lpg-compatible-products :is(ul, ol) {
-		grid-template-columns: repeat(2, minmax(0, 1fr));
-	}
-}
-
-.lpg-compatible-products li {
-	display: flex;
-	flex-direction: column;
-	gap: var(--wp--preset--spacing--20);
-	padding: var(--wp--preset--spacing--30);
-	background: var(--wp--preset--color--surface);
-	border: 1px solid var(--wp--preset--color--border);
-	border-radius: 4px;
-	font-size: var(--wp--preset--font-size--small);
-}
-
-.lpg-compatible-products img {
-	display: block;
-	width: 100%;
-	height: auto;
-	aspect-ratio: 1;
-	object-fit: contain;
-	background: var(--wp--preset--color--base);
+	white-space: nowrap;
 }

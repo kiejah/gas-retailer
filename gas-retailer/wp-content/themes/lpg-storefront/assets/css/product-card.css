@@ -1,0 +1,142 @@
+/*
+ * Product card: one look for WooCommerce product-template cards (shop,
+ * archives, related) and lpg/compatible-products cards. Loaded only when one
+ * of those blocks renders (wp_enqueue_block_style in functions.php).
+ * Markup is owned by WooCommerce and the LPG plugin; this file only styles it.
+ *
+ * WooCommerce card selectors are scoped under .wc-block-product-template so
+ * they outrank core/WooCommerce defaults (0,3,0) without !important.
+ */
+
+:is(.wc-block-product-template .wc-block-product, .lpg-compatible-products__item) {
+	display: flex;
+	flex-direction: column;
+	gap: var(--wp--custom--card--gap);
+	padding: var(--wp--custom--card--padding);
+	background: var(--wp--preset--color--base);
+	border: 1px solid var(--wp--preset--color--border);
+	border-radius: var(--wp--custom--card--radius);
+	font-size: var(--wp--preset--font-size--small);
+	text-align: start;
+}
+
+:is(.wc-block-product-template .wc-block-product, .lpg-compatible-products__item):hover {
+	border-color: var(--wp--preset--color--border-strong);
+}
+
+.wc-block-product-template .wc-block-product > *,
+.lpg-compatible-products__link > * {
+	margin: 0;
+}
+
+/* Image well: product on a plain neutral background, never cropped. */
+:is(.wc-block-product-template .wc-block-product .wc-block-components-product-image, .lpg-compatible-products__link) img {
+	display: block;
+	width: 100%;
+	height: auto;
+	aspect-ratio: 1;
+	object-fit: contain !important; /* WooCommerce sets object-fit inline. */
+	background: var(--wp--preset--color--surface);
+	border-radius: var(--wp--preset--border-radius--small);
+}
+
+.wc-block-product-template .wc-block-product .wc-block-components-product-image {
+	margin: 0 0 var(--wp--preset--spacing--10);
+}
+
+/* Name: wraps in full (technical names are not truncated). */
+.wc-block-product-template .wc-block-product .wp-block-post-title,
+.lpg-compatible-products__name {
+	margin: 0;
+	overflow-wrap: anywhere;
+	font-size: var(--wp--preset--font-size--medium) !important; /* Overrides the template's font-size class. */
+	font-weight: 600;
+	line-height: 1.35 !important;
+	text-align: start;
+}
+
+.lpg-compatible-products__link {
+	display: flex;
+	flex-direction: column;
+	gap: var(--wp--custom--card--gap);
+	color: var(--wp--preset--color--contrast);
+	text-decoration: none;
+}
+
+.wc-block-product-template .wc-block-product .wp-block-post-title a {
+	color: var(--wp--preset--color--contrast);
+	text-decoration: none;
+}
+
+.wc-block-product-template .wc-block-product .wp-block-post-title a:hover,
+.lpg-compatible-products__link:hover .lpg-compatible-products__name {
+	text-decoration: underline;
+}
+
+/* Price: bold charcoal, tabular figures, never orange. */
+.wc-block-product-template .wc-block-product .wp-block-woocommerce-product-price,
+.lpg-compatible-products__price {
+	margin: 0 !important; /* The default archive template sets an inline margin. */
+	color: var(--wp--preset--color--contrast);
+	font-size: var(--wp--preset--font-size--medium);
+	font-weight: 700;
+	font-variant-numeric: tabular-nums;
+}
+
+.wc-block-product-template .wc-block-product .wc-block-components-product-price {
+	font-size: inherit;
+	text-align: start;
+}
+
+:is(.wc-block-product-template .wc-block-product, .lpg-compatible-products__item) del {
+	color: var(--wp--preset--color--muted);
+	font-weight: 400;
+}
+
+:is(.wc-block-product-template .wc-block-product, .lpg-compatible-products__item) ins {
+	text-decoration: none;
+}
+
+/* "Enquire" (enquiry-only products, §11.9): a neutral label, not a button. */
+.lpg-compatible-products__price--enquire {
+	align-self: flex-start;
+	padding: 0.125rem 0.5rem;
+	border: 1px solid var(--wp--preset--color--border-strong);
+	border-radius: var(--wp--preset--border-radius--small);
+	color: var(--wp--preset--color--steel);
+	font-size: var(--wp--preset--font-size--x-small);
+	font-weight: 700;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+}
+
+/* Button sits at the bottom of the card at full width. */
+.wc-block-product-template .wc-block-product .wp-block-woocommerce-product-button {
+	margin-top: auto;
+	padding-top: var(--wp--preset--spacing--20);
+}
+
+.wc-block-product-template .wc-block-product .wc-block-components-product-button .wc-block-components-product-button__button {
+	width: 100%;
+	min-height: 44px;
+	margin: 0 !important; /* The default archive template sets an inline margin. */
+	border: 1px solid var(--wp--preset--color--accent);
+	justify-content: center;
+}
+
+.wc-block-product-template .wc-block-product .wc-block-components-product-button .wc-block-components-product-button__button:hover {
+	border-color: var(--wp--preset--color--accent-dark);
+}
+
+/* "Read more" / "Select options" (not an add-to-cart action): outline style. */
+.wc-block-product-template .wc-block-product .wc-block-components-product-button .wc-block-components-product-button__button:not(.add_to_cart_button) {
+	background: transparent;
+	border-color: var(--wp--preset--color--contrast);
+	color: var(--wp--preset--color--contrast);
+	font-weight: 600;
+}
+
+.wc-block-product-template .wc-block-product .wc-block-components-product-button .wc-block-components-product-button__button:not(.add_to_cart_button):hover {
+	background: var(--wp--preset--color--surface);
+	border-color: var(--wp--preset--color--contrast);
+}
