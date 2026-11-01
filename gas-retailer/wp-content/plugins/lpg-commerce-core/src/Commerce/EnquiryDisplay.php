@@ -161,7 +161,13 @@ final class EnquiryDisplay implements Service {
 				return false;
 			}
 			$referer = (string) wp_get_raw_referer();
-			if ( '' === $referer || 0 === strpos( $referer, admin_url() ) ) {
+			if ( '' === $referer ) {
+				return false;
+			}
+			// Compare paths, not full URLs, so an http/https mismatch behind a proxy can't misclassify admin screens.
+			$referer_path = (string) wp_parse_url( $referer, PHP_URL_PATH );
+			$admin_path   = (string) wp_parse_url( admin_url(), PHP_URL_PATH );
+			if ( '' !== $admin_path && 0 === strpos( $referer_path, $admin_path ) ) {
 				return false;
 			}
 		}

@@ -164,6 +164,10 @@ cPanel guide: DB, HTTPS, SMTP, backups, caching, production wp-config, deploy (G
 - **Phase 4 gate:** PHPUnit tests for CAT-007, CAT-020, CAT-049/SEC-003, SEC-001, CAT-076, CAT-097; PERF-002 in the performance pass; SEO-006 in the SEO pass.
 - **Phase 7:** the remaining §2.14 rows, a manual or Playwright check of the search dropdown, BLK-012, a real uninstall run, other browsers.
 
+## Carried into Phase 5 (from the Phase 4 security review)
+- Plugin hardening service: block anonymous `/wp/v2/users` (L1). Reduce the repeated `request-a-quote` page check in the theme to one helper in `inc/` (maintenance note).
+- Deployment items collected in `docs/deployment-checklist.md`.
+
 ## Next tasks
 - Phase 4 step 1: the design-system checkpoint (lpg-theme) goes to the owner proxy for its one-round review (P-008), then the page templates.
 - In parallel: lpg-qa adds the P-012 condition tests.
