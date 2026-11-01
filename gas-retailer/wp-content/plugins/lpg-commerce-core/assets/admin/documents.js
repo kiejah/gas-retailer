@@ -5,22 +5,28 @@
 ( function () {
 	'use strict';
 
-	var box = document.querySelector( '[data-lpg-documents]' );
+	const box = document.querySelector( '[data-lpg-documents]' );
 	if ( ! box ) {
 		return;
 	}
-	var body = box.querySelector( '[data-lpg-doc-rows]' );
-	var template = box.querySelector( '[data-lpg-doc-template]' );
-	var addButton = box.querySelector( '[data-lpg-doc-add]' );
-	var empty = box.querySelector( '[data-lpg-doc-empty]' );
-	var frame = null;
+	const body = box.querySelector( '[data-lpg-doc-rows]' );
+	const template = box.querySelector( '[data-lpg-doc-template]' );
+	const addButton = box.querySelector( '[data-lpg-doc-add]' );
+	const empty = box.querySelector( '[data-lpg-doc-empty]' );
+	let frame = null;
 
 	function reindex() {
-		var rows = body.querySelectorAll( '[data-lpg-doc-row]' );
+		const rows = body.querySelectorAll( '[data-lpg-doc-row]' );
 		Array.prototype.forEach.call( rows, function ( row, index ) {
-			Array.prototype.forEach.call( row.querySelectorAll( '[name^="lpg_documents["]' ), function ( input ) {
-				input.name = input.name.replace( /^lpg_documents\[[^\]]*\]/, 'lpg_documents[' + index + ']' );
-			} );
+			Array.prototype.forEach.call(
+				row.querySelectorAll( '[name^="lpg_documents["]' ),
+				function ( input ) {
+					input.name = input.name.replace(
+						/^lpg_documents\[[^\]]*\]/,
+						'lpg_documents[' + index + ']'
+					);
+				}
+			);
 		} );
 		if ( empty ) {
 			empty.hidden = rows.length > 0;
@@ -28,22 +34,28 @@
 	}
 
 	function addRow( attachment ) {
-		if ( body.querySelector( '[data-lpg-doc-row][data-id="' + attachment.id + '"]' ) ) {
+		if (
+			body.querySelector(
+				'[data-lpg-doc-row][data-id="' + attachment.id + '"]'
+			)
+		) {
 			return;
 		}
-		var fragment = template.content.cloneNode( true );
-		var row = fragment.querySelector( '[data-lpg-doc-row]' );
+		const fragment = template.content.cloneNode( true );
+		const row = fragment.querySelector( '[data-lpg-doc-row]' );
 		row.setAttribute( 'data-id', attachment.id );
 		row.querySelector( '[data-lpg-doc-id]' ).value = attachment.id;
-		row.querySelector( '[data-lpg-doc-file]' ).textContent = attachment.filename || attachment.title || ( '#' + attachment.id );
-		row.querySelector( '[data-lpg-doc-label]' ).value = attachment.title || '';
+		row.querySelector( '[data-lpg-doc-file]' ).textContent =
+			attachment.filename || attachment.title || '#' + attachment.id;
+		row.querySelector( '[data-lpg-doc-label]' ).value =
+			attachment.title || '';
 		body.appendChild( fragment );
 	}
 
 	body.addEventListener( 'click', function ( event ) {
-		var button = event.target.closest( '[data-lpg-doc-remove]' );
+		const button = event.target.closest( '[data-lpg-doc-remove]' );
 		if ( button ) {
-			var row = button.closest( '[data-lpg-doc-row]' );
+			const row = button.closest( '[data-lpg-doc-row]' );
 			row.parentNode.removeChild( row );
 			reindex();
 		}
@@ -56,15 +68,18 @@
 					title: addButton.getAttribute( 'data-title' ),
 					button: { text: addButton.getAttribute( 'data-button' ) },
 					library: { type: 'application/pdf' },
-					multiple: true
+					multiple: true,
 				} );
 				frame.on( 'select', function () {
-					frame.state().get( 'selection' ).each( function ( model ) {
-						var attachment = model.toJSON();
-						if ( 'application/pdf' === attachment.mime ) {
-							addRow( attachment );
-						}
-					} );
+					frame
+						.state()
+						.get( 'selection' )
+						.each( function ( model ) {
+							const attachment = model.toJSON();
+							if ( 'application/pdf' === attachment.mime ) {
+								addRow( attachment );
+							}
+						} );
 					reindex();
 				} );
 			}
@@ -73,4 +88,4 @@
 	}
 
 	reindex();
-}() );
+} )();

@@ -36,9 +36,14 @@ function Edit( { attributes, setAttributes, context } ) {
 						__next40pxDefaultSize
 						__nextHasNoMarginBottom
 						label={ __( 'Heading', 'lpg-commerce-core' ) }
-						help={ __( 'Leave empty to hide the heading.', 'lpg-commerce-core' ) }
+						help={ __(
+							'Leave empty to hide the heading.',
+							'lpg-commerce-core'
+						) }
 						value={ heading }
-						onChange={ ( value ) => setAttributes( { heading: value } ) }
+						onChange={ ( value ) =>
+							setAttributes( { heading: value } )
+						}
 					/>
 				</PanelBody>
 			</InspectorControls>
@@ -46,7 +51,9 @@ function Edit( { attributes, setAttributes, context } ) {
 				<ServerSideRender
 					block={ metadata.name }
 					attributes={ attributes }
-					urlQueryArgs={ context?.postId ? { post_id: context.postId } : {} }
+					urlQueryArgs={
+						context?.postId ? { post_id: context.postId } : {}
+					}
 					skipBlockSupportAttributes
 					EmptyResponsePlaceholder={ EmptyPlaceholder }
 				/>

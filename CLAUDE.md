@@ -54,4 +54,10 @@ vendor/bin/phpunit tests/integration/PluginTest.php                             
 - Tests use `tests/wp-tests-config.php` (git-ignored; template in `tests/wp-tests-config.sample.php`). It points at the separate `gas_retailer_test` DB with prefix `wptests_` and a MySQL user that can only reach that DB.
 - The test suite drops tables on every run. `tests/bootstrap.php` refuses to run unless the DB name ends in `_test` and the prefix is `wptests_`. Never weaken that guard.
 - Test classes go in `tests/integration/*Test.php` and extend `WP_UnitTestCase`.
-- The block build tool (`@wordpress/scripts`) is added in Phase 3 and needs Node 22+.
+- Block build (Node ≥ 22.22.2; local Node is via nvm at `~/.nvm/versions/node/v22.23.4/bin`, which non-interactive shells don't load, so prefix `PATH`):
+  ```bash
+  npm run build      # blocks/ → lpg-commerce-core/build/blocks (commit build/; cPanel has no Node)
+  npm run start      # watch mode
+  npm run lint:js    # ESLint (eslint.config.cjs marks @wordpress/* as core modules, provided by WordPress)
+  ```
+  Without `build/blocks/blocks-manifest.php`, `Blocks\Registry` registers blocks from source with no editor scripts: the front end works but the blocks don't appear in the editor.

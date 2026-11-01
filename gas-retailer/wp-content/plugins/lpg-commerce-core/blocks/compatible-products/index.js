@@ -45,9 +45,14 @@ function Edit( { attributes, setAttributes, context } ) {
 						__next40pxDefaultSize
 						__nextHasNoMarginBottom
 						label={ __( 'Heading', 'lpg-commerce-core' ) }
-						help={ __( 'Leave empty to hide the heading.', 'lpg-commerce-core' ) }
+						help={ __(
+							'Leave empty to hide the heading.',
+							'lpg-commerce-core'
+						) }
 						value={ heading }
-						onChange={ ( value ) => setAttributes( { heading: value } ) }
+						onChange={ ( value ) =>
+							setAttributes( { heading: value } )
+						}
 					/>
 					<RangeControl
 						__next40pxDefaultSize
@@ -56,16 +61,23 @@ function Edit( { attributes, setAttributes, context } ) {
 						value={ columns }
 						min={ COLUMNS.min }
 						max={ COLUMNS.max }
-						onChange={ ( value ) => setAttributes( { columns: value } ) }
+						onChange={ ( value ) =>
+							setAttributes( { columns: value } )
+						}
 					/>
 					<RangeControl
 						__next40pxDefaultSize
 						__nextHasNoMarginBottom
-						label={ __( 'Maximum number of products', 'lpg-commerce-core' ) }
+						label={ __(
+							'Maximum number of products',
+							'lpg-commerce-core'
+						) }
 						value={ limit }
 						min={ LIMIT.min }
 						max={ LIMIT.max }
-						onChange={ ( value ) => setAttributes( { limit: value } ) }
+						onChange={ ( value ) =>
+							setAttributes( { limit: value } )
+						}
 					/>
 				</PanelBody>
 			</InspectorControls>
@@ -73,7 +85,9 @@ function Edit( { attributes, setAttributes, context } ) {
 				<ServerSideRender
 					block={ metadata.name }
 					attributes={ attributes }
-					urlQueryArgs={ context?.postId ? { post_id: context.postId } : {} }
+					urlQueryArgs={
+						context?.postId ? { post_id: context.postId } : {}
+					}
 					skipBlockSupportAttributes
 					EmptyResponsePlaceholder={ EmptyPlaceholder }
 				/>

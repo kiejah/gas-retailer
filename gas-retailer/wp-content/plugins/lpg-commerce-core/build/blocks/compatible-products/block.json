@@ -1,0 +1,59 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "lpg/compatible-products",
+  "version": "0.3.0",
+  "title": "Compatible products",
+  "category": "woocommerce",
+  "icon": "products",
+  "description": "Cards for the products marked as compatible with this product: image, name, and price or Enquire.",
+  "keywords": [
+    "compatible",
+    "related",
+    "accessories",
+    "lpg"
+  ],
+  "textdomain": "lpg-commerce-core",
+  "attributes": {
+    "heading": {
+      "type": "string",
+      "default": "Compatible products"
+    },
+    "columns": {
+      "type": "integer",
+      "default": 4
+    },
+    "limit": {
+      "type": "integer",
+      "default": 8
+    }
+  },
+  "usesContext": [
+    "postId",
+    "postType"
+  ],
+  "supports": {
+    "html": false,
+    "align": [
+      "wide",
+      "full"
+    ],
+    "spacing": {
+      "margin": true,
+      "padding": true
+    },
+    "typography": {
+      "fontSize": true
+    }
+  },
+  "example": {
+    "attributes": {
+      "heading": "Compatible products",
+      "columns": 4,
+      "limit": 4
+    }
+  },
+  "editorScript": "file:./index.js",
+  "style": "file:./style-index.css",
+  "render": "file:./render.php"
+}

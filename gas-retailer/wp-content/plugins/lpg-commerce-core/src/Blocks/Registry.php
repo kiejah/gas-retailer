@@ -52,14 +52,12 @@ final class Registry implements Service {
 		$manifest = $build . '/blocks-manifest.php';
 
 		if ( is_readable( $manifest ) ) {
-			if ( function_exists( 'wp_register_block_types_from_metadata_collection' ) ) {
-				// WordPress 6.8+.
+			// WordPress 6.8+ bulk registration, only when none of our blocks exist yet:
+			// it does not skip registered types, so a repeat call would trigger
+			// "block type already registered" notices.
+			if ( function_exists( 'wp_register_block_types_from_metadata_collection' ) && ! self::any_registered() ) {
 				wp_register_block_types_from_metadata_collection( $build, $manifest );
 				return;
-			}
-			if ( function_exists( 'wp_register_block_metadata_collection' ) ) {
-				// WordPress 6.7.
-				wp_register_block_metadata_collection( $build, $manifest );
 			}
 			foreach ( self::BLOCKS as $name ) {
 				self::register_one( $build . '/' . $name );
@@ -109,9 +107,22 @@ final class Registry implements Service {
 	}
 
 	/**
-	 * Register one block directory unless that block is already registered.
+	 * Whether any LPG block type is already registered.
+	 */
+	private static function any_registered(): bool {
+		$registry = \WP_Block_Type_Registry::get_instance();
+		foreach ( self::BLOCKS as $name ) {
+			if ( $registry->is_registered( 'lpg/' . $name ) ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Register one block from a directory containing block.json, unless already registered.
 	 *
-	 * @param string $dir Directory containing block.json.
+	 * @param string $dir Block directory.
 	 */
 	private static function register_one( string $dir ): void {
 		$file = $dir . '/block.json';
