@@ -30,3 +30,4 @@ These items are collected during development so Phase 8 doesn't miss them. Confi
 - [ ] Block anonymous `/wp/v2/users` (plugin hardening service; scheduled for Phase 5).
 - [ ] Re-run `composer audit` and `npm audit --omit=dev` before release (dev-only advisories, L2: `npm audit fix` without `--force`).
 - [ ] After any WooCommerce upgrade: re-check the mini-cart drawer keyboard fix (DEF-004 depends on WooCommerce's `--is-hidden` drawer class names).
+- [ ] Do **not** deploy `wp-content/mu-plugins/dev-mail-to-log.php` (dev-only mail catcher). Configure real SMTP instead.

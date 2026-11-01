@@ -52,7 +52,7 @@ class SettingsTest extends WP_UnitTestCase {
 		$this->assertSame( '[Opening hours]', Settings::get( 'opening_hours' ) );
 		$this->assertSame( "Hello, I'm interested in {product} ({sku}). {url}", Settings::get( 'wa_template_product' ) );
 		$this->assertSame( "Hello, I'd like a cylinder {type}: {brand} {size}. Delivery: {location}.", Settings::get( 'wa_template_exchange' ) );
-		$this->assertSame( 24, Settings::get( 'enquiry_retention_months' ) );
+		$this->assertSame( 0, Settings::get( 'enquiry_retention_months' ) );
 		$this->assertFalse( Settings::get( 'delete_data_on_uninstall' ) );
 		$this->assertNull( Settings::get( 'no_such_key' ) );
 	}

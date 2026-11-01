@@ -258,7 +258,7 @@ final class SettingsTab implements Service {
 				'enquiry_retention_months',
 				'number',
 				__( 'Keep enquiries for (months)', 'lpg-commerce-core' ),
-				__( '0 switches automatic deletion off. The retention period is pending client approval.', 'lpg-commerce-core' ),
+				__( 'Quote requests and enquiries older than this (except those in review or quoted) are deleted automatically. 0 switches this off. Leave at 0 until the client approves a retention period.', 'lpg-commerce-core' ),
 				array(
 					'custom_attributes' => array(
 						'min'  => '0',

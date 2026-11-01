@@ -66,3 +66,4 @@ vendor/bin/phpunit tests/integration/PluginTest.php                             
 
 - Name every fixture `[QA TEST]` and delete it with `--force`, **by the IDs you created**. Never delete by filename pattern or glob in `uploads/`.
 - **Never touch the WooCommerce placeholder** (attachment #8, `uploads/woocommerce-placeholder*.webp`). It was deleted twice; the cause was the test suite sharing the dev uploads folder (DEF-009, fixed: `tests/bootstrap.php` now redirects uploads to a temp dir). Never remove that redirect. To restore it, copy `plugins/woocommerce/assets/images/placeholder.webp` to `uploads/woocommerce-placeholder.webp`, then run `wp media regenerate 8 --yes`.
+- **Dev mail never sends:** `wp-content/mu-plugins/dev-mail-to-log.php` (untracked, local only) writes every `wp_mail` to `logs/mail.log`. Check that file to see notifications. Don't remove it on dev, and never deploy it.

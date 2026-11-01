@@ -7,6 +7,9 @@
 
 namespace LPG\Commerce;
 
+use LPG\Commerce\Enquiries\EnquiryPostType;
+use LPG\Commerce\Enquiries\RfqPostType;
+use LPG\Commerce\Privacy\Retention;
 use LPG\Commerce\Specs\ProfilePostType;
 use LPG\Commerce\Taxonomies\Segment;
 
@@ -31,14 +34,25 @@ final class Installer {
 	 * Activation hook.
 	 */
 	public static function activate(): void {
-		ProfilePostType::add_caps();
+		self::add_caps();
 		self::install();
+	}
+
+	/**
+	 * Grant every plugin capability to administrator and shop_manager.
+	 * Called on activation and first install only (L4).
+	 */
+	public static function add_caps(): void {
+		ProfilePostType::add_caps();
+		RfqPostType::add_caps();
+		EnquiryPostType::add_caps();
 	}
 
 	/**
 	 * Deactivation hook. Keeps all business data.
 	 */
 	public static function deactivate(): void {
+		Retention::unschedule();
 		flush_rewrite_rules();
 	}
 
@@ -49,7 +63,15 @@ final class Installer {
 		// Caps are granted on activation or first install only, so an upgrade
 		// never re-grants caps an operator removed (L4).
 		if ( false === get_option( self::VERSION_OPTION ) ) {
-			ProfilePostType::add_caps();
+			self::add_caps();
+		}
+		// Idempotent; also covers upgrades made without re-activation. Deferred
+		// to `init` when needed: scheduling reads `cron_schedules`, which other
+		// plugins translate, and install() can run on `plugins_loaded`.
+		if ( did_action( 'init' ) ) {
+			Retention::schedule();
+		} else {
+			add_action( 'init', array( Retention::class, 'schedule' ) );
 		}
 		Segment::seed_terms();
 
@@ -69,7 +91,8 @@ final class Installer {
 	 *
 	 * Contact numbers and emails default to empty: real values are entered in
 	 * WooCommerce → Settings → LPG and never ship in code (P-023). Address and
-	 * hours are marked placeholders (W-002). Strings are stored content, so
+	 * hours are marked placeholders (W-002). Retention is 0 (off) until the
+	 * client approves a period (W-007). Strings are stored content, so
 	 * they are not translated here (this can run before `init`).
 	 *
 	 * @return array<string, mixed>
@@ -85,7 +108,7 @@ final class Installer {
 			'wa_template_product'      => "Hello, I'm interested in {product} ({sku}). {url}",
 			'wa_template_exchange'     => "Hello, I'd like a cylinder {type}: {brand} {size}. Delivery: {location}.",
 			'privacy_policy_version'   => 'draft-2026-11-01',
-			'enquiry_retention_months' => 24,
+			'enquiry_retention_months' => 0,
 			'delete_data_on_uninstall' => false,
 		);
 	}
