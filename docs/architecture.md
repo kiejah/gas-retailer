@@ -371,3 +371,99 @@ For products where `EnquiryOnly::is_enquiry_only()` is true, the plugin (new ser
 - **Placement:** the theme puts it in the single-product summary, after the product meta.
 - Empty `label` hides the label span (same as an empty heading hides the `<h2>`). Confirmed by Lead.
 | C17 | The theme removes WooCommerce's classic `woocommerce_upsell_display` hook during block-template rendering (via `woocommerce_blocks_hook_compatibility_additional_data`) to stop a duplicate upsells list | **Accepted in the theme.** It is presentation (which markup renders) and changes no data or behaviour. Recorded as the one documented exception to the "functions.php = enqueue/supports/patterns" rule |
+
+## 13. Phase 5 interface contract (Lead, 2026-11-01): business workflows
+
+Builds on §5. Owner inputs are recorded in docs/owner-decisions.md (W-002/W-003, cylinder options, notification emails, W-007). **No personal contact data goes in the repo.** It lives in `lpg_settings` and the client edits it in the dashboard.
+
+### 13.1 Settings: `lpg_settings` (one option, `autoload` = no)
+
+| Key | Type | Notes |
+|---|---|---|
+| `whatsapp_number` | digits, international format (`2547XXXXXXXX`) | Set on dev. Validation: `/^[1-9]\d{7,14}$/` |
+| `contact_phone` | same format | Set on dev (same number) |
+| `notify_sales_email` | email | **Primary** recipient (To). Set on dev |
+| `notify_owner_email` | email | Secondary (Cc). Placeholder. Set on dev |
+| `shop_address` | text (multi-line) | Placeholder `[Shop address, Nairobi]` |
+| `opening_hours` | text (multi-line) | Placeholder `[Opening hours]` |
+| `wa_template_product` | text | Default: "Hello, I'm interested in {product} ({sku}). {url}" |
+| `wa_template_exchange` | text | Default: "Hello, I'd like a cylinder {type}: {brand} {size}. Delivery: {location}." |
+| `privacy_policy_version` | string | Saved with each RFQ consent |
+| `enquiry_retention_months` | int, 0 = off | Default 24 (W-007 ⚖, pending client) |
+| `delete_data_on_uninstall` | bool | Existing |
+
+- **Admin UI:** a **WooCommerce → Settings → "LPG" tab** (WC Settings API), with capability `manage_woocommerce`.
+- **Getter:** `LPG\Commerce\Settings\Settings::get( string $key ): mixed` (defaults applied).
+
+### 13.2 Cylinder brands
+- **Taxonomy `lpg_cylinder_brand`:** not attached to products (`object_type` = `[]`); `public` false, `show_ui` true, menu under Products, caps = WooCommerce `manage_product_terms` etc.
+- **Sizes:** term meta `lpg_sizes`, a string[] such as `["6kg","13kg"]`, edited on the term screen (one per line).
+- **Seed** (`wp lpg seed`, create-missing only): K-Gas, Total, Pro Gas, each with 6kg and 13kg.
+- **Read API:** `CylinderBrands::all(): array` → `[ [ 'id', 'name', 'slug', 'sizes' => string[] ] ]`.
+
+### 13.3 Records (private CPTs, custom caps per §5)
+
+| CPT | Purpose | Statuses |
+|---|---|---|
+| `lpg_rfq` | Quote requests | `lpg-new`, `lpg-review`, `lpg-quoted`, `lpg-closed` |
+| `lpg_enquiry` | Logged WhatsApp product and exchange enquiries (**"initiated", not "sent"**, R7) | `lpg-new`, `lpg-handled` |
+
+- **Caps:** `capability_type` = `lpg_rfq` / `lpg_enquiry`, `map_meta_cap` true. Granted to administrator and shop_manager on activation only (as L4), removed on uninstall.
+- **CPT settings:** `public`, `publicly_queryable` and `show_in_rest` all **false**, and `exclude_from_search` true.
+- **RFQ meta:** `_lpg_contact` {name, organisation, phone, email}, `_lpg_segment` (term slug), `_lpg_items` [{product_id?:int, description:string, qty:int}], `_lpg_requirements`, `_lpg_project`, `_lpg_location`, `_lpg_comments`, `_lpg_consent` {at: ISO8601, policy_version}.
+- **Enquiry meta:** `_lpg_type` (product|exchange), `_lpg_product_id`, `_lpg_brand`, `_lpg_size`, `_lpg_exchange_type` (exchange|new), `_lpg_location`.
+- **Admin:**
+  - List tables with columns (date, name/organisation, segment or type, status) and filters by status and segment.
+  - Read-only detail meta boxes, plus a status change.
+  - Phone and email shown as `tel:` / `mailto:` links, and a "Reply on WhatsApp" link.
+
+### 13.4 REST (namespace `lpg/v1`)
+
+| Route | Method | Auth | Body | Result |
+|---|---|---|---|---|
+| `/rfq` | POST | public, nonce `X-WP-Nonce` (`wp_rest`) | the §13.3 fields + `consent: true` + `hp` (honeypot, must be empty) | 201 `{ id, message }` |
+| `/enquiry` | POST | public, nonce | `type`, product_id or brand/size/exchange_type, location | 201 `{ id, whatsapp_url }` |
+
+- **Validation:** required fields and lengths; email format; KE phone; qty 1–10 000; `product_id` must be a published product; brand and size must exist in `CylinderBrands::all()`; consent required for RFQ.
+- **Rate limit:** per IP **and** per route, 5 per 10 minutes (transients) → 429.
+- **Honeypot:** a filled honeypot returns a fake 201 and stores nothing.
+- **Errors:** WP_Error with `rest_invalid_param`; field-level messages are translatable.
+
+### 13.5 WhatsApp
+- **Builder:** `WhatsApp\MessageBuilder` is pure (no WordPress calls beyond formatting) and unit-testable. `link( string $number, string $text ): string` → `https://wa.me/{digits}?text={rawurlencode}`.
+- **Placeholders:** `{product}`, `{sku}`, `{url}`, `{brand}`, `{size}`, `{type}`, `{location}`. Unknown placeholders are removed, and the result is trimmed to 1 000 characters.
+- **No number configured:** the WhatsApp UI hides itself (graceful degradation).
+
+### 13.6 Blocks (dynamic, built, `lpg-` classes, escape everything, §11.9 rules)
+
+| Block | Where | Behaviour |
+|---|---|---|
+| `lpg/enquiry-button` | Single product (theme places it next to price/add-to-cart) | Shows for enquiry-only products (and optionally all products, via attribute `showFor`: enquiry-only\|all). It opens an inline, editable textarea pre-filled from `wa_template_product`. "Open WhatsApp" POSTs `/enquiry` (best effort), then navigates to `whatsapp_url`. No account needed |
+| `lpg/rfq-form` | The `request-a-quote` page | The fields from §13.3, with multiple item rows (add/remove), segment select (commercial/industrial/household), consent checkbox, honeypot. Uses the REST nonce; shows success and error states inline. Progressive enhancement: without JS it shows the contact number and email instead |
+| `lpg/exchange-form` | A "Refills & Exchange" page/section | Brand → size (filtered by brand) → exchange/new → location → "Continue on WhatsApp" (POST `/enquiry`, then redirect) |
+| `lpg/whatsapp-link` | Header (P-017) and footer | A "WhatsApp us" link plus the tel: link; renders nothing if no number is set |
+| `lpg/business-info` | Footer and contact page | Address, hours and phone from settings, with placeholders shown as-is |
+
+- **Front-end JS:** small `viewScript` modules per block, vanilla JS (wp-scripts), no jQuery.
+- **Performance:** loaded only where the block renders.
+
+### 13.7 Notifications
+- **On a new RFQ:** `wp_mail` To `notify_sales_email`, Cc `notify_owner_email`, `Reply-To` = the customer's email.
+- **Content:** a plain-text summary plus a link to the admin record. **No raw HTML from user input.**
+- **New exchange or product enquiry:** an optional digest. Phase 5 sends an immediate short email for exchange requests only (they are time-sensitive); product enquiries are logged only.
+
+### 13.8 Privacy (W-007, draft pending client approval)
+- **Exporters and erasers:** WordPress personal-data exporters/erasers for `lpg_rfq` and `lpg_enquiry`, matched by email or phone.
+- **Retention:** a daily cron deletes `lpg_enquiry` and `lpg_rfq` records older than `enquiry_retention_months` that have status `lpg-new`/`lpg-handled`/`lpg-closed`. It is off when the setting is 0, and **stays off until the client approves the retention period**.
+- **Consent text:** from docs/legal/privacy-notice-draft.md Part A, stored as translatable defaults and marked DRAFT in the admin until approved.
+
+### 13.9 Shipping (W-003, WooCommerce data, not code)
+- A **"Nairobi" zone** (Kenya → Nairobi County, `KE:KE30`) with:
+  - **Flat rate KSh 300**;
+  - **Free shipping, minimum order KSh 10,000**;
+  - **Local pickup** (address = placeholder).
+- No shipping outside the zone (customers outside Nairobi see "no shipping options", with a message pointing to WhatsApp).
+- Configured on dev with WP-CLI and documented in the deployment checklist.
+
+### 13.10 Hardening
+- **`Security\RestHardening`:** anonymous requests to `/wp/v2/users` (list and single) get 401. Logged-in users with `list_users` are unaffected (security L1).
