@@ -29,6 +29,7 @@ final class Plugin {
 		Relations\Compatibility::class,
 		Relations\Documents::class,
 		Commerce\EnquiryOnly::class,
+		Commerce\EnquiryDisplay::class,
 		Commerce\ProductFields::class,
 		Seo\StructuredData::class,
 		Blocks\Registry::class,

@@ -342,3 +342,17 @@ Global `pa_*` attributes are kept, because WooCommerce owns them.
 | C14 | DEF-002: `&` appears as `&amp;` inside the product JSON-LD | This comes from WooCommerce core's encoding, not our code. Accepted for now; reviewed in the Phase 4 SEO pass (check how Google's Rich Results Test reads it) |
 | C15 | Phase 3B security review | M1: blocks render nothing for password-protected products until the password is entered. H1: blocks render only `is_viewable()` products. SD1: no spec structured data for password-protected products. Note: the theme stylesheet loads on every page; trimming that belongs to the Phase 4 performance pass |
 | C16 | Q12: password-protected products as compatible-product cards on *other* pages | **Keep showing them** (name, image, price, link), matching WooCommerce's own related, upsell and product grids. The card reveals nothing behind the password, and the link leads to the password form |
+
+## 12. Phase 4 interface contract (Lead, 2026-11-01)
+
+### 12.1 Enquiry label in product listings (owner proxy P-015)
+
+For products where `EnquiryOnly::is_enquiry_only()` is true, the plugin (new service `Commerce\EnquiryDisplay`) changes **front-end display only**:
+- **Price:** the price HTML is replaced by `<span class="lpg-enquire-label">Enquire</span>` in WooCommerce loops (block product template `woocommerce/product-price` and classic loops) **and** on the single product page. Admin screens are unchanged and the stored price is never modified.
+- **Card button:** the add-to-cart / "Read more" button (block `woocommerce/product-button`, classic `woocommerce_loop_add_to_cart_link`) becomes a plain link to the product, `<a class="lpg-enquire-link wp-element-button is-style-outline" href="{permalink}">View details</a>`. The real enquiry/WhatsApp button arrives in Phase 5.
+- **Not changed, and recorded:** Store API and REST prices, and product JSON-LD `offers`. The JSON-LD keeps the stored price, if any (owner question W-012).
+- **Classes:** `lpg-enquire-label` and `lpg-enquire-link`. The theme styles them; the existing `lpg-compatible-products__price--enquire` stays.
+
+### 12.2 Navigation
+- "Request a quote" is shown **only if a published page with slug `request-a-quote` exists** (resolved at render time), per P-013 #1. No placeholder page is created; Phase 5 creates the page.
+- Submenus open on tap, per P-014.
