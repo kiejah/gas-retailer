@@ -1,0 +1,16 @@
+{
+	"name": "gas-retailer",
+	"private": true,
+	"description": "Kenya LPG Commerce Platform: block build tooling (dev only). Built assets are committed; cPanel needs no Node.",
+	"engines": {
+		"node": ">=22.22.2"
+	},
+	"scripts": {
+		"build": "wp-scripts build --webpack-src-dir=gas-retailer/wp-content/plugins/lpg-commerce-core/blocks --output-path=gas-retailer/wp-content/plugins/lpg-commerce-core/build/blocks --webpack-copy-php --blocks-manifest",
+		"start": "wp-scripts start --webpack-src-dir=gas-retailer/wp-content/plugins/lpg-commerce-core/blocks --output-path=gas-retailer/wp-content/plugins/lpg-commerce-core/build/blocks --webpack-copy-php --blocks-manifest",
+		"lint:js": "wp-scripts lint-js gas-retailer/wp-content/plugins/lpg-commerce-core/blocks gas-retailer/wp-content/plugins/lpg-commerce-core/assets"
+	},
+	"devDependencies": {
+		"@wordpress/scripts": "36.1.0"
+	}
+}

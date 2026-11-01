@@ -1,0 +1,9 @@
+/* Layout only; the theme owns visual styling of .lpg-spec-table. */
+.lpg-spec-table__table {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+.lpg-spec-table__label {
+	text-align: start;
+}

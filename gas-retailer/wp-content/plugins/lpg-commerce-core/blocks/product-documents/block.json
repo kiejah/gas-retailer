@@ -1,0 +1,37 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "lpg/product-documents",
+	"version": "0.3.0",
+	"title": "Product documents",
+	"category": "woocommerce",
+	"icon": "media-document",
+	"description": "List of the product's PDF documents (datasheets, manuals, certificates) with type and file size.",
+	"keywords": [ "documents", "datasheet", "manual", "pdf", "lpg" ],
+	"textdomain": "lpg-commerce-core",
+	"attributes": {
+		"heading": {
+			"type": "string",
+			"default": "Product documents"
+		}
+	},
+	"usesContext": [ "postId", "postType" ],
+	"supports": {
+		"html": false,
+		"align": [ "wide", "full" ],
+		"spacing": {
+			"margin": true,
+			"padding": true
+		},
+		"typography": {
+			"fontSize": true
+		}
+	},
+	"example": {
+		"attributes": {
+			"heading": "Product documents"
+		}
+	},
+	"editorScript": "file:./index.js",
+	"render": "file:./render.php"
+}

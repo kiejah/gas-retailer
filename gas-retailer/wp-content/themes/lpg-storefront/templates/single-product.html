@@ -1,0 +1,59 @@
+<!-- wp:template-part {"slug":"header","area":"header","tagName":"header"} /-->
+
+<!-- wp:group {"tagName":"main","style":{"spacing":{"padding":{"top":"var:preset|spacing|50","bottom":"var:preset|spacing|70"}}},"layout":{"inherit":true,"type":"constrained"}} -->
+<main class="wp-block-group" style="padding-top:var(--wp--preset--spacing--50);padding-bottom:var(--wp--preset--spacing--70)">
+	<!-- wp:woocommerce/breadcrumbs /-->
+	<!-- wp:woocommerce/store-notices /-->
+
+	<!-- wp:columns {"align":"wide"} -->
+	<div class="wp-block-columns alignwide">
+		<!-- wp:column {"width":"512px"} -->
+		<div class="wp-block-column" style="flex-basis:512px">
+			<!-- wp:woocommerce/product-image-gallery /-->
+		</div>
+		<!-- /wp:column -->
+
+		<!-- wp:column -->
+		<div class="wp-block-column">
+			<!-- wp:post-title {"level": 1, "__woocommerceNamespace":"woocommerce/product-query/product-title"} /-->
+
+			<!-- wp:woocommerce/product-rating {"isDescendentOfSingleProductTemplate":true} /-->
+
+			<!-- wp:woocommerce/product-price {"isDescendentOfSingleProductTemplate":true, "fontSize":"large"} /-->
+
+			<!-- wp:post-excerpt {"__woocommerceNamespace":"woocommerce/product-query/product-summary", "excerptLength":100} /-->
+
+			<!-- wp:woocommerce/add-to-cart-form /-->
+
+			<!-- wp:woocommerce/product-meta -->
+			<div class="wp-block-woocommerce-product-meta">
+				<!-- wp:group {"layout":{"type":"flex","flexWrap":"nowrap"}} -->
+				<div class="wp-block-group">
+					<!-- wp:woocommerce/product-sku /-->
+
+					<!-- wp:post-terms {"term":"product_cat","prefix":"Category: "} /-->
+
+					<!-- wp:post-terms {"term":"product_tag","prefix":"Tags: "} /-->
+
+				</div>
+				<!-- /wp:group -->
+			</div>
+			<!-- /wp:woocommerce/product-meta -->
+		</div>
+		<!-- /wp:column -->
+	</div>
+	<!-- /wp:columns -->
+
+	<!-- wp:lpg/spec-table /-->
+
+	<!-- wp:woocommerce/product-details {"align":"wide","className":"is-style-minimal"} /-->
+
+	<!-- wp:lpg/product-documents /-->
+
+	<!-- wp:lpg/compatible-products /-->
+
+	<!-- wp:pattern {"slug":"woocommerce-blocks/related-products"} /-->
+</main>
+<!-- /wp:group -->
+
+<!-- wp:template-part {"slug":"footer","area":"footer","tagName":"footer"} /-->

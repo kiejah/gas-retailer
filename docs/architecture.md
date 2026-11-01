@@ -330,3 +330,11 @@ Global `pa_*` attributes are kept, because WooCommerce owns them.
 | C12 | Phase 3A security review (L1–L4) | All fixed in 3A: compatibility only writes onto products the user can edit (L1); reserved field keys, starting with `profile_id` (L2); numbers capped at 20 significant digits, with a JSON-LD fallback (L3); spec-profile caps granted only on activation or first install (L4). `Documents::get()` also skips `woocommerce_uploads/` files, and a deleted product is removed from other products' compatibility lists |
 
 **Phase 3B block output rules (from the security review):** WooCommerce REST `meta_data` can write `_lpg_*` keys without our sanitising, so blocks must escape everything on output: `esc_html` for labels, warranty and spec display, `esc_url` for document links, `esc_attr` for attributes. Never echo meta raw.
+
+**§11.9 additions (Lead, 2026-11-01, from the Phase 3B build):**
+- **Heading defaults:** "Technical specifications", "Compatible products", "Product documents". They are translated in PHP. An empty heading hides the `<h2>`.
+- **Stable CSS classes for the theme:**
+  - `lpg-spec-table__{heading,table,row,label,value}`, plus `__row--{key}`
+  - `lpg-compatible-products__{heading,list,item,link,image,name,price}`, plus `__price--enquire` and the inline `--lpg-columns`
+  - `lpg-product-documents__{heading,list,item,link,label,meta}`, plus `__item--{type}`
+- **Attribute ranges:** enforced by the PHP clamp and the editor controls, not by block.json `minimum`/`maximum`, because those would make the block-renderer REST endpoint return 400.

@@ -1,0 +1,25 @@
+/* Layout only; the theme owns visual styling of .lpg-compatible-products. */
+.lpg-compatible-products__list {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 1.5rem;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+@media (min-width: 782px) {
+	.lpg-compatible-products__list {
+		grid-template-columns: repeat(var(--lpg-columns, 4), minmax(0, 1fr));
+	}
+}
+
+.lpg-compatible-products__link {
+	display: block;
+}
+
+.lpg-compatible-products__image {
+	display: block;
+	width: 100%;
+	height: auto;
+}
