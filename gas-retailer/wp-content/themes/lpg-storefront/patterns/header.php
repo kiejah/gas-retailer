@@ -20,7 +20,8 @@
  * The WhatsApp link (lpg/whatsapp-link, plugin block, P-017/P-023) is a modest
  * text/icon link in the tools row, never a floating bubble. Below 600 px it
  * shows the icon only and keeps its text as the accessible name. It renders
- * nothing while no WhatsApp number is set in the plugin settings.
+ * nothing while no WhatsApp number is set in the plugin settings. showPhone is
+ * false here (the phone is in the footer business information).
  *
  * @package lpg_storefront
  */
@@ -69,7 +70,7 @@ $lpg_products = array(
 
 		<!-- wp:group {"className":"lpg-header__tools","style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"flex","flexWrap":"nowrap","justifyContent":"right"}} -->
 		<div class="wp-block-group lpg-header__tools">
-			<!-- wp:lpg/whatsapp-link {"className":"lpg-header__whatsapp"} /-->
+			<!-- wp:lpg/whatsapp-link {"showPhone":false,"className":"lpg-header__whatsapp"} /-->
 
 			<!-- wp:woocommerce/customer-account {"displayStyle":"icon_only","iconClass":"wc-block-customer-account__account-icon"} /-->
 

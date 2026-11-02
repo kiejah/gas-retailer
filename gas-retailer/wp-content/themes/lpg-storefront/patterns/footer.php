@@ -27,7 +27,7 @@ defined( 'ABSPATH' ) || exit;
 		<div class="wp-block-group lpg-footer__contact" style="margin-top:var(--wp--preset--spacing--40)">
 			<!-- wp:lpg/business-info /-->
 
-			<!-- wp:lpg/whatsapp-link {"className":"lpg-footer__whatsapp"} /-->
+			<!-- wp:lpg/whatsapp-link {"showPhone":false,"className":"lpg-footer__whatsapp"} /-->
 		</div>
 		<!-- /wp:group -->
 

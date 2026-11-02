@@ -1,81 +1,44 @@
 /*
- * lpg-commerce-core form blocks: enquiry button (single product), quote
- * request form and cylinder exchange form. Loaded only when one of those
- * blocks renders (functions.php). Markup and behaviour are owned by the
- * plugin; these rules are scoped to the block roots and use element and
- * attribute selectors (aria-invalid, aria-busy, disabled, hidden) so they
- * do not depend on the plugin's inner class names.
- * Design system: docs/design-system.md §6.13.
+ * lpg-commerce-core form blocks: enquiry button (.lpg-enquiry), quote
+ * request form (.lpg-rfq) and cylinder exchange form (.lpg-exchange).
+ * Loaded only when one of those blocks renders (functions.php). Markup,
+ * behaviour and layout-only base styles are owned by the plugin; this file
+ * adds the design system on top (docs/design-system.md §6.13).
  */
 
-:is(.lpg-enquiry, .lpg-rfq-form, .lpg-exchange-form) {
-	--lpg-gap: var(--wp--preset--spacing--40);
-	box-sizing: border-box;
+:is(.lpg-enquiry, .lpg-rfq, .lpg-exchange) {
 	max-width: 100%;
 }
 
-:is(.lpg-enquiry, .lpg-rfq-form, .lpg-exchange-form) *,
-:is(.lpg-enquiry, .lpg-rfq-form, .lpg-exchange-form) *::before,
-:is(.lpg-enquiry, .lpg-rfq-form, .lpg-exchange-form) *::after {
-	box-sizing: inherit;
-}
-
-/* The plugin's scripts toggle `hidden`; display rules below must not undo it. */
-:is(.lpg-enquiry, .lpg-rfq-form, .lpg-exchange-form) [hidden] {
-	display: none !important;
-}
-
-:is(.lpg-rfq-form, .lpg-exchange-form) {
+:is(.lpg-rfq, .lpg-exchange) {
 	margin-block: var(--wp--preset--spacing--50);
 }
 
-:is(.lpg-rfq-form, .lpg-exchange-form) form {
-	display: grid;
-	gap: var(--lpg-gap);
-	margin: 0;
+/* ---- Fields (shared .lpg-field markup) ---- */
+
+:is(.lpg-rfq, .lpg-exchange) .lpg-field {
+	min-width: 0;
+	margin-block-end: var(--wp--preset--spacing--40);
 }
 
-:is(.lpg-enquiry, .lpg-rfq-form, .lpg-exchange-form) :is(p, h2, h3) {
-	margin-block: 0;
-}
-
-:is(.lpg-rfq-form, .lpg-exchange-form) :is(h2, h3, legend) {
-	font-size: var(--wp--preset--font-size--large);
-	font-weight: 700;
-	line-height: 1.3;
-}
-
-/* ---- Labels and fields ---- */
-
-:is(.lpg-enquiry, .lpg-rfq-form, .lpg-exchange-form) label {
-	display: block;
-	margin-block-end: 0.25rem;
+:is(.lpg-rfq, .lpg-exchange) .lpg-field > label,
+.lpg-enquiry__label {
 	font-weight: 600;
 	line-height: 1.4;
 }
 
-:is(.lpg-enquiry, .lpg-rfq-form, .lpg-exchange-form) :is(textarea, select, input:not([type="checkbox"], [type="radio"], [type="hidden"], [type="submit"], [type="button"])) {
-	display: block;
-	width: 100%;
-	max-width: 100%;
+:is(.lpg-enquiry, .lpg-rfq, .lpg-exchange) :is(textarea, select, input:not([type="checkbox"], [type="radio"], [type="hidden"])) {
 	min-height: var(--wp--custom--control--height);
-	margin: 0;
-	padding: 0.5rem 0.75rem;
-	background-color: var(--wp--preset--color--base);
-	border: 1px solid var(--wp--preset--color--border-strong);
-	border-radius: var(--wp--preset--border-radius--small);
-	color: var(--wp--preset--color--contrast);
-	font: inherit;
+	font-family: inherit;
 	font-size: var(--wp--preset--font-size--medium);
-	line-height: 1.5;
 }
 
-:is(.lpg-enquiry, .lpg-rfq-form, .lpg-exchange-form) textarea {
+:is(.lpg-enquiry, .lpg-rfq, .lpg-exchange) textarea {
 	min-height: 7.5rem;
 	resize: vertical;
 }
 
-:is(.lpg-enquiry, .lpg-rfq-form, .lpg-exchange-form) select {
+:is(.lpg-rfq, .lpg-exchange) select {
 	padding-inline-end: 2.25rem;
 	appearance: none;
 	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%231C232B' stroke-width='2'/%3E%3C/svg%3E");
@@ -84,137 +47,239 @@
 	background-size: 0.75rem auto;
 }
 
-:is(.lpg-enquiry, .lpg-rfq-form, .lpg-exchange-form) input[type="number"] {
+/* Disabled control (exchange size select until a brand is chosen). */
+:is(.lpg-rfq, .lpg-exchange) :is(select, input, textarea):disabled {
+	background-color: var(--wp--preset--color--surface);
+	color: var(--wp--preset--color--muted);
+	cursor: not-allowed;
+}
+
+.lpg-rfq input[type="number"] {
 	font-variant-numeric: tabular-nums;
 }
 
-/* Hints, the required mark and small print. */
-:is(.lpg-enquiry, .lpg-rfq-form, .lpg-exchange-form) :is(small, [class*="__help"], [class*="__hint"], [class*="__description"], [class*="__notice"], [class*="__privacy"]) {
+.lpg-field__required {
+	color: var(--wp--preset--color--error);
+}
+
+:is(.lpg-rfq__required-note, .lpg-field__help, .lpg-notice) {
+	margin: 0;
 	color: var(--wp--preset--color--muted);
 	font-size: var(--wp--preset--font-size--small);
 	font-weight: 400;
 }
 
-:is(.lpg-enquiry, .lpg-rfq-form, .lpg-exchange-form) :is(abbr[title], [class*="__required"]) {
-	color: var(--wp--preset--color--error);
-	text-decoration: none;
-	cursor: help;
+/* Draft-wording flag (W-007): distinct but calm. Neutral, dashed, small. */
+.lpg-notice__draft {
+	display: inline-block;
+	margin-inline-end: 0.25rem;
+	padding: 0 0.375rem;
+	border: 1px dashed var(--wp--preset--color--border-strong);
+	border-radius: var(--wp--preset--border-radius--small);
+	background-color: var(--wp--preset--color--surface);
+	color: var(--wp--preset--color--steel);
+	font-size: var(--wp--preset--font-size--x-small);
+	font-style: normal;
+	font-weight: 600;
+	letter-spacing: 0.02em;
+	line-height: 1.6;
 }
 
-/* ---- Fieldsets, radios and the consent checkbox ---- */
+/* Shown only without JavaScript: contact details instead of the form. */
+.lpg-form-fallback {
+	margin: 0;
+	padding: var(--wp--preset--spacing--40);
+	border: 1px solid var(--wp--preset--color--border);
+	border-radius: var(--wp--preset--border-radius--medium);
+	background-color: var(--wp--preset--color--surface);
+	overflow-wrap: anywhere;
+}
 
-:is(.lpg-rfq-form, .lpg-exchange-form) fieldset {
+/* ---- Fieldsets ---- */
+
+:is(.lpg-rfq, .lpg-exchange) fieldset {
 	min-width: 0;
 	margin: 0;
 	padding: 0;
 	border: 0;
 }
 
-:is(.lpg-rfq-form, .lpg-exchange-form) legend {
-	margin-block-end: var(--wp--preset--spacing--20);
+/* Floated so the legend sits inside the group, below the divider rule. */
+.lpg-rfq__group > legend {
+	float: left;
+	width: 100%;
+	margin-block-end: var(--wp--preset--spacing--30);
 	padding: 0;
+	font-size: var(--wp--preset--font-size--large);
+	font-weight: 700;
+	line-height: 1.3;
 }
 
-:is(.lpg-enquiry, .lpg-rfq-form, .lpg-exchange-form) :is(input[type="checkbox"], input[type="radio"]) {
+.lpg-rfq__group > legend + * {
+	clear: both;
+}
+
+.lpg-rfq__group + .lpg-rfq__group {
+	padding-block-start: var(--wp--preset--spacing--40);
+	border-block-start: 1px solid var(--wp--preset--color--border);
+}
+
+:is(.lpg-rfq__form, .lpg-exchange__form) {
+	display: grid;
+	gap: var(--wp--preset--spacing--40);
+}
+
+:is(.lpg-rfq, .lpg-exchange) :is(.lpg-rfq__form, .lpg-exchange__form) > * {
+	margin: 0;
+}
+
+/* Radio group (exchange / new): legend like a label, 44 px rows. */
+.lpg-field--radio > legend {
+	margin-block-end: 0.25rem;
+	padding: 0;
+	font-weight: 600;
+}
+
+:is(.lpg-rfq, .lpg-exchange, .lpg-enquiry) :is(input[type="checkbox"], input[type="radio"]) {
 	flex: none;
 	width: 1.25rem;
 	height: 1.25rem;
-	margin: 0.125rem 0 0;
+	margin: 0;
 	accent-color: var(--wp--preset--color--contrast);
 	cursor: pointer;
 }
 
-/* A label wrapping its checkbox or radio: the whole row is a 44 px target. */
-:is(.lpg-enquiry, .lpg-rfq-form, .lpg-exchange-form) label:has(> input:is([type="checkbox"], [type="radio"])) {
+.lpg-exchange .lpg-field--radio {
+	gap: 0;
+}
+
+.lpg-exchange .lpg-field--radio > label {
 	display: flex;
-	align-items: flex-start;
+	align-items: center;
 	gap: var(--wp--preset--spacing--20);
 	min-height: 44px;
-	margin: 0;
-	padding-block: 0.5rem;
+	padding-block: 0.25rem;
 	font-weight: 400;
 	cursor: pointer;
 }
 
-:is(.lpg-rfq-form, .lpg-exchange-form) fieldset:has(input[type="radio"]) > :not(legend) {
-	display: flex;
-	flex-wrap: wrap;
-	column-gap: var(--wp--preset--spacing--50);
+/* Consent: checkbox beside its label; the label is the large target. */
+.lpg-rfq .lpg-field--checkbox > input {
+	margin-block-start: 0.2rem;
+}
+
+.lpg-rfq .lpg-field--checkbox {
+	display: grid;
+	grid-template-columns: 1.25rem minmax(0, 1fr);
+	align-items: start;
+	gap: 0.25rem var(--wp--preset--spacing--30);
+	padding-block: 0.5rem;
+}
+
+.lpg-rfq .lpg-field--checkbox > label {
+	min-height: 44px;
+	font-weight: 400;
+	cursor: pointer;
+}
+
+.lpg-rfq .lpg-field--checkbox > .lpg-field-error {
+	grid-column: 1 / -1;
+}
+
+/* ---- Item rows ---- */
+
+.lpg-rfq__item-list {
+	display: grid;
+	gap: var(--wp--preset--spacing--30);
+	margin: 0 0 var(--wp--preset--spacing--30);
+	padding-inline-start: 1.25rem;
+}
+
+.lpg-rfq__item {
+	padding: var(--wp--preset--spacing--30) var(--wp--preset--spacing--40);
+	border: 1px solid var(--wp--preset--color--border);
+	border-radius: var(--wp--preset--border-radius--medium);
+	background-color: var(--wp--preset--color--surface);
+}
+
+.lpg-rfq__item::marker {
+	color: var(--wp--preset--color--muted);
+	font-weight: 600;
+}
+
+.lpg-rfq .lpg-rfq__item .lpg-field {
+	margin-block-end: var(--wp--preset--spacing--30);
 }
 
 /* ---- Buttons ---- */
 
-:is(.lpg-enquiry, .lpg-rfq-form, .lpg-exchange-form) :is(button, .wp-element-button) {
+:is(.lpg-enquiry, .lpg-rfq, .lpg-exchange) :is(button, .wp-element-button) {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	gap: var(--wp--preset--spacing--20);
+	box-sizing: border-box;
 	min-height: 44px;
 	text-align: center;
 	cursor: pointer;
 }
 
-:is(.lpg-enquiry, .lpg-rfq-form, .lpg-exchange-form) :is(button, .wp-element-button) svg {
-	flex: none;
-	width: 1.25em;
-	height: 1.25em;
-}
-
-/* Main actions are full width on phones. */
-.lpg-enquiry > :is(button, .wp-element-button),
-:is(.lpg-enquiry, .lpg-rfq-form, .lpg-exchange-form) :is(button[type="submit"], input[type="submit"]) {
+/* Main actions: full width on phones. */
+:is(.lpg-enquiry__toggle, .lpg-enquiry__open, .lpg-rfq__submit, .lpg-exchange__submit) {
 	width: 100%;
 }
 
-/* Secondary buttons in the quote form (add/remove item rows) use the outline look. */
-.lpg-rfq-form button[type="button"] {
-	background-color: transparent;
+/* Secondary actions use the outline look, so Submit is the one accent button. */
+/* Root-prefixed: theme.json's `:root :where(.wp-element-button)` is (0,1,0). */
+.lpg-rfq :is(.lpg-rfq__add-item, .lpg-rfq__remove-item),
+.lpg-enquiry .lpg-enquiry__toggle[aria-expanded="true"] {
+	padding: 0.5rem 1rem;
 	border: 1px solid var(--wp--preset--color--contrast);
 	border-radius: var(--wp--preset--border-radius--medium);
+	background-color: transparent;
 	color: var(--wp--preset--color--contrast);
-	padding: 0.5rem 1rem;
 	font-size: var(--wp--preset--font-size--medium);
 	font-weight: 600;
+	line-height: 1.5;
 }
 
-.lpg-rfq-form button[type="button"]:hover:not(:disabled) {
+.lpg-rfq :is(.lpg-rfq__add-item, .lpg-rfq__remove-item):hover,
+.lpg-enquiry .lpg-enquiry__toggle[aria-expanded="true"]:hover {
 	background-color: var(--wp--preset--color--surface);
+	color: var(--wp--preset--color--contrast);
 }
 
-/* Disabled and sending: dimmed, not clickable, and the form says it is busy. */
-:is(.lpg-enquiry, .lpg-rfq-form, .lpg-exchange-form) :is(button, input[type="submit"], .wp-element-button):is(:disabled, [aria-disabled="true"]) {
+/* Sending: the plugin disables Submit and sets aria-busy on the form. */
+:is(.lpg-enquiry, .lpg-rfq, .lpg-exchange) :is(button, .wp-element-button):disabled {
 	opacity: 0.6;
 	cursor: not-allowed;
 }
 
-:is(.lpg-enquiry, .lpg-rfq-form, .lpg-exchange-form):is([aria-busy="true"], .is-sending),
-:is(.lpg-enquiry, .lpg-rfq-form, .lpg-exchange-form) :is([aria-busy="true"], .is-sending) {
+:is(.lpg-rfq__form, .lpg-exchange__form)[aria-busy="true"] {
 	cursor: progress;
 }
 
-:is(.lpg-enquiry, .lpg-rfq-form, .lpg-exchange-form) :is([aria-busy="true"], .is-sending) :is(button[type="submit"], input[type="submit"]) {
-	opacity: 0.6;
-	pointer-events: none;
-}
+/* ---- Errors: red border plus "!" and text, never colour alone ---- */
 
-/* ---- Errors: red border plus a marked message, never colour alone ---- */
-
-:is(.lpg-enquiry, .lpg-rfq-form, .lpg-exchange-form) [aria-invalid="true"] {
+:is(.lpg-enquiry, .lpg-rfq, .lpg-exchange) [aria-invalid="true"]:is(input, select, textarea) {
 	border-color: var(--wp--preset--color--error);
 	box-shadow: inset 0 0 0 1px var(--wp--preset--color--error);
 }
 
-:is(.lpg-enquiry, .lpg-rfq-form, .lpg-exchange-form) :is([class*="__error"], [class*="field-error"], [class*="error-message"], [class*="error-text"]):not(input, select, textarea, label, fieldset, form, [class*="has-error"], :empty) {
+:is(.lpg-rfq, .lpg-exchange) fieldset[aria-invalid="true"] > legend {
+	color: var(--wp--preset--color--error);
+}
+
+.lpg-field-error {
 	display: flex;
 	align-items: flex-start;
 	gap: 0.375rem;
-	margin-block: 0.25rem 0;
+	margin: 0.25rem 0 0;
 	color: var(--wp--preset--color--error);
 	font-size: var(--wp--preset--font-size--small);
 	font-weight: 600;
 }
 
-:is(.lpg-enquiry, .lpg-rfq-form, .lpg-exchange-form) :is([class*="__error"], [class*="field-error"], [class*="error-message"], [class*="error-text"]):not(input, select, textarea, label, fieldset, form, [class*="has-error"], :empty)::before {
+:is(.lpg-field-error, .lpg-form-status.is-error)::before {
 	content: "!";
 	display: inline-flex;
 	flex: none;
@@ -222,7 +287,7 @@
 	justify-content: center;
 	width: 1.125rem;
 	height: 1.125rem;
-	margin-block-start: 0.125rem;
+	margin-block-start: 0.15rem;
 	border-radius: 50%;
 	background-color: var(--wp--preset--color--error);
 	color: var(--wp--preset--color--base);
@@ -231,19 +296,29 @@
 	line-height: 1;
 }
 
-/* A form-level error (role="alert") gets a bordered panel. */
-:is(.lpg-enquiry, .lpg-rfq-form, .lpg-exchange-form) [role="alert"]:not(:empty) {
+.lpg-form-status:empty {
+	display: none;
+}
+
+.lpg-form-status {
+	color: var(--wp--preset--color--muted);
+	font-size: var(--wp--preset--font-size--small);
+}
+
+.lpg-form-status.is-error {
+	display: flex;
+	gap: var(--wp--preset--spacing--20);
 	padding: var(--wp--preset--spacing--30) var(--wp--preset--spacing--40);
 	border: 1px solid var(--wp--preset--color--error);
 	border-inline-start-width: 4px;
 	border-radius: var(--wp--preset--border-radius--medium);
-	background-color: var(--wp--preset--color--base);
 	color: var(--wp--preset--color--error);
+	font-weight: 600;
 }
 
-/* ---- Success ---- */
+/* ---- Success (focused by the plugin) ---- */
 
-:is(.lpg-enquiry, .lpg-rfq-form, .lpg-exchange-form) :is([class*="__success"], [class*="--success"]):not(:empty) {
+.lpg-form-success {
 	display: flex;
 	align-items: flex-start;
 	gap: var(--wp--preset--spacing--20);
@@ -251,111 +326,45 @@
 	border: 1px solid var(--wp--preset--color--success);
 	border-inline-start-width: 4px;
 	border-radius: var(--wp--preset--border-radius--medium);
-	background-color: var(--wp--preset--color--base);
 	color: var(--wp--preset--color--contrast);
 }
 
-:is(.lpg-enquiry, .lpg-rfq-form, .lpg-exchange-form) :is([class*="__success"], [class*="--success"]):not(:empty)::before {
-	content: "\2713";
+.lpg-form-success::before {
+	content: "\2713" / "";
 	flex: none;
 	color: var(--wp--preset--color--success);
 	font-weight: 700;
-	line-height: 1.6;
-}
-
-/* Honeypot: off-screen for people, still present for bots. */
-:is(.lpg-rfq-form, .lpg-exchange-form, .lpg-enquiry) :is([class*="honeypot"], [class*="__hp"]) {
-	position: absolute !important;
-	left: -9999px !important;
-	width: 1px;
-	height: 1px;
-	overflow: hidden;
-}
-
-/* ---- Quote form: repeatable item rows ---- */
-
-.lpg-rfq-form :is([class$="__item"], [class*="__item "], [class$="__row"], [class*="__row "]) {
-	display: grid;
-	gap: var(--wp--preset--spacing--30);
-	padding: var(--wp--preset--spacing--40);
-	background-color: var(--wp--preset--color--surface);
-	border: 1px solid var(--wp--preset--color--border);
-	border-radius: var(--wp--preset--border-radius--medium);
-}
-
-.lpg-rfq-form :is([class$="__items"], [class*="__items "]) {
-	display: grid;
-	gap: var(--wp--preset--spacing--30);
-	margin: 0;
-	padding: 0;
-	list-style: none;
-}
-
-.lpg-rfq-form :is([class$="__item"], [class*="__item "], [class$="__row"], [class*="__row "]) > * {
-	min-width: 0;
-	margin: 0;
 }
 
 /* ---- Enquiry button (single product summary) ---- */
 
 .lpg-enquiry {
-	display: grid;
-	gap: var(--wp--preset--spacing--30);
 	margin-block: var(--wp--preset--spacing--40);
 }
 
-/* Once the panel is open, the toggle steps back to the outline look so the
-   panel's "Open WhatsApp" is the one accent button (design-system §2). */
-.lpg-enquiry > :is(button, .wp-element-button)[aria-expanded="true"] {
-	background-color: transparent;
-	border-color: var(--wp--preset--color--contrast);
-	color: var(--wp--preset--color--contrast);
-}
-
-.lpg-enquiry > :is(button, .wp-element-button)[aria-expanded="true"]:hover {
-	background-color: var(--wp--preset--color--surface);
-}
-
-.lpg-enquiry > :is(div, form, section):not(:empty) {
-	display: grid;
+.lpg-enquiry__panel {
 	gap: var(--wp--preset--spacing--30);
 	padding: var(--wp--preset--spacing--40);
-	background-color: var(--wp--preset--color--surface);
 	border: 1px solid var(--wp--preset--color--border);
 	border-radius: var(--wp--preset--border-radius--medium);
-}
-
-.lpg-enquiry label {
-	margin: 0;
+	background-color: var(--wp--preset--color--surface);
 }
 
 @media (min-width: 600px) {
-	.lpg-enquiry > :is(button, .wp-element-button),
-	:is(.lpg-enquiry, .lpg-rfq-form, .lpg-exchange-form) :is(button[type="submit"], input[type="submit"]) {
+	:is(.lpg-enquiry__toggle, .lpg-enquiry__open, .lpg-rfq__submit, .lpg-exchange__submit) {
 		width: auto;
+	}
+
+	:is(.lpg-rfq__submit, .lpg-exchange__submit) {
 		justify-self: start;
 	}
 
-	.lpg-enquiry > :is(div, form, section) :is(button, .wp-element-button) {
-		justify-self: start;
+	/* Plugin grid: description | qty | remove. Align the remove button with the inputs. */
+	.lpg-rfq .lpg-rfq__item .lpg-field {
+		margin-block-end: 0;
 	}
 
-	/* Item rows: fields side by side, the remove button at the end. */
-	.lpg-rfq-form :is([class$="__item"], [class*="__item "], [class$="__row"], [class*="__row "]) {
-		display: flex;
-		flex-wrap: wrap;
-		align-items: flex-end;
-	}
-
-	.lpg-rfq-form :is([class$="__item"], [class*="__item "], [class$="__row"], [class*="__row "]) > * {
-		flex: 1 1 10rem;
-	}
-
-	.lpg-rfq-form :is([class$="__item"], [class*="__item "], [class$="__row"], [class*="__row "]) > :has(input[type="number"]) {
-		flex: 0 0 7rem;
-	}
-
-	.lpg-rfq-form :is([class$="__item"], [class*="__item "], [class$="__row"], [class*="__row "]) > button {
-		flex: 0 0 auto;
+	.lpg-rfq__remove-item {
+		margin-block-start: 1.6rem;
 	}
 }

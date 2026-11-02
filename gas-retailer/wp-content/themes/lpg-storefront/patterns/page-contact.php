@@ -32,7 +32,7 @@ $lpg_rfq_note = sprintf(
 <div class="wp-block-group lpg-contact">
 	<!-- wp:lpg/business-info /-->
 
-	<!-- wp:lpg/whatsapp-link {"showPhone":true} /-->
+	<!-- wp:lpg/whatsapp-link {"showPhone":false} /-->
 </div>
 <!-- /wp:group -->
 
