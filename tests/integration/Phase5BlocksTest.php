@@ -10,6 +10,7 @@ require_once __DIR__ . '/LpgRecordFixtures.php';
 
 use LPG\Commerce\Blocks\BusinessInfo;
 use LPG\Commerce\Blocks\Contact;
+use LPG\Commerce\Blocks\DeliveryNote;
 use LPG\Commerce\Blocks\EnquiryButton;
 use LPG\Commerce\Blocks\ExchangeForm;
 use LPG\Commerce\Blocks\RfqForm;
@@ -308,6 +309,32 @@ class Phase5BlocksTest extends WP_UnitTestCase {
 			)
 		);
 		$this->assertSame( '', BusinessInfo::render() );
+	}
+
+	// ----- Delivery note ---------------------------------------------------------------
+
+	public function test_delivery_note_default_text_and_link(): void {
+		$html = DeliveryNote::render( array() );
+		$this->assertSame(
+			'<p class="lpg-delivery-note">We deliver within Nairobi only. For other locations, contact us on WhatsApp. '
+			. '<a class="lpg-delivery-note__link lpg-whatsapp-link" href="' . esc_url( MessageBuilder::link( '254700000001', 'Hello, I would like a delivery outside Nairobi.' ) ) . '" target="_blank" rel="noopener noreferrer">'
+			. 'Message us on WhatsApp<span class="screen-reader-text"> (opens in a new tab)</span></a></p>',
+			$html
+		);
+		$this->assertSame( $html, DeliveryNote::render( array( 'text' => '   ' ) ), 'Blank text uses the default.' );
+	}
+
+	public function test_delivery_note_without_number_is_text_only(): void {
+		$this->set_settings( array( 'whatsapp_number' => '' ) );
+		$this->assertSame( '<p class="lpg-delivery-note">We deliver within Nairobi only. For other locations, contact us on WhatsApp.</p>', DeliveryNote::render( array() ) );
+	}
+
+	public function test_delivery_note_custom_text_is_escaped(): void {
+		$html = DeliveryNote::render( array( 'text' => 'Nairobi & Kiambu <script>alert(1)</script>' ) );
+		$this->assertStringStartsWith( '<p class="lpg-delivery-note">Nairobi &amp; Kiambu &lt;script&gt;alert(1)&lt;/script&gt; <a ', $html );
+		$this->assertStringNotContainsString( '<script', $html );
+		$this->assertStringContainsString( 'lpg-delivery-note', do_blocks( '<!-- wp:lpg/delivery-note {"text":"Custom"} /-->' ) );
+		$this->assertStringContainsString( '>Custom <a ', do_blocks( '<!-- wp:lpg/delivery-note {"text":"Custom"} /-->' ) );
 	}
 
 	public function test_blocks_render_through_do_blocks(): void {

@@ -21,7 +21,7 @@ final class Registry implements Service {
 	/**
 	 * Block directory names (source `blocks/<name>`, build `build/blocks/<name>`).
 	 */
-	public const BLOCKS = array( 'spec-table', 'compatible-products', 'product-documents', 'product-warranty', 'enquiry-button', 'rfq-form', 'exchange-form', 'whatsapp-link', 'business-info' );
+	public const BLOCKS = array( 'spec-table', 'compatible-products', 'product-documents', 'product-warranty', 'enquiry-button', 'rfq-form', 'exchange-form', 'whatsapp-link', 'business-info', 'delivery-note' );
 
 	/**
 	 * Attach hooks.

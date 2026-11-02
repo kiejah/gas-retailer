@@ -1,0 +1,36 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "lpg/delivery-note",
+  "version": "0.5.3",
+  "title": "Delivery area note",
+  "category": "woocommerce",
+  "icon": "location-alt",
+  "description": "A short note that delivery is within Nairobi only, with a WhatsApp link for other locations. For the checkout page.",
+  "keywords": [
+    "delivery",
+    "shipping",
+    "nairobi",
+    "whatsapp",
+    "lpg"
+  ],
+  "textdomain": "lpg-commerce-core",
+  "attributes": {
+    "text": {
+      "type": "string",
+      "default": ""
+    }
+  },
+  "supports": {
+    "html": false,
+    "spacing": {
+      "margin": true,
+      "padding": true
+    },
+    "typography": {
+      "fontSize": true
+    }
+  },
+  "editorScript": "file:./index.js",
+  "render": "file:./render.php"
+}

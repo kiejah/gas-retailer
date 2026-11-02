@@ -93,6 +93,42 @@ return array(
 		'style' => 'file:./style-index.css',
 		'render' => 'file:./render.php'
 	),
+	'delivery-note' => array(
+		'$schema' => 'https://schemas.wp.org/trunk/block.json',
+		'apiVersion' => 3,
+		'name' => 'lpg/delivery-note',
+		'version' => '0.5.3',
+		'title' => 'Delivery area note',
+		'category' => 'woocommerce',
+		'icon' => 'location-alt',
+		'description' => 'A short note that delivery is within Nairobi only, with a WhatsApp link for other locations. For the checkout page.',
+		'keywords' => array(
+			'delivery',
+			'shipping',
+			'nairobi',
+			'whatsapp',
+			'lpg'
+		),
+		'textdomain' => 'lpg-commerce-core',
+		'attributes' => array(
+			'text' => array(
+				'type' => 'string',
+				'default' => ''
+			)
+		),
+		'supports' => array(
+			'html' => false,
+			'spacing' => array(
+				'margin' => true,
+				'padding' => true
+			),
+			'typography' => array(
+				'fontSize' => true
+			)
+		),
+		'editorScript' => 'file:./index.js',
+		'render' => 'file:./render.php'
+	),
 	'enquiry-button' => array(
 		'$schema' => 'https://schemas.wp.org/trunk/block.json',
 		'apiVersion' => 3,
