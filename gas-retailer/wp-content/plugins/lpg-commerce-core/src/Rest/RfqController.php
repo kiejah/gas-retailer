@@ -26,7 +26,7 @@ defined( 'ABSPATH' ) || exit;
  * - consent: true (required)
  * - hp: honeypot, must be empty
  *
- * Returns 201 { id, message }.
+ * Returns 201 { message } (no record ID, C22).
  */
 final class RfqController extends FormController {
 
@@ -148,10 +148,7 @@ final class RfqController extends FormController {
 	 * @return array<string, mixed>
 	 */
 	protected function honeypot_response(): array {
-		return array(
-			'id'      => 0,
-			'message' => self::success_message(),
-		);
+		return array( 'message' => self::success_message() );
 	}
 
 	/**
@@ -173,8 +170,13 @@ final class RfqController extends FormController {
 		if ( '' === $phone ) {
 			$errors['contact.phone'] = __( 'Enter a Kenyan phone number, for example 07XX XXX XXX.', 'lpg-commerce-core' );
 		}
-		$email = sanitize_email( (string) ( $contact['email'] ?? '' ) );
-		if ( '' === $email || ! is_email( $email ) ) {
+		// Check the raw value: schema sanitising (sanitize_email) would already
+		// have dropped some of these characters.
+		$raw_contact = $this->request ? $this->request->get_param( 'contact' ) : null;
+		$raw_email   = trim( (string) ( is_array( $raw_contact ) && is_scalar( $raw_contact['email'] ?? null ) ? $raw_contact['email'] : ( $contact['email'] ?? '' ) ) );
+		$email       = sanitize_email( $raw_email );
+		// Valid in RFC 5322 but unsafe in mailto: links and headers (C22 L1).
+		if ( '' === $email || ! is_email( $email ) || strpbrk( $raw_email, '?&%=/' ) !== false ) {
 			$errors['contact.email'] = __( 'Enter a valid email address.', 'lpg-commerce-core' );
 		}
 
@@ -220,35 +222,31 @@ final class RfqController extends FormController {
 			return self::invalid( $errors );
 		}
 
-		$id = RfqPostType::create(
-			array(
-				'contact'      => array(
-					'name'         => $name,
-					'organisation' => $organisation,
-					'phone'        => $phone,
-					'email'        => $email,
-				),
-				'segment'      => $segment,
-				'items'        => $items,
-				'requirements' => sanitize_textarea_field( (string) ( $params['requirements'] ?? '' ) ),
-				'project'      => sanitize_text_field( (string) ( $params['project'] ?? '' ) ),
-				'location'     => sanitize_text_field( (string) ( $params['location'] ?? '' ) ),
-				'comments'     => sanitize_textarea_field( (string) ( $params['comments'] ?? '' ) ),
-				'consent'      => array(
-					'at'             => gmdate( 'c' ),
-					'policy_version' => (string) Settings::get( 'privacy_policy_version' ),
-				),
-			)
+		$record = array(
+			'contact'      => array(
+				'name'         => $name,
+				'organisation' => $organisation,
+				'phone'        => $phone,
+				'email'        => $email,
+			),
+			'segment'      => $segment,
+			'items'        => $items,
+			'requirements' => sanitize_textarea_field( (string) ( $params['requirements'] ?? '' ) ),
+			'project'      => sanitize_text_field( (string) ( $params['project'] ?? '' ) ),
+			'location'     => sanitize_text_field( (string) ( $params['location'] ?? '' ) ),
+			'comments'     => sanitize_textarea_field( (string) ( $params['comments'] ?? '' ) ),
+			'consent'      => array(
+				'at'             => gmdate( 'c' ),
+				'policy_version' => (string) Settings::get( 'privacy_policy_version' ),
+			),
 		);
+		$id     = $this->save_with_ceiling( static fn() => RfqPostType::create( $record ) );
 		if ( is_wp_error( $id ) ) {
 			return new \WP_Error( 'lpg_save_failed', __( 'Sorry, your request could not be saved. Please contact us by phone.', 'lpg-commerce-core' ), array( 'status' => 500 ) );
 		}
 
 		return new \WP_REST_Response(
-			array(
-				'id'      => $id,
-				'message' => self::success_message(),
-			),
+			array( 'message' => self::success_message() ),
 			201
 		);
 	}

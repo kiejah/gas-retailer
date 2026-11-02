@@ -186,16 +186,23 @@ class Phase5BlocksTest extends WP_UnitTestCase {
 		$this->assertTrue( wp_script_is( 'lpg-rfq-form-view-script', 'enqueued' ) );
 	}
 
-	public function test_rfq_no_js_fallback_shows_phone_and_sales_email(): void {
+	public function test_rfq_no_js_fallback_shows_phone_and_public_email_only(): void {
 		$html = RfqForm::render();
 		$this->assertStringContainsString( '<a class="lpg-phone-link" href="tel:+254700000001">+254 700 000 001</a>', $html );
-		$this->assertStringContainsString( '<a class="lpg-email-link" href="mailto:sales@example.test">sales@example.test</a>', $html );
+		$this->assertStringNotContainsString( 'mailto:', $html, 'No public email set: phone only.' );
+		$this->assertStringNotContainsString( 'sales@example.test', $html, 'Notification address never printed.' );
+		$this->assertStringNotContainsString( 'owner@example.test', $html );
+
+		$this->set_settings( array( 'public_email' => 'hello@example.test' ) );
+		$html = RfqForm::render();
+		$this->assertStringContainsString( '<a class="lpg-email-link" href="mailto:hello%40example.test">hello@example.test</a>', $html );
+		$this->assertStringNotContainsString( 'sales@example.test', $html );
 
 		$this->set_settings(
 			array(
-				'whatsapp_number'    => '',
-				'contact_phone'      => '',
-				'notify_sales_email' => 'not valid',
+				'whatsapp_number' => '',
+				'contact_phone'   => '',
+				'public_email'    => 'not valid',
 			)
 		);
 		$html = RfqForm::render();

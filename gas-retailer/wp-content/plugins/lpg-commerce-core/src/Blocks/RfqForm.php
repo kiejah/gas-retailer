@@ -20,7 +20,8 @@ defined( 'ABSPATH' ) || exit;
  * items not listed, and a product list would add a query to every view.
  *
  * Progressive enhancement: the form is rendered `hidden` and the view script
- * reveals it; without JS the visitor sees the phone number and Sales email.
+ * reveals it; without JS the visitor sees the phone number and, if set, the
+ * public contact email (never the notification addresses).
  */
 final class RfqForm {
 
@@ -139,17 +140,17 @@ final class RfqForm {
 	}
 
 	/**
-	 * No-JS fallback: phone and Sales email (public contact details from settings).
+	 * No-JS fallback: phone, plus `public_email` when set.
 	 */
 	private static function fallback(): string {
 		$phone = Contact::phone();
-		$email = Contact::sales_email();
+		$email = Contact::public_email();
 		$parts = array();
 		if ( '' !== $phone ) {
 			$parts[] = Contact::phone_link( $phone, 'lpg-phone-link' );
 		}
 		if ( '' !== $email ) {
-			$parts[] = sprintf( '<a class="lpg-email-link" href="%s">%s</a>', esc_url( 'mailto:' . $email ), esc_html( $email ) );
+			$parts[] = sprintf( '<a class="lpg-email-link" href="%s">%s</a>', esc_url( 'mailto:' . rawurlencode( $email ) ), esc_html( $email ) );
 		}
 		if ( $parts ) {
 			/* translators: %s: phone and/or email links. */

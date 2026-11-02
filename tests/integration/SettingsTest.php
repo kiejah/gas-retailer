@@ -58,7 +58,7 @@ class SettingsTest extends WP_UnitTestCase {
 	}
 
 	public function test_default_settings_cover_every_documented_key(): void {
-		$keys = array( 'whatsapp_number', 'contact_phone', 'notify_sales_email', 'notify_owner_email', 'shop_address', 'opening_hours', 'wa_template_product', 'wa_template_exchange', 'privacy_policy_version', 'enquiry_retention_months', 'delete_data_on_uninstall' );
+		$keys = array( 'whatsapp_number', 'contact_phone', 'notify_sales_email', 'notify_owner_email', 'public_email', 'shop_address', 'opening_hours', 'wa_template_product', 'wa_template_exchange', 'privacy_policy_version', 'enquiry_retention_months', 'delete_data_on_uninstall' );
 		$this->assertSame( $keys, array_keys( Installer::default_settings() ) );
 		$this->assertSame( '', Installer::default_settings()['notify_sales_email'] );
 	}

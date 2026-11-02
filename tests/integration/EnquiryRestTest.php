@@ -53,7 +53,8 @@ class EnquiryRestTest extends WP_UnitTestCase {
 		);
 
 		$this->assertSame( 201, $response->get_status() );
-		$id = $response->get_data()['id'];
+		$this->assertSame( array( 'message', 'whatsapp_url' ), array_keys( $response->get_data() ) );
+		$id = $this->latest_record( EnquiryPostType::POST_TYPE );
 		$this->assertSame( 'lpg-new', get_post_status( $id ) );
 		$this->assertSame( 'product', EnquiryPostType::get( $id )['type'] );
 		$this->assertSame( $product, EnquiryPostType::get( $id )['product_id'] );
@@ -72,7 +73,7 @@ class EnquiryRestTest extends WP_UnitTestCase {
 		$response = $this->post_route( '/enquiry', $this->exchange( array( 'exchange_type' => 'new' ) ) );
 
 		$this->assertSame( 201, $response->get_status() );
-		$id      = $response->get_data()['id'];
+		$id      = $this->latest_record( EnquiryPostType::POST_TYPE );
 		$enquiry = EnquiryPostType::get( $id );
 		$this->assertSame( 'K-Gas', $enquiry['brand'], 'Stored by brand name.' );
 		$this->assertSame( '13kg', $enquiry['size'] );
@@ -94,7 +95,7 @@ class EnquiryRestTest extends WP_UnitTestCase {
 		$response = $this->post_route( '/enquiry', $this->exchange() );
 
 		$this->assertSame( 201, $response->get_status() );
-		$this->assertGreaterThan( 0, $response->get_data()['id'] );
+		$this->assertSame( 1, $this->count_records( EnquiryPostType::POST_TYPE ) );
 		$this->assertSame( '', $response->get_data()['whatsapp_url'] );
 	}
 
@@ -169,6 +170,47 @@ class EnquiryRestTest extends WP_UnitTestCase {
 		$this->assertSame( 0, $this->count_records( EnquiryPostType::POST_TYPE ) );
 	}
 
+	public function test_hidden_or_password_protected_product_is_rejected(): void {
+		$hidden = wc_get_product( $this->product() );
+		$hidden->set_catalog_visibility( 'hidden' );
+		$hidden->save();
+		$protected = $this->product();
+		wp_update_post(
+			array(
+				'ID'            => $protected,
+				'post_password' => 'qa-test',
+			)
+		);
+		$purchasable = new WC_Product_Simple();
+		$purchasable->set_name( '[QA TEST] Priced' );
+		$purchasable->set_regular_price( '100' );
+		$purchasable->set_status( 'publish' );
+		$purchasable->save();
+
+		foreach ( array( $hidden->get_id(), $protected ) as $id ) {
+			$response = $this->post_route(
+				'/enquiry',
+				array(
+					'type'       => 'product',
+					'product_id' => $id,
+				)
+			);
+			$this->assertSame( 400, $response->get_status(), "#$id" );
+			$this->assertArrayHasKey( 'product_id', $response->get_data()['data']['params'] );
+		}
+		$this->assertSame(
+			201,
+			$this->post_route(
+				'/enquiry',
+				array(
+					'type'       => 'product',
+					'product_id' => $purchasable->get_id(),
+				)
+			)->get_status(),
+			'Enquiry-only is not required.'
+		);
+	}
+
 	public function test_draft_product_is_rejected(): void {
 		$response = $this->post_route(
 			'/enquiry',
@@ -190,19 +232,15 @@ class EnquiryRestTest extends WP_UnitTestCase {
 	public function test_honeypot_and_rate_limit(): void {
 		$response = $this->post_route( '/enquiry', $this->exchange( array( 'hp' => 'filled' ) ) );
 		$this->assertSame( 201, $response->get_status() );
-		$this->assertSame(
-			array(
-				'id'           => 0,
-				'whatsapp_url' => '',
-			),
-			$response->get_data()
-		);
+		$this->assertSame( array( 'message', 'whatsapp_url' ), array_keys( $response->get_data() ) );
+		$this->assertSame( '', $response->get_data()['whatsapp_url'] );
 		$this->assertSame( 0, $this->count_records( EnquiryPostType::POST_TYPE ) );
 
-		for ( $i = 2; $i <= 5; $i++ ) {
+		// The honeypot hit did not use up any of the visitor's five.
+		for ( $i = 1; $i <= 5; $i++ ) {
 			$this->assertSame( 201, $this->post_route( '/enquiry', $this->exchange() )->get_status(), "call $i" );
 		}
 		$this->assertSame( 429, $this->post_route( '/enquiry', $this->exchange() )->get_status() );
-		$this->assertSame( 4, $this->count_records( EnquiryPostType::POST_TYPE ) );
+		$this->assertSame( 5, $this->count_records( EnquiryPostType::POST_TYPE ) );
 	}
 }

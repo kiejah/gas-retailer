@@ -141,7 +141,7 @@ class RecordAdminTest extends WP_UnitTestCase {
 		( new AdminScreens() )->render_details( get_post( $id ) );
 		$html = ob_get_clean();
 
-		$this->assertStringContainsString( 'href="mailto:buyer@example.test"', $html );
+		$this->assertStringContainsString( 'href="mailto:buyer%40example.test"', $html );
 		$this->assertStringContainsString( 'href="tel:+254700000002"', $html );
 		$this->assertStringContainsString( 'Reply on WhatsApp', $html );
 		$this->assertStringContainsString( 'https://wa.me/254700000002?text=Hello%20Test%20Buyer', $html );

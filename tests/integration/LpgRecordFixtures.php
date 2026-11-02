@@ -130,6 +130,16 @@ trait LpgRecordFixtures {
 	}
 
 	/**
+	 * Newest record ID of a type (the REST responses carry no ID, C22).
+	 *
+	 * @param string $post_type Post type.
+	 */
+	protected function latest_record( string $post_type ): int {
+		global $wpdb;
+		return (int) $wpdb->get_var( $wpdb->prepare( "SELECT MAX(ID) FROM {$wpdb->posts} WHERE post_type = %s", $post_type ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	}
+
+	/**
 	 * Number of records of a type, any status.
 	 *
 	 * @param string $post_type Post type.

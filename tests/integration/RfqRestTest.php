@@ -60,9 +60,9 @@ class RfqRestTest extends WP_UnitTestCase {
 		$response = $this->post_route( '/rfq', $body );
 
 		$this->assertSame( 201, $response->get_status() );
-		$id = $response->get_data()['id'];
+		$this->assertSame( array( 'message' ), array_keys( $response->get_data() ), 'No record ID in the response.' );
+		$id = $this->latest_record( RfqPostType::POST_TYPE );
 		$this->assertGreaterThan( 0, $id );
-		$this->assertNotEmpty( $response->get_data()['message'] );
 		$this->assertSame( RfqPostType::POST_TYPE, get_post_type( $id ) );
 		$this->assertSame( 'lpg-new', get_post_status( $id ) );
 
@@ -228,20 +228,20 @@ class RfqRestTest extends WP_UnitTestCase {
 		$response = $this->post_route( '/rfq', $body );
 
 		$this->assertSame( 201, $response->get_status() );
-		$this->assertSame( 0, $response->get_data()['id'] );
+		$this->assertSame( array( 'message' ), array_keys( $response->get_data() ), 'Same shape as a real success.' );
 		$this->assertSame( 0, $this->count_records( RfqPostType::POST_TYPE ) );
 		$this->assertFalse( tests_retrieve_phpmailer_instance()->get_sent() );
 	}
 
 	public function test_rate_limit_allows_five_per_ip_per_route(): void {
 		for ( $i = 1; $i <= 5; $i++ ) {
-			$this->assertSame( 201, $this->post_route( '/rfq', $this->rfq_body( array( 'hp' => 'x' ) ) )->get_status(), "call $i" );
+			$this->assertSame( 201, $this->post_route( '/rfq', $this->rfq_body() )->get_status(), "call $i" );
 		}
 		$sixth = $this->post_route( '/rfq', $this->rfq_body() );
 		$this->assertSame( 429, $sixth->get_status() );
 		$this->assertSame( 'lpg_rate_limited', $sixth->get_data()['code'] );
 		$this->assertGreaterThan( 0, (int) $sixth->get_headers()['Retry-After'] );
-		$this->assertSame( 0, $this->count_records( RfqPostType::POST_TYPE ) );
+		$this->assertSame( 5, $this->count_records( RfqPostType::POST_TYPE ) );
 
 		// Another route and another IP have their own budgets.
 		$this->assertSame( 400, $this->post_route( '/enquiry', array( 'type' => 'bogus' ) )->get_status() );
@@ -252,7 +252,7 @@ class RfqRestTest extends WP_UnitTestCase {
 	public function test_rate_limit_ignores_forwarded_for_header(): void {
 		for ( $i = 1; $i <= 5; $i++ ) {
 			$_SERVER['HTTP_X_FORWARDED_FOR'] = "198.51.100.$i";
-			$this->post_route( '/rfq', $this->rfq_body( array( 'hp' => 'x' ) ) );
+			$this->post_route( '/rfq', $this->rfq_body() );
 		}
 		$_SERVER['HTTP_X_FORWARDED_FOR'] = '198.51.100.99';
 		$this->assertSame( 429, $this->post_route( '/rfq', $this->rfq_body() )->get_status() );
@@ -260,8 +260,8 @@ class RfqRestTest extends WP_UnitTestCase {
 	}
 
 	public function test_notification_to_sales_cc_owner_reply_to_customer(): void {
-		$response = $this->post_route( '/rfq', $this->rfq_body() );
-		$id       = $response->get_data()['id'];
+		$this->post_route( '/rfq', $this->rfq_body() );
+		$id = $this->latest_record( RfqPostType::POST_TYPE );
 
 		$mailer = tests_retrieve_phpmailer_instance();
 		$sent   = $mailer->get_sent( 0 );

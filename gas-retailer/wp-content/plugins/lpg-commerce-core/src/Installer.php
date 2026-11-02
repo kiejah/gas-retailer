@@ -89,6 +89,8 @@ final class Installer {
 	 * Default settings (architecture §13.1). Existing installs keep their
 	 * stored values; Settings::get() merges these in for missing keys.
 	 *
+	 * `public_email` is the optional address shown on the site (C22 L3); the
+	 * notification addresses are never printed on the front end.
 	 * Contact numbers and emails default to empty: real values are entered in
 	 * WooCommerce → Settings → LPG and never ship in code (P-023). Address and
 	 * hours are marked placeholders (W-002). Retention is 0 (off) until the
@@ -103,6 +105,7 @@ final class Installer {
 			'contact_phone'            => '',
 			'notify_sales_email'       => '',
 			'notify_owner_email'       => '',
+			'public_email'             => '',
 			'shop_address'             => '[Shop address, Nairobi]',
 			'opening_hours'            => '[Opening hours]',
 			'wa_template_product'      => "Hello, I'm interested in {product} ({sku}). {url}",

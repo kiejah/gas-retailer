@@ -7,6 +7,7 @@
 
 namespace LPG\Commerce\Rest;
 
+use LPG\Commerce\Enquiries\Notifications;
 use LPG\Commerce\Service;
 
 defined( 'ABSPATH' ) || exit;
@@ -16,10 +17,13 @@ defined( 'ABSPATH' ) || exit;
  *
  * Request handling order, all inside the callback so it is fully controlled:
  * 1. REST nonce (`wp_rest`) check, also for logged-out visitors;
- * 2. rate limit, per IP and route (counts every request that passed 1);
- * 3. honeypot: a filled `hp` gets a fake 201 and nothing is stored;
+ * 2. honeypot: a filled `hp` gets a fake 201, nothing is stored or counted;
+ * 3. per-IP limits (ClientIp bucket, see C22): RATE_LIMIT accepted
+ *    submissions and INVALID_LIMIT invalid bodies per RATE_WINDOW, counted
+ *    separately after the outcome is known;
  * 4. schema validation and sanitisation of each argument, then the
- *    controller's own rules (required fields, cross-field checks).
+ *    controller's own rules (required fields, cross-field checks);
+ * 5. the site-wide hourly ceiling (save_with_ceiling()).
  *
  * The route `args` carry the full JSON schema (exposed by OPTIONS) but no
  * validate/sanitize callbacks, so WordPress does not reject a request before
@@ -32,6 +36,23 @@ abstract class FormController implements Service {
 	public const RATE_LIMIT = 5;
 
 	public const RATE_WINDOW = 600;
+
+	/**
+	 * Invalid (400) requests allowed per IP per RATE_WINDOW.
+	 */
+	public const INVALID_LIMIT = 20;
+
+	/**
+	 * Default site-wide submissions per rolling hour (see global_limit()).
+	 */
+	public const GLOBAL_LIMIT = 30;
+
+	/**
+	 * The request being handled (raw values, before schema sanitising).
+	 *
+	 * @var \WP_REST_Request|null
+	 */
+	protected ?\WP_REST_Request $request = null;
 
 	/**
 	 * Route path, e.g. '/rfq'.
@@ -108,27 +129,41 @@ abstract class FormController implements Service {
 			);
 		}
 
-		$retry_after = $this->hit_rate_limit();
-		if ( $retry_after > 0 ) {
-			$response = new \WP_REST_Response(
-				array(
-					'code'    => 'lpg_rate_limited',
-					'message' => __( 'Too many requests. Please wait a few minutes and try again, or contact us by phone.', 'lpg-commerce-core' ),
-					'data'    => array( 'status' => 429 ),
-				),
-				429
-			);
-			$response->header( 'Retry-After', (string) $retry_after );
-			return $response;
-		}
-
+		// Honeypot first: bot hits never touch a visitor's rate-limit budget.
 		$hp = $request->get_param( 'hp' );
 		if ( null !== $hp && '' !== $hp ) {
 			return new \WP_REST_Response( $this->honeypot_response(), 201 );
 		}
 
-		$params = array();
-		$errors = array();
+		$client      = ClientIp::bucket( ClientIp::current() );
+		$retry_after = $this->rate_limited( $client );
+		if ( $retry_after > 0 ) {
+			return self::too_many( $retry_after );
+		}
+
+		$response = $this->validate_and_handle( $request );
+
+		// Count the outcome: accepted submissions and invalid bodies have
+		// separate per-IP budgets, so junk cannot use up a visitor's five.
+		$status = $response instanceof \WP_Error ? (int) ( $response->get_error_data()['status'] ?? 400 ) : $response->get_status();
+		if ( 201 === $status ) {
+			RateCounter::incr( $this->ip_key( 'v', $client, self::RATE_WINDOW ), self::window_left( self::RATE_WINDOW ) );
+		} elseif ( 400 === $status ) {
+			RateCounter::incr( $this->ip_key( 'i', $client, self::RATE_WINDOW ), self::window_left( self::RATE_WINDOW ) );
+		}
+		return $response;
+	}
+
+	/**
+	 * Schema validation, then the controller's own rules.
+	 *
+	 * @param \WP_REST_Request $request Request.
+	 * @return \WP_REST_Response|\WP_Error
+	 */
+	private function validate_and_handle( \WP_REST_Request $request ) {
+		$this->request = $request;
+		$params        = array();
+		$errors        = array();
 		foreach ( $this->schema() as $name => $schema ) {
 			$value = $request->get_param( $name );
 			if ( null === $value ) {
@@ -230,35 +265,100 @@ abstract class FormController implements Service {
 	}
 
 	/**
-	 * Count this request against the per-IP, per-route limit.
+	 * Seconds to wait if this client is over either per-IP budget, else 0.
 	 *
-	 * Fixed window of RATE_WINDOW seconds stored in a transient keyed by a
-	 * salted hash of REMOTE_ADDR (proxy headers are not trusted, so they
-	 * cannot be spoofed to dodge the limit).
-	 *
-	 * @return int Seconds to wait when the limit is reached, otherwise 0.
+	 * @param string $client Client bucket (ClientIp::bucket()).
 	 */
-	private function hit_rate_limit(): int {
-		$ip  = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
-		$key = 'lpg_rl_' . substr( hash_hmac( 'sha256', $this->route() . '|' . $ip, wp_salt( 'nonce' ) ), 0, 32 );
-		$now = time();
+	private function rate_limited( string $client ): int {
+		$over = RateCounter::get( $this->ip_key( 'v', $client, self::RATE_WINDOW ) ) >= self::RATE_LIMIT
+			|| RateCounter::get( $this->ip_key( 'i', $client, self::RATE_WINDOW ) ) >= self::INVALID_LIMIT;
+		return $over ? self::window_left( self::RATE_WINDOW ) : 0;
+	}
 
-		$entry = get_transient( $key );
-		if ( ! is_array( $entry ) || ! isset( $entry['start'], $entry['count'] ) || $now - (int) $entry['start'] >= self::RATE_WINDOW ) {
-			$entry = array(
-				'start' => $now,
-				'count' => 0,
-			);
+	/**
+	 * The 429 response.
+	 *
+	 * @param int $retry_after Seconds.
+	 */
+	private static function too_many( int $retry_after ): \WP_REST_Response {
+		$response = new \WP_REST_Response(
+			array(
+				'code'    => 'lpg_rate_limited',
+				'message' => __( 'Too many requests. Please wait a few minutes and try again, or contact us by phone.', 'lpg-commerce-core' ),
+				'data'    => array( 'status' => 429 ),
+			),
+			429
+		);
+		$response->header( 'Retry-After', (string) $retry_after );
+		return $response;
+	}
+
+	/**
+	 * Counter key for a per-IP bucket in the current fixed window.
+	 *
+	 * @param string $kind   v (accepted) or i (invalid).
+	 * @param string $client Client bucket.
+	 * @param int    $window Window length in seconds.
+	 */
+	private function ip_key( string $kind, string $client, int $window ): string {
+		return RateCounter::key( 'lpg_rl_' . $kind . '_', $this->route(), $client, (string) intdiv( time(), $window ) );
+	}
+
+	/**
+	 * Seconds left in the current fixed window.
+	 *
+	 * @param int $window Window length in seconds.
+	 */
+	private static function window_left( int $window ): int {
+		return max( 1, $window - ( time() % $window ) );
+	}
+
+	/**
+	 * Site-wide submissions per rolling hour above which notifications are
+	 * suppressed for this route (records are still saved).
+	 */
+	protected function global_limit(): int {
+		/**
+		 * Filters the site-wide hourly submission ceiling for an lpg/v1 route.
+		 * Above it records are still saved, but notification emails are
+		 * replaced by one "unusual volume" alert per hour.
+		 *
+		 * @param int    $limit Submissions per rolling hour.
+		 * @param string $route Route without the namespace, e.g. 'rfq'.
+		 */
+		return max( 1, (int) apply_filters( 'lpg_global_rate_limit', static::GLOBAL_LIMIT, ltrim( $this->route(), '/' ) ) );
+	}
+
+	/**
+	 * Save a record under the site-wide ceiling.
+	 *
+	 * Counts the submission in an hourly bucket and estimates the rolling-hour
+	 * total as this hour plus the overlapping share of the previous hour.
+	 * Above the ceiling the record is still created (genuine leads are never
+	 * dropped) but its notification is suppressed, and Sales gets a single
+	 * "unusual volume" alert for the hour.
+	 *
+	 * @param callable $create fn(): int|\WP_Error.
+	 * @return int|\WP_Error Post ID.
+	 */
+	protected function save_with_ceiling( callable $create ) {
+		$route = ltrim( $this->route(), '/' );
+		$hour  = intdiv( time(), HOUR_IN_SECONDS );
+		$now   = RateCounter::incr( RateCounter::key( 'lpg_rl_g_', $route, (string) $hour ), 2 * HOUR_IN_SECONDS );
+		$prev  = RateCounter::get( RateCounter::key( 'lpg_rl_g_', $route, (string) ( $hour - 1 ) ) );
+		$share = 1 - ( time() % HOUR_IN_SECONDS ) / HOUR_IN_SECONDS;
+		$count = (int) ceil( $now + $prev * $share );
+		$limit = $this->global_limit();
+
+		if ( $count <= $limit ) {
+			return $create();
 		}
 
-		$remaining = self::RATE_WINDOW - ( $now - (int) $entry['start'] );
-		if ( (int) $entry['count'] >= self::RATE_LIMIT ) {
-			return max( 1, $remaining );
+		$id = Notifications::suppressed( $create );
+		if ( RateCounter::add_once( RateCounter::key( 'lpg_rl_a_', $route, (string) $hour ), HOUR_IN_SECONDS ) ) {
+			Notifications::send_volume_alert( $route, $count, $limit );
 		}
-
-		$entry['count'] = (int) $entry['count'] + 1;
-		set_transient( $key, $entry, max( 1, $remaining ) );
-		return 0;
+		return $id;
 	}
 
 	/**
@@ -268,6 +368,20 @@ abstract class FormController implements Service {
 	 */
 	protected static function is_published_product( int $product_id ): bool {
 		return $product_id > 0 && 'product' === get_post_type( $product_id ) && 'publish' === get_post_status( $product_id );
+	}
+
+	/**
+	 * Whether a product can be enquired about: published, no post password,
+	 * and visible in the catalogue (whether or not it is enquiry only).
+	 *
+	 * @param int $product_id Product ID.
+	 */
+	protected static function is_enquirable_product( int $product_id ): bool {
+		if ( ! self::is_published_product( $product_id ) || '' !== (string) get_post_field( 'post_password', $product_id ) ) {
+			return false;
+		}
+		$product = wc_get_product( $product_id );
+		return $product instanceof \WC_Product && $product->is_visible();
 	}
 
 	/**

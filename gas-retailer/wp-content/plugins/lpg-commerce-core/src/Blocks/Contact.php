@@ -33,10 +33,11 @@ final class Contact {
 	}
 
 	/**
-	 * Sales email for display, or '' when none or invalid.
+	 * The public contact email (`public_email`), or '' when none or invalid.
+	 * Notification addresses are never shown on the front end (C22 L3).
 	 */
-	public static function sales_email(): string {
-		$email = (string) Settings::get( 'notify_sales_email' );
+	public static function public_email(): string {
+		$email = (string) Settings::get( 'public_email' );
 		return is_email( $email ) ? $email : '';
 	}
 

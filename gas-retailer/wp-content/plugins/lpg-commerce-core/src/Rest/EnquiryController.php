@@ -26,10 +26,15 @@ defined( 'ABSPATH' ) || exit;
  *   location (required, ≤200)
  * - hp: honeypot, must be empty
  *
- * Returns 201 { id, whatsapp_url }. `whatsapp_url` is '' when no WhatsApp
+ * Returns 201 { message, whatsapp_url } (no record ID, C22). `whatsapp_url` is '' when no WhatsApp
  * number is configured, so the block can show its fallback.
  */
 final class EnquiryController extends FormController {
+
+	/**
+	 * Default site-wide enquiries per rolling hour before notifications pause.
+	 */
+	public const GLOBAL_LIMIT = 60;
 
 	/**
 	 * Route path.
@@ -91,7 +96,7 @@ final class EnquiryController extends FormController {
 	 */
 	protected function honeypot_response(): array {
 		return array(
-			'id'           => 0,
+			'message'      => self::success_message(),
 			'whatsapp_url' => '',
 		);
 	}
@@ -109,7 +114,7 @@ final class EnquiryController extends FormController {
 
 		if ( EnquiryPostType::TYPE_PRODUCT === $type ) {
 			$product_id = (int) ( $params['product_id'] ?? 0 );
-			if ( ! self::is_published_product( $product_id ) ) {
+			if ( ! self::is_enquirable_product( $product_id ) ) {
 				$errors['product_id'] = __( 'This product is not available.', 'lpg-commerce-core' );
 			}
 			if ( $errors ) {
@@ -175,17 +180,24 @@ final class EnquiryController extends FormController {
 			return self::invalid( array( 'type' => __( 'Choose an enquiry type.', 'lpg-commerce-core' ) ) );
 		}//end if
 
-		$id = EnquiryPostType::create( $data );
+		$id = $this->save_with_ceiling( static fn() => EnquiryPostType::create( $data ) );
 		if ( is_wp_error( $id ) ) {
 			return new \WP_Error( 'lpg_save_failed', __( 'Sorry, your enquiry could not be saved. Please contact us by phone.', 'lpg-commerce-core' ), array( 'status' => 500 ) );
 		}
 
 		return new \WP_REST_Response(
 			array(
-				'id'           => $id,
+				'message'      => self::success_message(),
 				'whatsapp_url' => MessageBuilder::link( (string) Settings::get( 'whatsapp_number' ), $message ),
 			),
 			201
 		);
+	}
+
+	/**
+	 * Success message.
+	 */
+	private static function success_message(): string {
+		return __( 'Thank you. Continue on WhatsApp to send your request.', 'lpg-commerce-core' );
 	}
 }

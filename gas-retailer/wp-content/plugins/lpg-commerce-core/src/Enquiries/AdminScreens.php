@@ -346,7 +346,7 @@ final class AdminScreens implements Service {
 				$phone_html .= sprintf( ' &middot; <a href="%s" target="_blank" rel="noopener noreferrer">%s</a>', esc_url( $reply ), esc_html__( 'Reply on WhatsApp', 'lpg-commerce-core' ) );
 			}
 		}
-		$email_html = is_email( $contact['email'] ) ? sprintf( '<a href="%s">%s</a>', esc_url( 'mailto:' . $contact['email'] ), esc_html( $contact['email'] ) ) : esc_html( $contact['email'] );
+		$email_html = is_email( $contact['email'] ) ? sprintf( '<a href="%s">%s</a>', esc_url( 'mailto:' . rawurlencode( $contact['email'] ) ), esc_html( $contact['email'] ) ) : esc_html( $contact['email'] );
 
 		$items = '';
 		foreach ( $rfq['items'] as $item ) {

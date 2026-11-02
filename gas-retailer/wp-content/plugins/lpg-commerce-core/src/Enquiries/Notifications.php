@@ -28,6 +28,61 @@ defined( 'ABSPATH' ) || exit;
 final class Notifications implements Service {
 
 	/**
+	 * Whether notifications are suppressed for records created right now
+	 * (site-wide ceiling exceeded, C22 M1b).
+	 *
+	 * @var bool
+	 */
+	private static bool $suppressed = false;
+
+	/**
+	 * Run a callback with record notifications suppressed.
+	 *
+	 * @param callable $callback Callback.
+	 * @return mixed The callback's return value.
+	 */
+	public static function suppressed( callable $callback ) {
+		$previous         = self::$suppressed;
+		self::$suppressed = true;
+		try {
+			return $callback();
+		} finally {
+			self::$suppressed = $previous;
+		}
+	}
+
+	/**
+	 * Tell Sales that submissions passed the hourly ceiling. Counts only,
+	 * no customer data. The caller ensures one alert per route per hour.
+	 *
+	 * @param string $route Route, e.g. 'rfq'.
+	 * @param int    $count Estimated submissions in the last hour.
+	 * @param int    $limit Ceiling.
+	 * @return bool Whether wp_mail() reported success.
+	 */
+	public static function send_volume_alert( string $route, int $count, int $limit ): bool {
+		$to = self::recipient( 'notify_sales_email' );
+		if ( '' === $to ) {
+			$to = self::recipient( 'notify_owner_email' );
+		}
+		if ( '' === $to ) {
+			return false;
+		}
+		$label = 'rfq' === $route ? __( 'quote requests', 'lpg-commerce-core' ) : __( 'WhatsApp enquiries', 'lpg-commerce-core' );
+		/* translators: 1: site name, 2: record type. */
+		$subject = self::header_safe( sprintf( __( '[%1$s] Unusual volume of %2$s', 'lpg-commerce-core' ), self::site_name(), $label ) );
+		$lines   = array(
+			/* translators: 1: number of submissions, 2: record type, 3: hourly limit. */
+			sprintf( __( 'About %1$d %2$s were submitted in the last hour (the alert level is %3$d per hour).', 'lpg-commerce-core' ), $count, $label, $limit ),
+			'',
+			__( 'All of them are saved, but email notifications for new ones are paused for the rest of this hour. Please review the list in the dashboard; this may be spam.', 'lpg-commerce-core' ),
+			'',
+			__( 'View in the dashboard:', 'lpg-commerce-core' ) . ' ' . admin_url( 'edit.php?post_type=' . ( 'rfq' === $route ? RfqPostType::POST_TYPE : EnquiryPostType::POST_TYPE ) ),
+		);
+		return self::mail( $to, $subject, $lines, array() );
+	}
+
+	/**
 	 * Attach hooks.
 	 */
 	public function register(): void {
@@ -42,7 +97,7 @@ final class Notifications implements Service {
 	 * @param bool     $update  Whether this is an update.
 	 */
 	public function on_insert( $post_id, $post, $update ): void {
-		if ( $update || ! $post instanceof \WP_Post ) {
+		if ( $update || self::$suppressed || ! $post instanceof \WP_Post ) {
 			return;
 		}
 		try {

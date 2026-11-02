@@ -112,6 +112,7 @@ final class SettingsTab implements Service {
 			'contact_phone'      => __( 'Contact phone', 'lpg-commerce-core' ),
 			'notify_sales_email' => __( 'Sales notification email', 'lpg-commerce-core' ),
 			'notify_owner_email' => __( 'Owner notification email (Cc)', 'lpg-commerce-core' ),
+			'public_email'       => __( 'Public contact email', 'lpg-commerce-core' ),
 		);
 
 		foreach ( Settings::PHONE_KEYS as $key ) {
@@ -132,7 +133,7 @@ final class SettingsTab implements Service {
 			}
 		}
 
-		foreach ( array( 'notify_sales_email', 'notify_owner_email' ) as $key ) {
+		foreach ( array( 'notify_sales_email', 'notify_owner_email', 'public_email' ) as $key ) {
 			if ( ! array_key_exists( $key, $input ) ) {
 				continue;
 			}
@@ -226,6 +227,7 @@ final class SettingsTab implements Service {
 			$field( 'contact_phone', 'text', __( 'Contact phone', 'lpg-commerce-core' ), __( 'Same format. Used for the call link.', 'lpg-commerce-core' ), array( 'custom_attributes' => array( 'inputmode' => 'numeric' ) ) ),
 			$field( 'notify_sales_email', 'email', __( 'Sales notification email', 'lpg-commerce-core' ), __( 'New quote requests and enquiries are sent here.', 'lpg-commerce-core' ) ),
 			$field( 'notify_owner_email', 'email', __( 'Owner notification email (Cc)', 'lpg-commerce-core' ), __( 'Copied on new quote requests.', 'lpg-commerce-core' ) ),
+			$field( 'public_email', 'email', __( 'Public contact email', 'lpg-commerce-core' ), __( 'Optional. Shown on the site (for example under the quote form when JavaScript is off). The notification addresses above are never shown publicly.', 'lpg-commerce-core' ) ),
 			$field( 'shop_address', 'textarea', __( 'Shop address', 'lpg-commerce-core' ), __( 'Shown in the footer, contact page and pickup details.', 'lpg-commerce-core' ), array( 'css' => 'min-height:5em;' ) ),
 			$field( 'opening_hours', 'textarea', __( 'Opening hours', 'lpg-commerce-core' ), '', array( 'css' => 'min-height:5em;' ) ),
 			array(
