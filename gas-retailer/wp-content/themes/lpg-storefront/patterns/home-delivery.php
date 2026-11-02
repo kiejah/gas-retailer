@@ -3,12 +3,12 @@
  * Title: Homepage: delivery and refills
  * Slug: lpg-storefront/home-delivery
  * Categories: lpg-storefront
- * Description: Quiet delivery strip (Nairobi, free over KSh 10,000, pickup) with a small Refills and Exchange note. Copy is placeholder-marked and the client may revise it.
+ * Description: Quiet delivery strip (Nairobi, free on orders of KSh 10,000 or more, pickup) with a small Refills and Exchange note. Copy is placeholder-marked and the client may revise it.
  *
  * EDIT HERE: the strip is the list block named "Delivery info strip (editable)"
  * in the Site Editor's List View (class lpg-delivery-strip). Keep it in line
  * with WooCommerce > Settings > Shipping (zone "Nairobi": flat rate, free
- * shipping over KSh 10,000, local pickup; architecture §13.9). P-023: no
+ * shipping on orders of KSh 10,000 or more, local pickup; §13.9, C23). P-023: no
  * delivery-time promises and no tracking language. Refills stay a minor,
  * WhatsApp-led flow, never above the fold (P-005).
  *
@@ -17,17 +17,9 @@
 
 defined( 'ABSPATH' ) || exit;
 
-// Prefer the Refills & Exchange page (slug `refills-exchange`, created by the
-// Lead in Phase 5C) and fall back to the product category.
-$lpg_refills_page = get_page_by_path( 'refills-exchange' );
-$lpg_refills_url  = ( $lpg_refills_page && 'publish' === get_post_status( $lpg_refills_page ) ) ? get_permalink( $lpg_refills_page ) : '';
-if ( ! $lpg_refills_url ) {
-	$lpg_refills_term = taxonomy_exists( 'product_cat' ) ? get_term_by( 'slug', 'refills-exchange', 'product_cat' ) : false;
-	$lpg_refills_url  = $lpg_refills_term ? get_term_link( $lpg_refills_term ) : '';
-	if ( is_wp_error( $lpg_refills_url ) ) {
-		$lpg_refills_url = '';
-	}
-}
+// The Refills & Exchange page when published, else the category (C23).
+require_once get_theme_file_path( 'inc/page-links.php' );
+$lpg_refills_url = lpg_storefront_refills_url();
 ?>
 <!-- wp:group {"tagName":"section","align":"wide","className":"lpg-section","layout":{"type":"default"}} -->
 <section class="wp-block-group alignwide lpg-section">
@@ -50,7 +42,7 @@ if ( ! $lpg_refills_url ) {
 				<!-- /wp:list-item -->
 
 				<!-- wp:list-item -->
-				<li><?php echo esc_html__( 'Free delivery on orders over KSh 10,000', 'lpg-storefront' ); ?></li>
+				<li><?php echo esc_html__( 'Free delivery on orders of KSh 10,000 or more', 'lpg-storefront' ); ?></li>
 				<!-- /wp:list-item -->
 
 				<!-- wp:list-item -->

@@ -6,7 +6,10 @@
  * Links are built from the terms that exist when the pattern renders; a
  * missing term (or an inactive LPG plugin, for segments) drops its item.
  * "Request a quote" is included only when a published page with the slug
- * `request-a-quote` exists (architecture §12.2, P-013 #1).
+ * `request-a-quote` exists (architecture §12.2, P-013 #1). "Refills &
+ * Exchange" goes to the published `refills-exchange` page when it exists,
+ * otherwise to the product category (DEF-014, C23). Both checks use
+ * inc/page-links.php.
  *
  * Presentation data only: no business logic.
  *
@@ -14,6 +17,8 @@
  */
 
 defined( 'ABSPATH' ) || exit;
+
+require_once get_theme_file_path( 'inc/page-links.php' );
 
 $lpg_nav_cat_slugs = array(
 	'cylinders',
@@ -81,7 +86,6 @@ $lpg_nav_top_defs = array(
 	array( 'lpg_segment', 'industrial', __( 'Industrial', 'lpg-storefront' ) ),
 	array( 'product_cat', 'lpg-accessories', __( 'LPG Accessories', 'lpg-storefront' ) ),
 	array( 'product_cat', 'safety-equipment', __( 'Safety Equipment', 'lpg-storefront' ) ),
-	array( 'product_cat', 'refills-exchange', __( 'Refills & Exchange', 'lpg-storefront' ) ),
 );
 foreach ( $lpg_nav_top_defs as $lpg_nav_def ) {
 	if ( isset( $lpg_nav_terms[ $lpg_nav_def[0] ][ $lpg_nav_def[1] ] ) ) {
@@ -92,11 +96,20 @@ foreach ( $lpg_nav_top_defs as $lpg_nav_def ) {
 	}
 }
 
-$lpg_nav_rfq_page = get_page_by_path( 'request-a-quote' );
-if ( $lpg_nav_rfq_page && 'publish' === get_post_status( $lpg_nav_rfq_page ) ) {
+// Refills & Exchange: the page with the exchange form, else the category.
+$lpg_nav_refills_url = lpg_storefront_refills_url();
+if ( $lpg_nav_refills_url ) {
+	$lpg_nav_top[] = array(
+		'label' => __( 'Refills & Exchange', 'lpg-storefront' ),
+		'url'   => $lpg_nav_refills_url,
+	);
+}
+
+$lpg_nav_rfq_url = lpg_storefront_published_page_url( 'request-a-quote' );
+if ( $lpg_nav_rfq_url ) {
 	$lpg_nav_top[] = array(
 		'label' => __( 'Request a quote', 'lpg-storefront' ),
-		'url'   => get_permalink( $lpg_nav_rfq_page ),
+		'url'   => $lpg_nav_rfq_url,
 	);
 }
 

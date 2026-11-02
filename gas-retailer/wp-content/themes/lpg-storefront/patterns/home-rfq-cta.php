@@ -15,8 +15,8 @@
 
 defined( 'ABSPATH' ) || exit;
 
-$lpg_rfq_page = get_page_by_path( 'request-a-quote' );
-$lpg_rfq_url  = ( $lpg_rfq_page && 'publish' === get_post_status( $lpg_rfq_page ) ) ? get_permalink( $lpg_rfq_page ) : '';
+require_once get_theme_file_path( 'inc/page-links.php' );
+$lpg_rfq_url = lpg_storefront_published_page_url( 'request-a-quote' );
 ?>
 <!-- wp:group {"tagName":"section","align":"wide","className":"lpg-section lpg-band","layout":{"type":"constrained","contentSize":"760px","justifyContent":"left"}} -->
 <section class="wp-block-group alignwide lpg-section lpg-band">

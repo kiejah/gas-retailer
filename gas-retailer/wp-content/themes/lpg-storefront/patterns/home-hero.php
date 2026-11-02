@@ -17,8 +17,8 @@ defined( 'ABSPATH' ) || exit;
 $lpg_shop_url = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'shop' ) : home_url( '/' );
 
 // "Request a quote" only when a published page with that slug exists (§12.2).
-$lpg_rfq_page = get_page_by_path( 'request-a-quote' );
-$lpg_rfq_url  = ( $lpg_rfq_page && 'publish' === get_post_status( $lpg_rfq_page ) ) ? get_permalink( $lpg_rfq_page ) : '';
+require_once get_theme_file_path( 'inc/page-links.php' );
+$lpg_rfq_url = lpg_storefront_published_page_url( 'request-a-quote' );
 ?>
 <!-- wp:group {"tagName":"section","align":"full","className":"lpg-hero","style":{"spacing":{"padding":{"top":"var:preset|spacing|70","bottom":"var:preset|spacing|70"}}},"backgroundColor":"surface","layout":{"type":"constrained"}} -->
 <section class="wp-block-group alignfull lpg-hero has-surface-background-color has-background" style="padding-top:var(--wp--preset--spacing--70);padding-bottom:var(--wp--preset--spacing--70)">

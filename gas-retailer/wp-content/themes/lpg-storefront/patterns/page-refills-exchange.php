@@ -17,11 +17,8 @@
 
 defined( 'ABSPATH' ) || exit;
 
-$lpg_refills_term = taxonomy_exists( 'product_cat' ) ? get_term_by( 'slug', 'refills-exchange', 'product_cat' ) : false;
-$lpg_refills_url  = $lpg_refills_term ? get_term_link( $lpg_refills_term ) : '';
-if ( is_wp_error( $lpg_refills_url ) ) {
-	$lpg_refills_url = '';
-}
+require_once get_theme_file_path( 'inc/page-links.php' );
+$lpg_refills_url  = lpg_storefront_term_url( 'refills-exchange', 'product_cat' );
 $lpg_refills_note = $lpg_refills_url ? sprintf(
 	/* translators: %s: link to the Refills & Exchange product category. */
 	esc_html__( 'Looking for cylinders and refill products? See %s.', 'lpg-storefront' ),

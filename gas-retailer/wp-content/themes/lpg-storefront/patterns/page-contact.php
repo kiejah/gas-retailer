@@ -20,8 +20,9 @@
 
 defined( 'ABSPATH' ) || exit;
 
-$lpg_rfq_page = get_page_by_path( 'request-a-quote' );
-$lpg_rfq_url  = ( $lpg_rfq_page && 'publish' === get_post_status( $lpg_rfq_page ) ) ? get_permalink( $lpg_rfq_page ) : home_url( '/request-a-quote/' );
+require_once get_theme_file_path( 'inc/page-links.php' );
+$lpg_rfq_url  = lpg_storefront_published_page_url( 'request-a-quote' );
+$lpg_rfq_url  = $lpg_rfq_url ? $lpg_rfq_url : home_url( '/request-a-quote/' );
 $lpg_rfq_note = sprintf(
 	/* translators: %s: link to the Request a quote page. */
 	esc_html__( 'Ordering for a business or a project? %s with your list of items and quantities.', 'lpg-storefront' ),
