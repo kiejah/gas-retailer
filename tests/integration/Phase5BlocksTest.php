@@ -118,6 +118,8 @@ class Phase5BlocksTest extends WP_UnitTestCase {
 		$this->assertStringContainsString( 'lpg-notice__draft', $html );
 		$this->assertStringContainsString( 'You can edit this message before sending.', $html );
 		$this->assertStringContainsString( 'class="lpg-enquiry__open wp-element-button"', $html );
+		$this->assertMatchesRegularExpression( '#target="_blank" rel="noopener noreferrer">Open WhatsApp<span class="screen-reader-text"> \(opens in a new tab\)</span></a>#', $html, 'DEF-013.' );
+		$this->assertDoesNotMatchRegularExpression( '#class="lpg-enquiry__toggle[^>]*target=#', $html, 'The no-JS toggle opens in the same tab.' );
 		$this->assertTrue( wp_script_is( 'lpg-enquiry-button-view-script', 'enqueued' ) );
 
 		$this->assertNotSame( '', EnquiryButton::render( array( 'showFor' => 'all' ), $this->priced_product() ) );

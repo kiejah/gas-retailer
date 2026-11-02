@@ -30,6 +30,7 @@ final class Plugin {
 		Relations\Documents::class,
 		Commerce\EnquiryOnly::class,
 		Commerce\EnquiryDisplay::class,
+		Commerce\ShippingDisplay::class,
 		Commerce\ProductFields::class,
 		Seo\StructuredData::class,
 		Settings\SettingsTab::class,

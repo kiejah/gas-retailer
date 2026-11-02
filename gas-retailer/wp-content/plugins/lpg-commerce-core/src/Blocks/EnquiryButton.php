@@ -64,7 +64,7 @@ final class EnquiryButton {
 			. '<label class="lpg-enquiry__label" for="%6$s-message">%8$s</label>'
 			. '<textarea class="lpg-enquiry__message" id="%6$s-message" rows="4" maxlength="%9$d">%10$s</textarea>'
 			. '<p class="lpg-notice lpg-enquiry__notice">%11$s%12$s</p>'
-			. '<a class="lpg-enquiry__open wp-element-button" href="%5$s" target="_blank" rel="noopener noreferrer">%13$s</a>'
+			. '<a class="lpg-enquiry__open wp-element-button" href="%5$s" target="_blank" rel="noopener noreferrer">%13$s<span class="screen-reader-text"> %14$s</span></a>'
 			. '</div></div>',
 			Markup::wrapper( self::NAME, 'lpg-enquiry' ),
 			esc_attr( $number ),
@@ -78,7 +78,8 @@ final class EnquiryButton {
 			esc_textarea( $message ),
 			Contact::draft_flag(),
 			Contact::notice_text( 'product' ),
-			esc_html__( 'Open WhatsApp', 'lpg-commerce-core' )
+			esc_html__( 'Open WhatsApp', 'lpg-commerce-core' ),
+			esc_html__( '(opens in a new tab)', 'lpg-commerce-core' )
 		);
 	}
 }
